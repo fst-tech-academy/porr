@@ -44,7 +44,7 @@ const Help: React.FC = () => {
       category: 'getting-started',
       type: 'video',
       duration: '5:30',
-      description: 'Learn the basics of navigating the PORR system and understanding the main features.',
+      description: 'Learn the basics of navigating the NPST system and understanding the main features.',
       thumbnail: '/api/placeholder/300/200',
       videoUrl: '#',
       steps: [
@@ -374,7 +374,7 @@ const Help: React.FC = () => {
                 </div>
               </div>
               <p className="text-sm text-blue-700 mb-4">
-                Comprehensive guide covering all features, settings, and best practices for using the PORR system.
+                Comprehensive guide covering all features, settings, and best practices for using the NPST system.
               </p>
               <Button variant="outline" className="w-full border-blue-300 text-blue-700 hover:bg-blue-50">
                 <Download className="h-4 w-4 mr-2" />

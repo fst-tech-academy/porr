@@ -57,9 +57,9 @@ async function fixS3Permissions() {
     // 3. Test a few files to make sure they're accessible
     console.log('\n🧪 Testing file accessibility...');
     const testFiles = [
-      'landlord-1758129990546-95173211.webp',
-      'broker-1758113494450-926780864.webp',
-      'tenant-1758050641567-510907587.jpg'
+      'test-image-1.webp',
+      'test-image-2.webp',
+      'test-image-3.jpg'
     ];
 
     for (const fileName of testFiles) {

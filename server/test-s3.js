@@ -22,8 +22,8 @@ async function testS3Connection() {
       });
     }
     
-    // Test 2: Check if your uploaded image exists
-    const testKey = 'broker-1757994313598-879169777.png';
+    // Test 2: Check if a test file exists (replace with actual file key if needed)
+    const testKey = 'test-image.png';
     console.log(`\n🔍 Checking if ${testKey} exists...`);
     
     try {

@@ -1,15 +1,15 @@
 #!/bin/bash
 
-# PORR Database Backup and Restore Script
-# This script provides comprehensive backup and restore functionality for the remote PORR database
+# NPST Database Backup and Restore Script
+# This script provides comprehensive backup and restore functionality for the remote NPST database
 
 # Database configuration
-DB_HOST="130.255.30.153"
+DB_HOST="localhost"
 DB_PORT="27017"
-DB_NAME="porr"
-DB_USER="cscs_user"
-DB_PASSWORD="Friday14="
-DB_AUTH_SOURCE="admin"
+DB_NAME="new_project_stater_template"
+DB_USER=""
+DB_PASSWORD=""
+DB_AUTH_SOURCE=""
 BACKUP_DIR="./backups"
 TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
 
@@ -66,7 +66,7 @@ check_mongodb_tools() {
 test_connection() {
     print_status "Testing database connection..."
     
-    if mongosh "mongodb://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}?authSource=${DB_AUTH_SOURCE}" --eval "db.runCommand('ping')" --quiet > /dev/null 2>&1; then
+    if mongosh "mongodb://${DB_HOST}:${DB_PORT}/${DB_NAME}" --eval "db.runCommand('ping')" --quiet > /dev/null 2>&1; then
         print_success "Database connection successful"
         return 0
     else
@@ -84,7 +84,7 @@ backup_database() {
     mkdir -p "$BACKUP_DIR"
     
     # Create backup filename with timestamp
-    BACKUP_FILE="${BACKUP_DIR}/porr_backup_${TIMESTAMP}"
+    BACKUP_FILE="${BACKUP_DIR}/${DB_NAME}_backup_${TIMESTAMP}"
     
     print_status "Creating backup: ${BACKUP_FILE}"
     
@@ -93,9 +93,6 @@ backup_database() {
         --host "$DB_HOST" \
         --port "$DB_PORT" \
         --db "$DB_NAME" \
-        --username "$DB_USER" \
-        --password "$DB_PASSWORD" \
-        --authenticationDatabase "$DB_AUTH_SOURCE" \
         --out "$BACKUP_FILE"; then
         
         print_success "Database backup completed successfully"
@@ -163,7 +160,7 @@ restore_database() {
     # Extract backup if it's compressed
     if [[ "$BACKUP_FILE" == *.tar.gz ]]; then
         print_status "Extracting backup file..."
-        EXTRACT_DIR="/tmp/porr_restore_$$"
+        EXTRACT_DIR="/tmp/NPST_restore_$$"
         mkdir -p "$EXTRACT_DIR"
         
         if tar -xzf "$BACKUP_FILE" -C "$EXTRACT_DIR"; then
@@ -180,15 +177,25 @@ restore_database() {
     # Perform the restore
     print_status "Restoring database from: $EXTRACTED_BACKUP"
     
+    # Check if there's a subdirectory with the original database name
+    # mongodump creates: backup_dir/db_name/collections.bson
+    # We need to find the actual database directory inside
+    DB_BACKUP_DIR="$EXTRACTED_BACKUP"
+    if [ -d "$EXTRACTED_BACKUP" ]; then
+        # Look for the first subdirectory (should be the database name)
+        SUBDIRS=($(find "$EXTRACTED_BACKUP" -mindepth 1 -maxdepth 1 -type d))
+        if [ ${#SUBDIRS[@]} -gt 0 ]; then
+            DB_BACKUP_DIR="${SUBDIRS[0]}"
+            print_status "Found database backup in: $DB_BACKUP_DIR"
+        fi
+    fi
+    
     if mongorestore \
         --host "$DB_HOST" \
         --port "$DB_PORT" \
         --db "$DB_NAME" \
-        --username "$DB_USER" \
-        --password "$DB_PASSWORD" \
-        --authenticationDatabase "$DB_AUTH_SOURCE" \
         --drop \
-        "$EXTRACTED_BACKUP"; then
+        "$DB_BACKUP_DIR"; then
         
         print_success "Database restore completed successfully"
         
@@ -236,7 +243,7 @@ show_status() {
     
     if test_connection; then
         print_status "Getting database statistics..."
-        mongosh "mongodb://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}?authSource=${DB_AUTH_SOURCE}" --eval "
+        mongosh "mongodb://${DB_HOST}:${DB_PORT}/${DB_NAME}" --eval "
             print('Collections:');
             db.getCollectionNames().forEach(function(name) {
                 var count = db.getCollection(name).countDocuments();
@@ -248,7 +255,7 @@ show_status() {
 
 # Function to show help
 show_help() {
-    echo "PORR Database Backup and Restore Script"
+    echo "NPST Database Backup and Restore Script"
     echo ""
     echo "Usage: $0 <command> [options]"
     echo ""
@@ -262,7 +269,7 @@ show_help() {
     echo ""
     echo "Examples:"
     echo "  $0 backup"
-    echo "  $0 restore ./backups/porr_backup_20241223_143022.tar.gz"
+    echo "  $0 restore ./backups/NPST_backup_20241223_143022.tar.gz"
     echo "  $0 list"
     echo "  $0 status"
     echo ""

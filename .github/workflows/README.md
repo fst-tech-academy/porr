@@ -1,10 +1,10 @@
-# GitHub Actions Workflow for PORR
+# GitHub Actions Workflow for NPST
 
-This document describes the GitHub Actions workflow configuration for the Puntland Offence Records Registry (PORR) project.
+This document describes the GitHub Actions workflow configuration for the New Project Starter Template (NPST) project.
 
 ## Workflow File
 
-**File**: `.github/workflows/github-actions-porr.yml`
+**File**: `.github/workflows/github-actions-NPST.yml`
 
 ## Workflow Overview
 
@@ -19,7 +19,7 @@ The workflow is triggered on pushes to the `develop` branch and performs the fol
 - Set up Node.js 20 environment
 - Install server dependencies (`npm ci`)
 - Install client dependencies (`npm ci`)
-- Test database connection to remote PORR database
+- Test database connection to remote NPST database
 - List repository files
 
 **Environment Variables**:
@@ -34,8 +34,8 @@ The workflow is triggered on pushes to the `develop` branch and performs the fol
 **Steps**:
 - Checkout repository code
 - Login to Docker Hub using secrets
-- Build and push backend Docker image (`asdini/porr-backend:latest`)
-- Build and push frontend Docker image (`asdini/porr-frontend:latest`)
+- Build and push backend Docker image (`asdini/NPST-backend:latest`)
+- Build and push frontend Docker image (`asdini/NPST-frontend:latest`)
 
 **Environment Variables**:
 - Backend: `MONGODB_URI`, `JWT_SECRET`, `NODE_ENV`
@@ -55,9 +55,9 @@ Configure the following secrets in your GitHub repository settings:
 
 ## Database Configuration
 
-The workflow uses the remote PORR database:
+The workflow uses the remote NPST database:
 - **Host**: 130.255.30.153:27017
-- **Database**: porr
+- **Database**: NPST
 - **Authentication**: cscs_user / Friday14=
 - **Auth Source**: admin
 
@@ -66,12 +66,12 @@ The workflow uses the remote PORR database:
 The workflow builds and pushes the following Docker images:
 
 ### Backend Image
-- **Repository**: `asdini/porr-backend`
+- **Repository**: `asdini/NPST-backend`
 - **Tag**: `latest`
 - **Build Context**: `server/` directory
 
 ### Frontend Image
-- **Repository**: `asdini/porr-frontend`
+- **Repository**: `asdini/NPST-frontend`
 - **Tag**: `latest`
 - **Build Context**: `client/` directory
 

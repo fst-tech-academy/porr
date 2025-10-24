@@ -2,10 +2,10 @@ const mongoose = require('mongoose');
 
 async function testConnection() {
   try {
-    console.log('Testing remote PORR database connection...');
-    const connectionString = 'mongodb://porr_user:Friday14=@130.255.30.153:27017/porr?authSource=admin';
+    console.log('Testing remote NPST database connection...');
+    const connectionString = 'mongodb://NPST_user:Friday14=@130.255.30.153:27017/NPST?authSource=admin';
     await mongoose.connect(connectionString);
-    console.log('✅ Connected to remote PORR database successfully!');
+    console.log('✅ Connected to remote NPST database successfully!');
     
     // Test a simple query
     const User = require('./models/User');

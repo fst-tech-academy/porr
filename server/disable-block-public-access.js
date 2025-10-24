@@ -49,7 +49,7 @@ async function disableBlockPublicAccess() {
 
     // Test a file
     console.log('\n🧪 Testing file accessibility...');
-    const testUrl = `https://${bucketName}.s3.${process.env.AWS_REGION}.amazonaws.com/landlord-1758129990546-95173211.webp`;
+    const testUrl = `https://${bucketName}.s3.${process.env.AWS_REGION}.amazonaws.com/test-image.webp`;
     console.log(`🔗 Test URL: ${testUrl}`);
     
     console.log('\n🎉 S3 is now publicly accessible!');

@@ -10,7 +10,7 @@ const AuditEvent = require('../models/AuditEvent');
 // Connect to MongoDB
 const connectDB = async () => {
   try {
-    await mongoose.connect(process.env.MONGODB_URI || 'mongodb://cscs_user:Friday14=@130.255.30.153:27017/porr?authSource=admin');
+    await mongoose.connect(process.env.MONGODB_URI || 'mongodb://cscs_user:Friday14=@130.255.30.153:27017/NPST?authSource=admin');
     console.log('✅ Connected to MongoDB');
   } catch (error) {
     console.error('❌ MongoDB connection error:', error);

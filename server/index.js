@@ -39,7 +39,7 @@ app.use(
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
-        imgSrc: ["'self'", "data:", "blob:", "http://localhost:5009", "https://porr-uploads.s3.eu-west-2.amazonaws.com", "https://porr-uploads.s3.amazonaws.com", "*"],
+        imgSrc: ["'self'", "data:", "blob:", "http://localhost:5009", "https://NPST-uploads.s3.eu-west-2.amazonaws.com", "https://NPST-uploads.s3.amazonaws.com", "*"],
         styleSrc: ["'self'", "'unsafe-inline'", "https:"],
         scriptSrc: ["'self'"],
         connectSrc: ["'self'", "http://localhost:5009"],
@@ -95,7 +95,7 @@ app.use("/api/*", auditMiddleware());
 
 // MongoDB connection
 const mongoUri =
-  process.env.MONGODB_URI || "mongodb://localhost:27017/porr";
+  process.env.MONGODB_URI || "mongodb://localhost:27017/NPST";
 console.log("🔗 Connecting to MongoDB...");
 console.log("📍 Database URI:", mongoUri);
 

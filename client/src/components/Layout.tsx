@@ -244,23 +244,13 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   setMobileOpen(false);
                 }}
                 className={`w-full flex items-center px-4 py-3 text-left rounded-lg transition-all duration-200 mb-1 group ${
-                  location.pathname === item.path || 
-                  (item.path === '/properties' && location.pathname.startsWith('/admin/properties')) ||
-                  (item.path === '/tenants' && location.pathname.startsWith('/admin/tenants')) ||
-                  (item.path === '/brokers' && location.pathname.startsWith('/admin/brokers')) ||
-                  (item.path === '/guarantors' && location.pathname.startsWith('/admin/guarantors')) ||
-                  (item.path === '/leases' && location.pathname.startsWith('/admin/leases'))
+                  location.pathname === item.path
                     ? 'bg-blue-900 dark:bg-blue-800 text-white shadow-sm'
                     : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700 hover:text-gray-900 dark:hover:text-white'
                 }`}
               >
                 <span className={`mr-3 transition-colors ${
-                  location.pathname === item.path || 
-                  (item.path === '/properties' && location.pathname.startsWith('/admin/properties')) ||
-                  (item.path === '/tenants' && location.pathname.startsWith('/admin/tenants')) ||
-                  (item.path === '/brokers' && location.pathname.startsWith('/admin/brokers')) ||
-                  (item.path === '/guarantors' && location.pathname.startsWith('/admin/guarantors')) ||
-                  (item.path === '/leases' && location.pathname.startsWith('/admin/leases'))
+                  location.pathname === item.path
                     ? 'text-white' 
                     : 'text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300'
                 }`}>

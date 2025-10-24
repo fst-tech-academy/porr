@@ -11,9 +11,9 @@ const router = express.Router();
 // @access  Private
 router.get('/stats', protect, checkDashboardAnalytics, async (req, res) => {
   try {
-    console.log('📊 Fetching PORR dashboard stats...');
+    console.log('📊 Fetching NPST dashboard stats...');
     
-    // Get counts for PORR system
+    // Get counts for NPST system
     const [
       usersCount,
       auditEventsCount,
@@ -47,7 +47,7 @@ router.get('/stats', protect, checkDashboardAnalytics, async (req, res) => {
       { $group: { _id: '$action', count: { $sum: 1 } } }
     ]);
 
-    console.log('✅ PORR dashboard stats fetched successfully');
+    console.log('✅ NPST dashboard stats fetched successfully');
 
     res.json({
       success: true,
@@ -81,7 +81,7 @@ router.get('/stats', protect, checkDashboardAnalytics, async (req, res) => {
 // @access  Private
 router.get('/overview', protect, async (req, res) => {
   try {
-    console.log('📊 Fetching PORR dashboard overview...');
+    console.log('📊 Fetching NPST dashboard overview...');
     
     // Get basic system information
     const totalUsers = await User.countDocuments();
@@ -97,7 +97,7 @@ router.get('/overview', protect, async (req, res) => {
       lastUpdated: new Date().toISOString()
     };
 
-    console.log('✅ PORR dashboard overview fetched successfully');
+    console.log('✅ NPST dashboard overview fetched successfully');
 
     res.json({
       success: true,

@@ -87,7 +87,7 @@ export const useSettings = () => {
   };
 
   const getSystemName = () => {
-    return settings?.systemName ?? 'Puntland Offence Records Registry';
+    return settings?.systemName ?? 'New Project Starter Template';
   };
 
   const getSystemDescription = () => {

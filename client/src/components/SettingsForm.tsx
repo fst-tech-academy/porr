@@ -132,7 +132,7 @@ const SettingsForm: React.FC = () => {
   const form = useForm<any>({
     resolver: yupResolver(settingsSchema),
     defaultValues: {
-      systemName: 'Puntland Offence Records Registry',
+      systemName: 'New Project Starter Template',
       systemDescription: 'A comprehensive system for managing offence records and legal proceedings',
       registration: {
         publicRegistration: true,

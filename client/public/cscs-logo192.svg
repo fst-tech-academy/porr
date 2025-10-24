@@ -12,13 +12,13 @@
   <!-- Main blue gradient rounded square (matching login page) -->
   <rect x="24" y="24" width="144" height="144" rx="36" ry="36" fill="url(#blueGradient)" transform="rotate(3 96 96)"/>
   
-  <!-- PORR Text (larger for better visibility) -->
-  <text x="96" y="120" font-family="Arial, sans-serif" font-size="56" font-weight="bold" text-anchor="middle" fill="white" transform="rotate(3 96 96)">PORR</text>
+  <!-- NPST Text (larger for better visibility) -->
+  <text x="96" y="120" font-family="Arial, sans-serif" font-size="56" font-weight="bold" text-anchor="middle" fill="white" transform="rotate(3 96 96)">NPST</text>
   
   <!-- Green indicator dot (matching login page) -->
   <circle cx="156" cy="36" r="18" fill="#10b981"/>
   <circle cx="156" cy="36" r="9" fill="white"/>
   
   <!-- Subtitle -->
-  <text x="96" y="160" font-family="Arial, sans-serif" font-size="14" text-anchor="middle" fill="#64748b" font-weight="500">Puntland Offence Records Registry</text>
+  <text x="96" y="160" font-family="Arial, sans-serif" font-size="14" text-anchor="middle" fill="#64748b" font-weight="500">New Project Starter Template</text>
 </svg>

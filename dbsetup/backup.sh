@@ -1,9 +1,9 @@
 #!/bin/bash
 
-# Simple wrapper script for PORR database backup
+# Simple wrapper script for NPST database backup
 # Usage: ./backup.sh
 
-echo "🗄️  PORR Database Backup"
+echo "🗄️  NPST Database Backup"
 echo "========================="
 
 # Change to the dbsetup directory

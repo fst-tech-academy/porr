@@ -1,9 +1,9 @@
 #!/bin/bash
 
-# Simple wrapper script for PORR database restore
+# Simple wrapper script for NPST database restore
 # Usage: ./restore.sh [backup_file]
 
-echo "🔄 PORR Database Restore"
+echo "🔄 NPST Database Restore"
 echo "========================"
 
 # Change to the dbsetup directory
@@ -19,7 +19,7 @@ if [ $# -eq 0 ]; then
     ./database-backup-restore.sh list
     echo ""
     echo "Example:"
-    echo "  ./restore.sh ./backups/porr_backup_20241223_143022.tar.gz"
+    echo "  ./restore.sh ./backups/NPST_backup_20241223_143022.tar.gz"
     exit 1
 fi
 

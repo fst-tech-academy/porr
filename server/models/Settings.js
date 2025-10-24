@@ -202,7 +202,7 @@ const settingsSchema = new mongoose.Schema({
   updatedBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
-    required: true
+    required: false // Optional because settings are created before users exist
   },
   version: {
     type: Number,

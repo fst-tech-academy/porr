@@ -216,7 +216,7 @@ const Login: React.FC = () => {
           <div className="max-w-md">
             {/* Title */}
             <h1 className="text-5xl font-bold text-white mb-6 leading-tight">
-              Puntland Offence Records Registry
+              New Project Starter Template
             </h1>
             <p className="text-xl text-blue-100 mb-8 leading-relaxed">
               Comprehensive system for managing offence records and legal proceedings

@@ -11,9 +11,6 @@ import {
 } from '../types';
 
 class ApiService {
-  getLeaseSuggestions(query: string) {
-    throw new Error("Method not implemented.");
-  }
   private api: AxiosInstance;
   private baseURL: string;
 

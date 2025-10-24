@@ -118,7 +118,7 @@ const Dashboard: React.FC = () => {
         if (response.success) {
           setStats(response.data);
 
-          // Set expiring soon count to 0 for PORR system
+          // Set expiring soon count to 0 for NPST system
           setExpiringSoonCount(0);
         } else {
           throw new Error(
@@ -221,54 +221,6 @@ const Dashboard: React.FC = () => {
       });
     });
 
-    // Tenants activities
-    stats?.recentActivity?.tenants?.slice(0, 2).forEach((tenant: any) => {
-      activities.push({
-        id: `tenant-${tenant._id}`,
-        type: "tenant",
-        action: "added",
-        entity: `${tenant.personalInfo?.firstName} ${tenant.personalInfo?.lastName}`,
-        entityId: tenant._id,
-        timestamp: new Date(tenant.createdAt),
-        icon: Plus,
-        color: "text-green-600",
-        bgColor: "bg-green-100",
-        navigationPath: `/tenants`,
-      });
-    });
-
-
-    // Brokers activities (using recent properties as proxy since we don't have recent brokers)
-    stats?.recentActivity?.properties?.slice(0, 1).forEach((property: any) => {
-      activities.push({
-        id: `broker-${property._id}`,
-        type: "broker",
-        action: "joined",
-        entity: `Property ${property.propertyId}`,
-        entityId: property._id,
-        timestamp: new Date(property.createdAt),
-        icon: Plus,
-        color: "text-purple-600",
-        bgColor: "bg-purple-100",
-        navigationPath: `/brokers`,
-      });
-    });
-
-    // Guarantors activities (using recent properties as proxy since we don't have recent guarantors)
-    stats?.recentActivity?.properties?.slice(0, 1).forEach((property: any) => {
-      activities.push({
-        id: `guarantor-${property._id}`,
-        type: "guarantor",
-        action: "added",
-        entity: `Property ${property.propertyId}`,
-        entityId: property._id,
-        timestamp: new Date(property.createdAt),
-        icon: Plus,
-        color: "text-indigo-600",
-        bgColor: "bg-indigo-100",
-        navigationPath: `/guarantors`,
-      });
-    });
 
     // Items activities
     stats?.recentActivity?.items?.slice(0, 3).forEach((item: any) => {
@@ -790,22 +742,6 @@ const Dashboard: React.FC = () => {
           </CardContent>
         </Card>
 
-        <Card className="p-6 bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-shadow">
-          <CardContent className="text-center">
-            <div className="w-16 h-16 bg-indigo-600 rounded-lg flex items-center justify-center mx-auto mb-4 shadow-sm">
-              <Users className="h-8 w-8 text-white" />
-            </div>
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-              {t("navigation.brokers")}
-            </h3>
-            <p className="text-3xl font-semibold text-gray-900 dark:text-white">
-              {stats?.counts?.brokers || 0}
-            </p>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-              Managing properties
-            </p>
-          </CardContent>
-        </Card>
       </div>
     </div>
   );

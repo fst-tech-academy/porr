@@ -68,6 +68,7 @@ const NPSTLogo: React.FC<NPSTLogoProps> = ({
         <div className="flex items-center">
           <h1 className={`font-bold text-slate-900 dark:text-white ${textSizeClasses[size]} leading-tight whitespace-nowrap`}>
             {getSystemName()}
+
           </h1>
         </div>
       )}

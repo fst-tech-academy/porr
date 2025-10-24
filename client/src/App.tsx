@@ -49,7 +49,7 @@ function App() {
                   element={
                     <ProtectedRoute>
                       <Routes>
-                        {/* PORR Admin Portal Routes */}
+                        {/* NPST Admin Portal Routes */}
                         <Route path="/admin/*" element={
                           <RoleBasedRoute allowedRoles={['admin', 'manager', 'officer', 'viewer']}>
                             <Layout>
