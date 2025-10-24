@@ -1,0 +1,8 @@
+version: '3'
+services:
+  web:
+    image: asdini/npst-frontend:latest
+    ports:
+      - "3009:3009"
+    environment:
+      NODE_ENV: production

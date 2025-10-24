@@ -1,0 +1,11 @@
+version: '3'
+services:
+  web:
+    image: asdini/npst-backend:latest
+    ports:
+      - "5009:5009"
+    environment:
+      NODE_ENV: production
+
+
+      

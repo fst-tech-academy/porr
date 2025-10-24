@@ -1,0 +1,18 @@
+<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="blueGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1e3a8a;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1d4ed8;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Main blue gradient rounded square (matching login page) -->
+  <rect x="2" y="2" width="28" height="28" rx="7" ry="7" fill="url(#blueGradient)" transform="rotate(3 16 16)"/>
+  
+  <!-- PORR Text (doubled in size for better visibility) -->
+  <text x="16" y="20" font-family="Arial, sans-serif" font-size="12" font-weight="bold" text-anchor="middle" fill="white" transform="rotate(3 16 16)">PORR</text>
+  
+  <!-- Green indicator dot (larger for better visibility) -->
+  <circle cx="27" cy="5" r="4" fill="#10b981"/>
+  <circle cx="27" cy="5" r="2" fill="white"/>
+</svg>

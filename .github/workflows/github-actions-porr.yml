@@ -1,0 +1,88 @@
+name: GitHub Actions PORR
+run-name: ${{ github.actor }} is testing out GitHub Actions 🚀
+
+on:
+  push:
+    branches: ["develop"]
+
+jobs:
+  Explore-GitHub-Actions:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
+      - run: echo "🐧 This job is now running on a ${{ runner.os }} server hosted by GitHub!"
+      - run: echo "🔎 The name of your branch is ${{ github.ref }} and your repository is ${{ github.repository }}."
+
+      - name: Check out repository code
+        uses: actions/checkout@v3
+      - name: Set up Node.js environment
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+      - run: |
+          cd server
+          npm ci
+      - run: |
+          cd client
+          npm ci
+
+      - name: Test database connection
+        run: |
+          cd server
+          node test-connection.js
+        env:
+          MONGODB_URI: mongodb://cscs_user:Friday14=@130.255.30.153:27017/porr?authSource=admin
+
+      - run: echo "💡 The ${{ github.repository }} repository has been cloned to the runner."
+      - run: echo "🖥️ The workflow is now ready to test your code on the runner."
+      - name: List files in the repository
+        run: |
+          ls ${{ github.workspace }}
+      - run: echo "🍏 This job's status is ${{ job.status }}."
+
+  build-push-docker-images:
+    needs: Explore-GitHub-Actions
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push the backend image
+        run: |
+          cd server
+          docker build . -t asdini/porr-backend:latest
+          docker push asdini/porr-backend:latest
+        env:
+          MONGODB_URI: mongodb://cscs_user:Friday14=@130.255.30.153:27017/porr?authSource=admin
+          JWT_SECRET: ${{ secrets.JWT_SECRET || '97b6283606d06012e63de1b3691f0d14a049b63089491a16f8b4c173f6bf3789ab18b927199d7a8b0bfe201767fe39fa821e0cd76cd9daccc0136f2490e9a562' }}
+          NODE_ENV: production
+          PORT: 5009
+
+      - name: Build and push the frontend image
+        run: |
+          cd client
+          docker build . -t asdini/porr-frontend:latest
+          docker push asdini/porr-frontend:latest
+        env:
+          REACT_APP_API_URL: ${{ secrets.REACT_APP_API_URL || 'http://localhost:5009/api' }}
+
+  # Explore-GitHub-Actions:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
+  #     - run: echo "🐧 This job is now running on a ${{ runner.os }} server hosted by GitHub!"
+  #     - run: echo "🔎 The name of your branch is ${{ github.ref }} and your repository is ${{ github.repository}}."
+  #     - name: Check out repository code
+  #       uses: actions/checkout@v3
+  #     - run: echo "💡 The ${{ github.repository }} repository has been cloned to the runner."
+  #     - run: echo "🖥️ The workflow is now ready to test your code on the runner."
+  #     - name: List files in the repository
+  #       run: |
+  #         ls ${{ github.workspace }}
+  #     - run: echo "🍏 This job's status is ${{ job.status }}."
