@@ -58,43 +58,9 @@ The New Project Starter Template (NPST) is a modern web application template bui
    ```bash
    git clone <repository-url>
    cd npst
-   ```
-
 2. **Install dependencies**
    ```bash
-   npm run install-all
-   ```
-
-3. **Environment Setup**
-   
-   **Backend Environment:**
-   ```bash
-   cd server
-   cp env.example .env
-   # Edit .env with your configuration
-   ```
-   
-   Edit `.env` file with your configuration:
-   ```env
-   NODE_ENV=development
-   PORT=5009
-   MONGODB_URI=mongodb://localhost:27017/npst
-   JWT_SECRET=your_super_secret_jwt_key_here
-   JWT_EXPIRE=7d
-   BCRYPT_ROUNDS=12
-   FRONTEND_URL=http://localhost:3009
-   ```
-
-   **Frontend Environment:**
-   ```bash
-   cd client
-   cp env.example .env
-   ```
-   
-   Edit `.env` file:
-   ```env
-   REACT_APP_API_URL=http://localhost:5009/api
-   ```
+   npm run install-all --legacy-peer-deps   
 
 4. **Start MongoDB**
    ```bash
@@ -105,7 +71,6 @@ The New Project Starter Template (NPST) is a modern web application template bui
    ```bash
    # From the root directory
    npm run dev
-   ```
 
    This will start both the backend server (port 5009) and frontend development server (port 3009).
 
