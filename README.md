@@ -235,6 +235,128 @@ The system uses MongoDB with the following main collections:
 - **organisations** - Multi-tenant organisations
 - **auditevents** - System audit logs and activity tracking
 
+## Database Setup & Data Import
+
+The project includes database setup scripts in the `dbsetup/` directory for backing up and restoring data.
+
+### Prerequisites for Database Scripts
+
+#### Linux/macOS
+```bash
+# Install MongoDB Database Tools
+# macOS
+brew install mongodb/brew/mongodb-database-tools
+
+# Ubuntu/Debian
+sudo apt-get install mongodb-database-tools
+
+# CentOS/RHEL
+sudo yum install mongodb-database-tools
+```
+
+#### Windows
+1. Download MongoDB Database Tools from [MongoDB Download Center](https://www.mongodb.com/try/download/database-tools)
+2. Extract the tools to a folder (e.g., `C:\mongodb-tools\`)
+3. Add the tools folder to your system PATH
+
+### Database Restore
+
+#### Linux/macOS
+```bash
+# List available backups
+cd dbsetup
+./database-backup-restore.sh list
+
+# Restore from a specific backup
+./restore.sh ./backups/your_backup_file.tar.gz
+
+# Or restore using the main script directly
+./database-backup-restore.sh restore ./backups/your_backup_file.tar.gz
+```
+
+#### Windows (PowerShell)
+```powershell
+# List available backups
+cd dbsetup
+.\database-backup-restore.sh list
+
+# Restore from a specific backup
+.\database-backup-restore.sh restore .\backups\your_backup_file.tar.gz
+```
+
+#### Windows (Command Prompt)
+```cmd
+# List available backups
+cd dbsetup
+database-backup-restore.sh list
+
+# Restore from a specific backup
+database-backup-restore.sh restore .\backups\your_backup_file.tar.gz
+```
+
+### Database Script Options
+
+The main script `database-backup-restore.sh` supports several operations:
+
+```bash
+# Available commands
+./database-backup-restore.sh backup          # Create a new backup
+./database-backup-restore.sh restore <file>  # Restore from backup
+./database-backup-restore.sh list            # List available backups
+./database-backup-restore.sh clean           # Clean old backups
+./database-backup-restore.sh help            # Show help information
+```
+
+### Configuration
+
+You can modify database connection settings in `dbsetup/database-backup-restore.sh`:
+
+```bash
+# Database configuration (edit these variables)
+DB_HOST="localhost"                    # MongoDB host
+DB_PORT="27017"                        # MongoDB port
+DB_NAME="new_project_stater_template"  # Database name
+DB_USER=""                            # Username (if authentication required)
+DB_PASSWORD=""                        # Password (if authentication required)
+DB_AUTH_SOURCE=""                     # Authentication database
+```
+
+### Troubleshooting Database Scripts
+
+#### Common Issues
+
+1. **Permission Denied (Linux/macOS)**
+   ```bash
+   chmod +x dbsetup/*.sh
+   ```
+
+2. **MongoDB Tools Not Found**
+   - Ensure MongoDB Database Tools are installed
+   - Check if tools are in your system PATH
+   - On Windows, verify the tools folder is added to PATH
+
+3. **Connection Refused**
+   - Ensure MongoDB is running
+   - Check if the database name and connection details are correct
+   - Verify MongoDB is accessible on the specified host and port
+
+4. **Backup File Not Found**
+   - Check the `backups/` directory
+   - Use `./database-backup-restore.sh list` to see available backups
+   - Ensure the backup file path is correct
+
+#### Testing Database Connection
+
+Before running backup/restore operations, test your MongoDB connection:
+
+```bash
+# Test MongoDB connection
+mongosh --eval "db.runCommand('ping')"
+
+# Or test with specific database
+mongosh new_project_stater_template --eval "db.stats()"
+```
+
 ## Security Features
 
 - JWT-based authentication
