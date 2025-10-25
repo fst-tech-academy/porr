@@ -219,7 +219,7 @@ const Login: React.FC = () => {
               New Project Starter Template
             </h1>
             <p className="text-xl text-blue-100 mb-8 leading-relaxed">
-              Comprehensive system for managing offence records and legal proceedings
+              Modern enterprise application template with advanced features and seamless user experience
             </p>
 
             {/* Features */}
@@ -227,19 +227,19 @@ const Login: React.FC = () => {
               <div className="flex items-center space-x-4">
                 <div className="w-3 h-3 bg-gradient-to-r from-green-400 to-green-500 rounded-full shadow-lg"></div>
                 <span className="text-blue-100 text-lg font-medium">
-                  Digital offence record management
+                  Real-time notifications and messaging
                 </span>
               </div>
               <div className="flex items-center space-x-4">
                 <div className="w-3 h-3 bg-gradient-to-r from-green-400 to-green-500 rounded-full shadow-lg"></div>
                 <span className="text-blue-100 text-lg font-medium">
-                  Legal case tracking and monitoring
+                  Advanced loading states and smooth UX
                 </span>
               </div>
               <div className="flex items-center space-x-4">
                 <div className="w-3 h-3 bg-gradient-to-r from-green-400 to-green-500 rounded-full shadow-lg"></div>
                 <span className="text-blue-100 text-lg font-medium">
-                  Comprehensive reporting and analytics
+                  Versioned API with backward compatibility
                 </span>
               </div>
             </div>
@@ -260,7 +260,7 @@ const Login: React.FC = () => {
           <h1 className="text-3xl font-bold text-slate-900 mb-2">
             New Project Starter Template
           </h1>
-          <p className="text-slate-600 text-base">A comprehensive system template for building enterprise applications</p>
+          <p className="text-slate-600 text-base">Modern enterprise template with notifications, loading states, and API versioning</p>
         </div>
 
         {/* Form Container */}
