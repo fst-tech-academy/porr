@@ -49,8 +49,65 @@ The New Project Starter Template (NPST) is a modern web application template bui
 ## Prerequisites
 
 - Node.js (v16 or higher)
-- MongoDB (v4.4 or higher)
+- MongoDB Community 7.0
 - npm or yarn
+
+### MongoDB Installation
+
+#### macOS (using Homebrew)
+```bash
+# Install Homebrew if you haven't already
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+# Install MongoDB Community 7.0
+brew tap mongodb/brew
+brew install mongodb-community@7.0
+
+# Start MongoDB service
+brew services start mongodb/brew/mongodb-community@7.0
+```
+
+#### Windows
+1. Download MongoDB Community Server 7.0 from [MongoDB Download Center](https://www.mongodb.com/try/download/community)
+2. Run the installer and follow the setup wizard
+3. Add MongoDB to your system PATH
+4. Start MongoDB service:
+   ```cmd
+   net start MongoDB
+   ```
+   Or start manually:
+   ```cmd
+   mongod
+   ```
+
+#### Linux (Ubuntu/Debian)
+```bash
+# Import MongoDB public key
+wget -qO - https://www.mongodb.org/static/pgp/server-7.0.asc | sudo apt-key add -
+
+# Add MongoDB repository
+echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/7.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-7.0.list
+
+# Update package database
+sudo apt-get update
+
+# Install MongoDB Community 7.0
+sudo apt-get install -y mongodb-org=7.0.0 mongodb-org-database=7.0.0 mongodb-org-server=7.0.0 mongodb-org-mongos=7.0.0 mongodb-org-tools=7.0.0
+
+# Start MongoDB service
+sudo systemctl start mongod
+sudo systemctl enable mongod
+```
+
+> **⚠️ Important Note for WSL Ubuntu Users**
+> 
+> If you're using WSL (Windows Subsystem for Linux) with Ubuntu, we **strongly recommend** installing MongoDB on Windows rather than on Ubuntu. This approach provides better performance, easier management, and avoids potential compatibility issues.
+> 
+> **For WSL Users:**
+> 1. Install MongoDB Community 7.0 on Windows using the Windows installation instructions above
+> 2. Start MongoDB as a Windows service
+> 3. Connect from your WSL environment using `localhost:27017`
+> 4. This ensures better integration with Windows services and tools
 
 ## Installation
 
@@ -98,10 +155,23 @@ The New Project Starter Template (NPST) is a modern web application template bui
 
 4. **Start MongoDB**
    ```bash
-   mongod
+   # macOS
+   brew services start mongodb/brew/mongodb-community@7.0
+   
+   # Windows
+   net start MongoDB
+   
+   # Linux
+   sudo systemctl start mongod
    ```
 
-5. **Run the application**
+5. **Verify MongoDB connection**
+   ```bash
+   cd server
+   npm run check-mongodb
+   ```
+
+6. **Run the application**
    ```bash
    # From the root directory
    npm run dev
