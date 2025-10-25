@@ -261,10 +261,30 @@ sudo yum install mongodb-database-tools
 
 ### Database Restore
 
+#### Quick Restore (All Platforms)
+```bash
+# Navigate to the dbsetup directory
+cd dbsetup
+
+# List available backups
+./database-backup-restore.sh list
+
+# Restore from the latest backup
+./restore.sh ./backups/latest_backup.tar.gz
+
+# Or restore from a specific backup
+./restore.sh ./backups/your_backup_file.tar.gz
+```
+
 #### Linux/macOS
 ```bash
-# List available backups
+# Make scripts executable (first time only)
+chmod +x dbsetup/*.sh
+
+# Navigate to dbsetup directory
 cd dbsetup
+
+# List available backups
 ./database-backup-restore.sh list
 
 # Restore from a specific backup
@@ -276,22 +296,46 @@ cd dbsetup
 
 #### Windows (PowerShell)
 ```powershell
-# List available backups
+# Navigate to dbsetup directory
 cd dbsetup
+
+# List available backups
 .\database-backup-restore.sh list
 
 # Restore from a specific backup
 .\database-backup-restore.sh restore .\backups\your_backup_file.tar.gz
+
+# Or use the simple restore script
+.\restore.sh .\backups\your_backup_file.tar.gz
 ```
 
 #### Windows (Command Prompt)
 ```cmd
-# List available backups
+# Navigate to dbsetup directory
 cd dbsetup
+
+# List available backups
 database-backup-restore.sh list
 
 # Restore from a specific backup
 database-backup-restore.sh restore .\backups\your_backup_file.tar.gz
+
+# Or use the simple restore script
+restore.sh .\backups\your_backup_file.tar.gz
+```
+
+#### Restore Examples
+```bash
+# Example 1: Restore from a specific date
+./restore.sh ./backups/npst_backup_20241223_143022.tar.gz
+
+# Example 2: Restore using main script
+./database-backup-restore.sh restore ./backups/npst_backup_20241223_143022.tar.gz
+
+# Example 3: List and choose from available backups
+./database-backup-restore.sh list
+# Then use the filename from the list
+./restore.sh ./backups/[filename_from_list].tar.gz
 ```
 
 ### Database Script Options
