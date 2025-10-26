@@ -359,7 +359,7 @@ You can modify database connection settings in `dbsetup/database-backup-restore.
 # Database configuration (edit these variables)
 DB_HOST="localhost"                    # MongoDB host
 DB_PORT="27017"                        # MongoDB port
-DB_NAME="new_project_stater_template"  # Database name
+DB_NAME="new_project_starter_template"  # Database name
 DB_USER=""                            # Username (if authentication required)
 DB_PASSWORD=""                        # Password (if authentication required)
 DB_AUTH_SOURCE=""                     # Authentication database
@@ -398,7 +398,7 @@ Before running backup/restore operations, test your MongoDB connection:
 mongosh --eval "db.runCommand('ping')"
 
 # Or test with specific database
-mongosh new_project_stater_template --eval "db.stats()"
+mongosh new_project_starter_template --eval "db.stats()"
 ```
 
 ## Security Features

@@ -6,7 +6,7 @@
 # Database configuration
 DB_HOST="localhost"
 DB_PORT="27017"
-DB_NAME="new_project_stater_template"
+DB_NAME="new_project_starter_template"
 DB_USER=""
 DB_PASSWORD=""
 DB_AUTH_SOURCE=""
