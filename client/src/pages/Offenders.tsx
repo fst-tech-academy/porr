@@ -22,8 +22,8 @@ const OffendersPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [riskLevelFilter, setRiskLevelFilter] = useState<string>('');
-  const [custodyStatusFilter, setCustodyStatusFilter] = useState<string>('');
+  const [riskLevelFilter, setRiskLevelFilter] = useState<string>('all');
+  const [custodyStatusFilter, setCustodyStatusFilter] = useState<string>('all');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
@@ -44,8 +44,8 @@ const OffendersPage: React.FC = () => {
         page: currentPage.toString(),
         limit: itemsPerPage.toString(),
         ...(searchTerm && { search: searchTerm }),
-        ...(riskLevelFilter && { riskLevel: riskLevelFilter }),
-        ...(custodyStatusFilter && { custodyStatus: custodyStatusFilter }),
+        ...(riskLevelFilter && riskLevelFilter !== 'all' && { riskLevel: riskLevelFilter }),
+        ...(custodyStatusFilter && custodyStatusFilter !== 'all' && { custodyStatus: custodyStatusFilter }),
       });
 
       const response = await api.get(`/offenders?${params}`);
@@ -189,7 +189,7 @@ const OffendersPage: React.FC = () => {
                   <SelectValue placeholder="Risk Level" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Risk Levels</SelectItem>
+                  <SelectItem value="all">All Risk Levels</SelectItem>
                   <SelectItem value="low">Low</SelectItem>
                   <SelectItem value="medium">Medium</SelectItem>
                   <SelectItem value="high">High</SelectItem>
@@ -203,7 +203,7 @@ const OffendersPage: React.FC = () => {
                   <SelectValue placeholder="Custody Status" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Status</SelectItem>
+                  <SelectItem value="all">All Status</SelectItem>
                   <SelectItem value="in_custody">In Custody</SelectItem>
                   <SelectItem value="released">Released</SelectItem>
                 </SelectContent>

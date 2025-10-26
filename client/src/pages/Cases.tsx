@@ -22,9 +22,9 @@ const CasesPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState<string>('');
-  const [caseTypeFilter, setCaseTypeFilter] = useState<string>('');
-  const [priorityFilter, setPriorityFilter] = useState<string>('');
+  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [caseTypeFilter, setCaseTypeFilter] = useState<string>('all');
+  const [priorityFilter, setPriorityFilter] = useState<string>('all');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
@@ -45,9 +45,9 @@ const CasesPage: React.FC = () => {
         page: currentPage.toString(),
         limit: itemsPerPage.toString(),
         ...(searchTerm && { search: searchTerm }),
-        ...(statusFilter && { status: statusFilter }),
-        ...(caseTypeFilter && { caseType: caseTypeFilter }),
-        ...(priorityFilter && { priority: priorityFilter }),
+        ...(statusFilter && statusFilter !== 'all' && { status: statusFilter }),
+        ...(caseTypeFilter && caseTypeFilter !== 'all' && { caseType: caseTypeFilter }),
+        ...(priorityFilter && priorityFilter !== 'all' && { priority: priorityFilter }),
       });
 
       const response = await api.get(`/cases?${params}`);
@@ -212,7 +212,7 @@ const CasesPage: React.FC = () => {
                   <SelectValue placeholder="Status" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Status</SelectItem>
+                  <SelectItem value="all">All Status</SelectItem>
                   <SelectItem value="open">Open</SelectItem>
                   <SelectItem value="under_investigation">Under Investigation</SelectItem>
                   <SelectItem value="charges_pending">Charges Pending</SelectItem>
@@ -230,7 +230,7 @@ const CasesPage: React.FC = () => {
                   <SelectValue placeholder="Case Type" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Types</SelectItem>
+                  <SelectItem value="all">All Types</SelectItem>
                   <SelectItem value="criminal">Criminal</SelectItem>
                   <SelectItem value="civil">Civil</SelectItem>
                   <SelectItem value="administrative">Administrative</SelectItem>
@@ -245,7 +245,7 @@ const CasesPage: React.FC = () => {
                   <SelectValue placeholder="Priority" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Priorities</SelectItem>
+                  <SelectItem value="all">All Priorities</SelectItem>
                   <SelectItem value="low">Low</SelectItem>
                   <SelectItem value="medium">Medium</SelectItem>
                   <SelectItem value="high">High</SelectItem>
