@@ -28,6 +28,10 @@ const auditRoutes = require("./routes/audit");
 const uploadRoutes = require("./routes/upload");
 const settingsRoutes = require("./routes/settings");
 const organisationRoutes = require("./routes/organisations");
+const offenderRoutes = require("./routes/offenders");
+const offenceRoutes = require("./routes/offences");
+const caseRoutes = require("./routes/cases");
+const courtRoutes = require("./routes/courts");
 const settingsManager = require("./utils/settingsManager");
 const { auditMiddleware } = require("./middleware/audit");
 
@@ -125,6 +129,10 @@ app.use("/api/audit", auditRoutes);
 app.use("/api/upload", uploadRoutes);
 app.use("/api/settings", settingsRoutes);
 app.use("/api/organisations", organisationRoutes);
+app.use("/api/offenders", offenderRoutes);
+app.use("/api/offences", offenceRoutes);
+app.use("/api/cases", caseRoutes);
+app.use("/api/courts", courtRoutes);
 
 // Health check endpoint
 app.get("/api/health", (req, res) => {
