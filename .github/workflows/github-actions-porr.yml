@@ -1,4 +1,4 @@
-name: GitHub Actions NPST
+name: GitHub Actions PORR
 run-name: ${{ github.actor }} is testing out GitHub Actions 🚀
 
 on:
@@ -31,7 +31,7 @@ jobs:
           cd server
           node test-connection.js
         env:
-          MONGODB_URI: mongodb://cscs_user:Friday14=@130.255.30.153:27017/NPST?authSource=admin
+          MONGODB_URI: mongodb://cscs_user:Friday14=@130.255.30.153:27017/porr?authSource=admin
 
       - run: echo "💡 The ${{ github.repository }} repository has been cloned to the runner."
       - run: echo "🖥️ The workflow is now ready to test your code on the runner."
@@ -56,10 +56,10 @@ jobs:
       - name: Build and push the backend image
         run: |
           cd server
-          docker build . -t asdini/NPST-backend:latest
-          docker push asdini/NPST-backend:latest
+          docker build . -t asdini/porr-backend:latest
+          docker push asdini/porr-backend:latest
         env:
-          MONGODB_URI: mongodb://cscs_user:Friday14=@130.255.30.153:27017/NPST?authSource=admin
+          MONGODB_URI: mongodb://cscs_user:Friday14=@130.255.30.153:27017/porr?authSource=admin
           JWT_SECRET: ${{ secrets.JWT_SECRET || '97b6283606d06012e63de1b3691f0d14a049b63089491a16f8b4c173f6bf3789ab18b927199d7a8b0bfe201767fe39fa821e0cd76cd9daccc0136f2490e9a562' }}
           NODE_ENV: production
           PORT: 5009
@@ -67,8 +67,8 @@ jobs:
       - name: Build and push the frontend image
         run: |
           cd client
-          docker build . -t asdini/NPST-frontend:latest
-          docker push asdini/NPST-frontend:latest
+          docker build . -t asdini/porr-frontend:latest
+          docker push asdini/porr-frontend:latest
         env:
           REACT_APP_API_URL: ${{ secrets.REACT_APP_API_URL || 'http://localhost:5009/api' }}
 

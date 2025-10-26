@@ -3,15 +3,19 @@
 # NPST Database Backup and Restore Script
 # This script provides comprehensive backup and restore functionality for the remote NPST database
 
-# Database configuration
-DB_HOST="localhost"
-DB_PORT="27017"
-DB_NAME="new_project_starter_template"
+# Database configuration - will be loaded from server/.env
+DB_HOST=""
+DB_PORT=""
+DB_NAME=""
 DB_USER=""
 DB_PASSWORD=""
 DB_AUTH_SOURCE=""
+MONGODB_URI=""
 BACKUP_DIR="./backups"
 TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
+
+# Path to server .env file
+SERVER_ENV_FILE="../server/.env"
 
 # Colors for output
 RED='\033[0;31m'
@@ -19,6 +23,104 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
+
+# Function to load environment variables from server/.env file
+load_env_config() {
+    print_status "Loading database configuration from $SERVER_ENV_FILE..."
+    
+    if [ ! -f "$SERVER_ENV_FILE" ]; then
+        print_error "Environment file not found: $SERVER_ENV_FILE"
+        print_error "Please create a .env file in the server directory with your MongoDB configuration"
+        print_error "Example .env file content:"
+        echo "  MONGODB_URI=mongodb://username:password@host:port/database_name"
+        echo "  # or separate variables:"
+        echo "  DB_HOST=your_host"
+        echo "  DB_PORT=27017"
+        echo "  DB_NAME=your_database"
+        echo "  DB_USER=your_username"
+        echo "  DB_PASSWORD=your_password"
+        echo "  DB_AUTH_SOURCE=admin"
+        exit 1
+    fi
+    
+    # Source the .env file
+    set -a  # automatically export all variables
+    source "$SERVER_ENV_FILE"
+    set +a  # stop automatically exporting
+    
+    # Parse MONGODB_URI if it exists
+    if [ -n "$MONGODB_URI" ]; then
+        print_status "Parsing MONGODB_URI: $MONGODB_URI"
+        
+        # Extract components from MongoDB URI
+        # Format: mongodb://[username:password@]host[:port]/database[?options]
+        if [[ $MONGODB_URI =~ mongodb://(.*) ]]; then
+            URI_PART="${BASH_REMATCH[1]}"
+            
+            # Check if credentials are present
+            if [[ $URI_PART =~ ^([^:]+):([^@]+)@(.*)$ ]]; then
+                DB_USER="${BASH_REMATCH[1]}"
+                DB_PASSWORD="${BASH_REMATCH[2]}"
+                URI_PART="${BASH_REMATCH[3]}"
+            fi
+            
+            # Extract host, port, database, and query parameters
+            if [[ $URI_PART =~ ^([^:/]+)(:([0-9]+))?/(.*)$ ]]; then
+                DB_HOST="${BASH_REMATCH[1]}"
+                DB_PORT="${BASH_REMATCH[3]:-27017}"  # Default to 27017 if not specified
+                DB_NAME_WITH_PARAMS="${BASH_REMATCH[4]}"
+                
+                # Separate database name from query parameters
+                if [[ $DB_NAME_WITH_PARAMS =~ ^([^?]+)(\?(.*))?$ ]]; then
+                    DB_NAME="${BASH_REMATCH[1]}"
+                    QUERY_PARAMS="${BASH_REMATCH[3]}"
+                    
+                    # Parse query parameters
+                    if [ -n "$QUERY_PARAMS" ]; then
+                        # Extract authSource parameter
+                        if [[ $QUERY_PARAMS =~ authSource=([^&]+) ]]; then
+                            DB_AUTH_SOURCE="${BASH_REMATCH[1]}"
+                        fi
+                    fi
+                else
+                    DB_NAME="$DB_NAME_WITH_PARAMS"
+                fi
+            fi
+        fi
+    fi
+    
+    # Use individual variables if MONGODB_URI is not set or incomplete
+    if [ -z "$DB_HOST" ] && [ -n "$DB_HOST_ENV" ]; then
+        DB_HOST="$DB_HOST_ENV"
+    fi
+    if [ -z "$DB_PORT" ] && [ -n "$DB_PORT_ENV" ]; then
+        DB_PORT="$DB_PORT_ENV"
+    fi
+    if [ -z "$DB_NAME" ] && [ -n "$DB_NAME_ENV" ]; then
+        DB_NAME="$DB_NAME_ENV"
+    fi
+    if [ -z "$DB_USER" ] && [ -n "$DB_USER_ENV" ]; then
+        DB_USER="$DB_USER_ENV"
+    fi
+    if [ -z "$DB_PASSWORD" ] && [ -n "$DB_PASSWORD_ENV" ]; then
+        DB_PASSWORD="$DB_PASSWORD_ENV"
+    fi
+    if [ -z "$DB_AUTH_SOURCE" ] && [ -n "$DB_AUTH_SOURCE_ENV" ]; then
+        DB_AUTH_SOURCE="$DB_AUTH_SOURCE_ENV"
+    fi
+    
+    # Set defaults if still empty
+    DB_HOST="${DB_HOST:-localhost}"
+    DB_PORT="${DB_PORT:-27017}"
+    DB_NAME="${DB_NAME:-new_project_starter_template}"
+    
+    print_success "Database configuration loaded:"
+    echo "  Host: $DB_HOST"
+    echo "  Port: $DB_PORT"
+    echo "  Database: $DB_NAME"
+    echo "  User: ${DB_USER:-'<not set>'}"
+    echo "  Auth Source: ${DB_AUTH_SOURCE:-'<not set>'}"
+}
 
 # Function to print colored output
 print_status() {
@@ -66,7 +168,22 @@ check_mongodb_tools() {
 test_connection() {
     print_status "Testing database connection..."
     
-    if mongosh "mongodb://${DB_HOST}:${DB_PORT}/${DB_NAME}" --eval "db.runCommand('ping')" --quiet > /dev/null 2>&1; then
+    # Build connection string
+    if [ -n "$DB_USER" ] && [ -n "$DB_PASSWORD" ]; then
+        # With authentication
+        if [ -n "$DB_AUTH_SOURCE" ]; then
+            CONNECTION_STRING="mongodb://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}?authSource=${DB_AUTH_SOURCE}"
+        else
+            CONNECTION_STRING="mongodb://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}"
+        fi
+    else
+        # Without authentication
+        CONNECTION_STRING="mongodb://${DB_HOST}:${DB_PORT}/${DB_NAME}"
+    fi
+    
+    print_status "Testing connection to: ${CONNECTION_STRING//:${DB_PASSWORD}@/:***@}"
+    
+    if mongosh "$CONNECTION_STRING" --eval "db.runCommand('ping')" --quiet > /dev/null 2>&1; then
         print_success "Database connection successful"
         return 0
     else
@@ -88,12 +205,27 @@ backup_database() {
     
     print_status "Creating backup: ${BACKUP_FILE}"
     
+    # Build mongodump arguments
+    DUMP_ARGS=(
+        --host "$DB_HOST"
+        --port "$DB_PORT"
+        --db "$DB_NAME"
+        --out "$BACKUP_FILE"
+    )
+    
+    # Add authentication if credentials are provided
+    if [ -n "$DB_USER" ] && [ -n "$DB_PASSWORD" ]; then
+        DUMP_ARGS+=(
+            --username "$DB_USER"
+            --password "$DB_PASSWORD"
+        )
+        if [ -n "$DB_AUTH_SOURCE" ]; then
+            DUMP_ARGS+=(--authenticationDatabase "$DB_AUTH_SOURCE")
+        fi
+    fi
+    
     # Perform the backup
-    if mongodump \
-        --host "$DB_HOST" \
-        --port "$DB_PORT" \
-        --db "$DB_NAME" \
-        --out "$BACKUP_FILE"; then
+    if mongodump "${DUMP_ARGS[@]}"; then
         
         print_success "Database backup completed successfully"
         
@@ -188,14 +320,19 @@ restore_database() {
     
     # Check if there's a subdirectory with the original database name
     # mongodump creates: backup_dir/db_name/collections.bson
-    # We need to find the actual database directory inside
+    # mongorestore expects: backup_dir (containing db_name subdirectory)
     DB_BACKUP_DIR="$EXTRACTED_BACKUP"
+    ORIGINAL_DB_NAME=""
+    
     if [ -d "$EXTRACTED_BACKUP" ]; then
         # Look for the first subdirectory (should be the database name)
         SUBDIRS=($(find "$EXTRACTED_BACKUP" -mindepth 1 -maxdepth 1 -type d))
         if [ ${#SUBDIRS[@]} -gt 0 ]; then
-            DB_BACKUP_DIR="${SUBDIRS[0]}"
-            print_status "Found database backup in: $DB_BACKUP_DIR"
+            ORIGINAL_DB_NAME=$(basename "${SUBDIRS[0]}")
+            print_status "Found database backup in: ${SUBDIRS[0]}"
+            print_status "Original database name: $ORIGINAL_DB_NAME"
+            # mongorestore expects the parent directory, not the database directory itself
+            DB_BACKUP_DIR="$EXTRACTED_BACKUP"
         fi
     fi
     
@@ -208,9 +345,19 @@ restore_database() {
         return 1
     fi
     
-    BSON_COUNT=$(find "$DB_BACKUP_DIR" -name "*.bson" | wc -l | tr -d ' ')
+    # Check for .bson files in the database subdirectory
+    DATABASE_SUBDIR="$DB_BACKUP_DIR/$ORIGINAL_DB_NAME"
+    if [ ! -d "$DATABASE_SUBDIR" ]; then
+        print_error "Database subdirectory not found: $DATABASE_SUBDIR"
+        if [[ "$BACKUP_FILE" == *.tar.gz ]]; then
+            rm -rf "$EXTRACT_DIR"
+        fi
+        return 1
+    fi
+    
+    BSON_COUNT=$(find "$DATABASE_SUBDIR" -name "*.bson" | wc -l | tr -d ' ')
     if [ "$BSON_COUNT" -eq 0 ]; then
-        print_error "No .bson files found in backup directory: $DB_BACKUP_DIR"
+        print_error "No .bson files found in database directory: $DATABASE_SUBDIR"
         if [[ "$BACKUP_FILE" == *.tar.gz ]]; then
             rm -rf "$EXTRACT_DIR"
         fi
@@ -218,15 +365,23 @@ restore_database() {
     fi
     print_status "Found $BSON_COUNT collection(s) to restore"
     
-    # Get the original database name from the backup directory
-    ORIGINAL_DB_NAME=$(basename "$DB_BACKUP_DIR")
-    
     # Build mongorestore arguments
     RESTORE_ARGS=(
         --host "$DB_HOST"
         --port "$DB_PORT"
         --drop
     )
+    
+    # Add authentication if credentials are provided
+    if [ -n "$DB_USER" ] && [ -n "$DB_PASSWORD" ]; then
+        RESTORE_ARGS+=(
+            --username "$DB_USER"
+            --password "$DB_PASSWORD"
+        )
+        if [ -n "$DB_AUTH_SOURCE" ]; then
+            RESTORE_ARGS+=(--authenticationDatabase "$DB_AUTH_SOURCE")
+        fi
+    fi
     
     # If database name changed, use namespace remapping
     if [ "$ORIGINAL_DB_NAME" != "$DB_NAME" ]; then
@@ -289,7 +444,19 @@ show_status() {
     
     if test_connection; then
         print_status "Getting database statistics..."
-        mongosh "mongodb://${DB_HOST}:${DB_PORT}/${DB_NAME}" --eval "
+        
+        # Build connection string for mongosh
+        if [ -n "$DB_USER" ] && [ -n "$DB_PASSWORD" ]; then
+            if [ -n "$DB_AUTH_SOURCE" ]; then
+                CONNECTION_STRING="mongodb://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}?authSource=${DB_AUTH_SOURCE}"
+            else
+                CONNECTION_STRING="mongodb://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}"
+            fi
+        else
+            CONNECTION_STRING="mongodb://${DB_HOST}:${DB_PORT}/${DB_NAME}"
+        fi
+        
+        mongosh "$CONNECTION_STRING" --eval "
             print('Collections:');
             db.getCollectionNames().forEach(function(name) {
                 var count = db.getCollection(name).countDocuments();
@@ -320,15 +487,25 @@ show_help() {
     echo "  $0 status"
     echo ""
     echo "Configuration:"
-    echo "  Database Host: $DB_HOST"
-    echo "  Database Port: $DB_PORT"
-    echo "  Database Name: $DB_NAME"
+    echo "  Environment File: $SERVER_ENV_FILE"
     echo "  Backup Directory: $BACKUP_DIR"
+    echo ""
+    echo "The script reads database configuration from the server/.env file."
+    echo "Required environment variables:"
+    echo "  MONGODB_URI=mongodb://username:password@host:port/database_name"
+    echo "  # OR separate variables:"
+    echo "  DB_HOST=your_host"
+    echo "  DB_PORT=27017"
+    echo "  DB_NAME=your_database"
+    echo "  DB_USER=your_username"
+    echo "  DB_PASSWORD=your_password"
+    echo "  DB_AUTH_SOURCE=admin"
 }
 
 # Main script logic
 case "$1" in
     "backup")
+        load_env_config
         check_mongodb_tools
         if test_connection; then
             backup_database
@@ -338,6 +515,7 @@ case "$1" in
         fi
         ;;
     "restore")
+        load_env_config
         check_mongodb_tools
         if test_connection; then
             restore_database "$2"
@@ -350,9 +528,11 @@ case "$1" in
         list_backups
         ;;
     "status")
+        load_env_config
         show_status
         ;;
     "test")
+        load_env_config
         check_mongodb_tools
         test_connection
         ;;
