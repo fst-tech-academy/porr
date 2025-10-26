@@ -23,6 +23,9 @@ import AuditLogs from './pages/AuditLogs';
 import Organisations from './pages/Organisations';
 import CreateOrganisation from './pages/CreateOrganisation';
 import OrganisationProfile from './pages/OrganisationProfile';
+import Offenders from './pages/Offenders';
+import CreateOffender from './pages/CreateOffender';
+import Cases from './pages/Cases';
 import NotFound from './pages/NotFound';
 import NotFoundTest from './pages/NotFoundTest';
 import NotFoundSimple from './pages/NotFoundSimple';
@@ -91,6 +94,23 @@ function App() {
                                     </FeatureBasedRoute>
                                   </RoleBasedRoute>
                                 } />
+                                {/* Offender Registry Routes */}
+                                <Route path="/offenders" element={
+                                  <RoleBasedRoute allowedRoles={['admin', 'manager', 'officer']}>
+                                    <Offenders />
+                                  </RoleBasedRoute>
+                                } />
+                                <Route path="/offenders/new" element={
+                                  <RoleBasedRoute allowedRoles={['admin', 'manager', 'officer']}>
+                                    <CreateOffender />
+                                  </RoleBasedRoute>
+                                } />
+                                <Route path="/cases" element={
+                                  <RoleBasedRoute allowedRoles={['admin', 'manager', 'officer']}>
+                                    <Cases />
+                                  </RoleBasedRoute>
+                                } />
+                                
                                 <Route path="/profile" element={<Profile />} />
                                 <Route path="/help" element={<Help />} />
                               </Routes>
@@ -134,6 +154,29 @@ function App() {
                         <Route path="/organisations/:id" element={
                           <RoleBasedRoute allowedRoles={['super_admin']}>
                             <OrganisationProfile />
+                          </RoleBasedRoute>
+                        } />
+                        
+                        {/* Direct offender registry routes */}
+                        <Route path="/offenders" element={
+                          <RoleBasedRoute allowedRoles={['admin', 'manager', 'officer']}>
+                            <Layout>
+                              <Offenders />
+                            </Layout>
+                          </RoleBasedRoute>
+                        } />
+                        <Route path="/offenders/new" element={
+                          <RoleBasedRoute allowedRoles={['admin', 'manager', 'officer']}>
+                            <Layout>
+                              <CreateOffender />
+                            </Layout>
+                          </RoleBasedRoute>
+                        } />
+                        <Route path="/cases" element={
+                          <RoleBasedRoute allowedRoles={['admin', 'manager', 'officer']}>
+                            <Layout>
+                              <Cases />
+                            </Layout>
                           </RoleBasedRoute>
                         } />
                         

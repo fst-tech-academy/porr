@@ -29,7 +29,11 @@ import {
   Activity,
   Key,
   Building2,
-  HelpCircle
+  HelpCircle,
+  UserCheck,
+  Scale,
+  Gavel,
+  AlertTriangle
 } from 'lucide-react';
 
 interface LayoutProps {
@@ -46,6 +50,15 @@ const getMenuItems = (
   ...(isDashboardAnalyticsEnabled ? [
     { text: t('navigation.dashboard'), icon: <LayoutDashboard className="h-5 w-5" />, path: '/dashboard' },
   ] : []),
+  
+  // Offender Registry System - Show for admin, manager, officer roles
+  ...(userRole === 'admin' || userRole === 'manager' || userRole === 'officer' ? [
+    { text: 'Offenders', icon: <UserCheck className="h-5 w-5" />, path: '/offenders' },
+    { text: 'Cases', icon: <FileText className="h-5 w-5" />, path: '/cases' },
+    { text: 'Offences', icon: <AlertTriangle className="h-5 w-5" />, path: '/offences' },
+    { text: 'Courts', icon: <Scale className="h-5 w-5" />, path: '/courts' },
+  ] : []),
+  
   // Show users only for admin/manager roles and if user management is enabled
   ...(userRole === 'admin' || userRole === 'manager' ? [
     ...(isUserManagementEnabled ? [
