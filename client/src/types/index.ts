@@ -238,3 +238,569 @@ export interface StatsResponse {
     [key: string]: any;
   };
 }
+
+// Offender Registry System Types
+
+export interface Offender {
+  _id: string;
+  personalInfo: {
+    firstName: string;
+    lastName: string;
+    middleName?: string;
+    dateOfBirth: string;
+    gender: 'male' | 'female' | 'other';
+    nationality: string;
+    nationalId?: string;
+    passportNumber?: string;
+    phoneNumber?: string;
+    email?: string;
+  };
+  physicalDescription?: {
+    height?: number;
+    weight?: number;
+    eyeColor?: 'brown' | 'blue' | 'green' | 'hazel' | 'gray' | 'amber' | 'other';
+    hairColor?: 'black' | 'brown' | 'blonde' | 'red' | 'gray' | 'white' | 'other';
+    skinTone?: 'light' | 'medium' | 'dark' | 'very dark';
+    distinguishingMarks?: string;
+    tattoos?: Array<{ description: string; location: string }>;
+    scars?: Array<{ description: string; location: string }>;
+  };
+  address?: {
+    current?: {
+      street?: string;
+      city?: string;
+      state?: string;
+      country?: string;
+      postalCode?: string;
+      coordinates?: { latitude: number; longitude: number };
+    };
+    permanent?: {
+      street?: string;
+      city?: string;
+      state?: string;
+      country?: string;
+      postalCode?: string;
+      coordinates?: { latitude: number; longitude: number };
+    };
+    previousAddresses?: Array<{
+      street?: string;
+      city?: string;
+      state?: string;
+      country?: string;
+      postalCode?: string;
+      dateFrom?: string;
+      dateTo?: string;
+    }>;
+  };
+  familyInfo?: {
+    maritalStatus?: 'single' | 'married' | 'divorced' | 'widowed' | 'separated';
+    spouse?: { name: string; phone?: string; address?: string };
+    children?: Array<{ name: string; age?: number; relationship: string }>;
+    parents?: {
+      father?: { name: string; phone?: string; address?: string };
+      mother?: { name: string; phone?: string; address?: string };
+    };
+    emergencyContact?: { name: string; relationship: string; phone?: string; address?: string };
+  };
+  employment?: {
+    current?: {
+      employer?: string;
+      position?: string;
+      address?: string;
+      phone?: string;
+      startDate?: string;
+    };
+    previous?: Array<{
+      employer?: string;
+      position?: string;
+      address?: string;
+      phone?: string;
+      startDate?: string;
+      endDate?: string;
+    }>;
+  };
+  criminalHistory: {
+    totalOffences: number;
+    firstOffenceDate?: string;
+    lastOffenceDate?: string;
+    offences: Array<{
+      offenceId: Offence | string;
+      caseId: Case | string;
+      dateCommitted: string;
+      dateArrested?: string;
+      status: 'pending' | 'convicted' | 'acquitted' | 'dismissed' | 'appealed';
+      sentence?: string;
+      fine?: number;
+      communityService?: number;
+      probationPeriod?: number;
+      notes?: string;
+    }>;
+    aliases?: Array<{ name: string; type: 'nickname' | 'alias' | 'maiden_name' | 'other' }>;
+  };
+  riskAssessment: {
+    level: 'low' | 'medium' | 'high' | 'critical';
+    factors?: Array<{ factor: string; weight: number }>;
+    lastAssessment?: string;
+    nextAssessment?: string;
+    notes?: string;
+  };
+  medicalInfo?: {
+    mentalHealthStatus?: 'stable' | 'treatment_required' | 'medication_required' | 'hospitalized';
+    physicalHealthStatus?: 'good' | 'fair' | 'poor' | 'critical';
+    medications?: Array<{ name: string; dosage: string; frequency: string }>;
+    allergies?: string[];
+    medicalNotes?: string;
+  };
+  status: {
+    isActive: boolean;
+    isInCustody: boolean;
+    custodyLocation?: string;
+    custodyStartDate?: string;
+    expectedReleaseDate?: string;
+    paroleStatus?: 'none' | 'eligible' | 'on_parole' | 'parole_violated' | 'completed';
+    probationStatus?: 'none' | 'active' | 'completed' | 'violated';
+  };
+  photos?: Array<{
+    url: string;
+    type: 'mugshot' | 'profile' | 'identification' | 'other';
+    description?: string;
+    uploadedAt: string;
+  }>;
+  documents?: Array<{
+    url: string;
+    type: 'id_copy' | 'passport_copy' | 'court_document' | 'medical_record' | 'other';
+    description?: string;
+    uploadedAt: string;
+  }>;
+  organisationId: string;
+  createdBy: User | string;
+  lastModifiedBy?: User | string;
+  tags?: string[];
+  notes?: string;
+  metadata: {
+    createdAt: string;
+    updatedAt: string;
+    version: number;
+  };
+  // Virtual fields
+  fullName?: string;
+  age?: number;
+}
+
+export interface Offence {
+  _id: string;
+  name: string;
+  description: string;
+  code: string;
+  category: 'violent_crime' | 'property_crime' | 'drug_offence' | 'white_collar_crime' | 'cyber_crime' | 'traffic_violation' | 'public_order' | 'sexual_offence' | 'terrorism' | 'other';
+  subcategory?: string;
+  severity: 'minor' | 'moderate' | 'serious' | 'major' | 'felony';
+  legalDefinition: string;
+  applicableLaws?: Array<{ law: string; section: string; description: string }>;
+  statuteOfLimitations?: number;
+  penalties: {
+    minimumSentence?: string;
+    maximumSentence?: string;
+    fineRange?: {
+      minimum?: number;
+      maximum?: number;
+      currency?: string;
+    };
+    communityService?: {
+      minimum?: number;
+      maximum?: number;
+    };
+    probation?: {
+      minimum?: number;
+      maximum?: number;
+    };
+    parole?: {
+      eligible?: boolean;
+      minimum?: number;
+      maximum?: number;
+    };
+  };
+  aggravatingFactors?: Array<{ factor: string; description: string; impact: 'low' | 'medium' | 'high' }>;
+  mitigatingFactors?: Array<{ factor: string; description: string; impact: 'low' | 'medium' | 'high' }>;
+  riskFactors: {
+    violenceRisk: 'low' | 'medium' | 'high';
+    recidivismRisk: 'low' | 'medium' | 'high';
+    publicSafetyRisk: 'low' | 'medium' | 'high';
+  };
+  reportingRequirements?: {
+    mandatoryReporting?: boolean;
+    reportingPeriod?: number;
+    reportingAuthority?: string;
+    specialRequirements?: string;
+  };
+  isActive: boolean;
+  effectiveDate: string;
+  repealedDate?: string;
+  repealedReason?: string;
+  organisationId: string;
+  createdBy: User | string;
+  lastModifiedBy?: User | string;
+  tags?: string[];
+  notes?: string;
+  metadata: {
+    createdAt: string;
+    updatedAt: string;
+    version: number;
+  };
+  // Virtual fields
+  displayName?: string;
+}
+
+export interface Case {
+  _id: string;
+  caseNumber: string;
+  title: string;
+  description: string;
+  caseType: 'criminal' | 'civil' | 'administrative' | 'appeal' | 'review' | 'investigation' | 'other';
+  priority: 'low' | 'medium' | 'high' | 'urgent';
+  offenders: Array<{
+    offenderId: Offender | string;
+    role: 'primary' | 'secondary' | 'accomplice' | 'witness';
+    charges: Array<{
+      offenceId: Offence | string;
+      count: number;
+      description?: string;
+      dateCommitted: string;
+      location?: string;
+    }>;
+  }>;
+  victims?: Array<{
+    name: string;
+    contactInfo?: { phone?: string; email?: string; address?: string };
+    relationship?: string;
+    impactStatement?: string;
+  }>;
+  witnesses?: Array<{
+    name: string;
+    contactInfo?: { phone?: string; email?: string; address?: string };
+    statement?: string;
+    credibility?: 'high' | 'medium' | 'low';
+  }>;
+  offences: Array<{
+    offenceId: Offence | string;
+    count: number;
+    description?: string;
+    dateCommitted: string;
+    location?: string;
+    evidence?: string[];
+  }>;
+  court?: {
+    courtId?: Court | string;
+    judge?: string;
+    prosecutor?: string;
+    defenseAttorney?: string;
+    courtDate?: string;
+    nextHearing?: string;
+  };
+  timeline: Array<{
+    date: string;
+    event: 'case_opened' | 'investigation_started' | 'arrest_made' | 'charges_filed' | 'arraignment' | 'preliminary_hearing' | 'trial_started' | 'trial_completed' | 'sentencing' | 'appeal_filed' | 'case_closed' | 'other';
+    description?: string;
+    location?: string;
+    participants?: string[];
+    documents?: string[];
+    createdBy?: User | string;
+  }>;
+  status: {
+    current: 'open' | 'under_investigation' | 'charges_pending' | 'in_court' | 'trial_in_progress' | 'awaiting_sentencing' | 'sentenced' | 'appealed' | 'closed' | 'dismissed' | 'acquitted';
+    previous: Array<{
+      status: string;
+      dateChanged: string;
+      changedBy: User | string;
+      reason?: string;
+    }>;
+  };
+  investigation?: {
+    assignedOfficer?: User | string;
+    assignedTeam?: Array<User | string>;
+    startDate?: string;
+    endDate?: string;
+    evidence?: Array<{
+      type: 'physical' | 'digital' | 'testimony' | 'document' | 'other';
+      description?: string;
+      collectedBy?: User | string;
+      collectedDate?: string;
+      location?: string;
+      chainOfCustody?: Array<{ person: string; date: string; action: string }>;
+    }>;
+    leads?: Array<{
+      description: string;
+      source?: string;
+      status: 'active' | 'investigated' | 'closed' | 'false';
+      assignedTo?: User | string;
+    }>;
+  };
+  outcome?: {
+    verdict?: 'guilty' | 'not_guilty' | 'dismissed' | 'plea_bargain' | 'pending';
+    sentence?: string;
+    fine?: number;
+    communityService?: number;
+    probationPeriod?: number;
+    paroleEligibility?: string;
+    restitution?: number;
+    notes?: string;
+  };
+  documents?: Array<{
+    name: string;
+    type: 'arrest_report' | 'investigation_report' | 'court_document' | 'evidence' | 'medical_report' | 'witness_statement' | 'other';
+    url: string;
+    uploadedBy?: User | string;
+    uploadedAt: string;
+    description?: string;
+    isConfidential?: boolean;
+  }>;
+  organisationId: string;
+  createdBy: User | string;
+  lastModifiedBy?: User | string;
+  tags?: string[];
+  notes?: string;
+  metadata: {
+    createdAt: string;
+    updatedAt: string;
+    version: number;
+  };
+  // Virtual fields
+  caseAge?: number;
+}
+
+export interface Court {
+  _id: string;
+  name: string;
+  code: string;
+  description?: string;
+  type: 'supreme_court' | 'appeals_court' | 'district_court' | 'regional_court' | 'municipal_court' | 'specialized_court' | 'military_court' | 'other';
+  jurisdiction: 'federal' | 'state' | 'regional' | 'municipal' | 'specialized';
+  level: 'trial' | 'appellate' | 'supreme' | 'administrative';
+  address?: {
+    street?: string;
+    city?: string;
+    state?: string;
+    country?: string;
+    postalCode?: string;
+    coordinates?: { latitude: number; longitude: number };
+  };
+  contactInfo?: {
+    phone?: string;
+    email?: string;
+    fax?: string;
+    website?: string;
+  };
+  personnel?: {
+    judges?: Array<{
+      name: string;
+      title?: string;
+      specialization?: string[];
+      contactInfo?: { phone?: string; email?: string };
+      isActive?: boolean;
+    }>;
+    clerks?: Array<{
+      name: string;
+      title?: string;
+      contactInfo?: { phone?: string; email?: string };
+      isActive?: boolean;
+    }>;
+    prosecutors?: Array<{
+      name: string;
+      title?: string;
+      specialization?: string[];
+      contactInfo?: { phone?: string; email?: string };
+      isActive?: boolean;
+    }>;
+  };
+  operations?: {
+    businessHours?: {
+      monday?: { open: string; close: string };
+      tuesday?: { open: string; close: string };
+      wednesday?: { open: string; close: string };
+      thursday?: { open: string; close: string };
+      friday?: { open: string; close: string };
+      saturday?: { open: string; close: string };
+      sunday?: { open: string; close: string };
+    };
+    holidays?: string[];
+    capacity?: {
+      courtrooms?: number;
+      seatingCapacity?: number;
+    };
+    facilities?: Array<{
+      name: string;
+      type: 'courtroom' | 'conference_room' | 'holding_cell' | 'office' | 'other';
+      capacity?: number;
+      equipment?: string[];
+    }>;
+  };
+  caseManagement?: {
+    caseTypes?: string[];
+    maxCaseLoad?: number;
+    currentCaseLoad?: number;
+    averageProcessingTime?: number;
+    backlogThreshold?: number;
+  };
+  budget?: {
+    annual?: number;
+    currency?: string;
+    allocated?: number;
+    spent?: number;
+    remaining?: number;
+  };
+  metrics?: {
+    casesProcessed?: number;
+    averageResolutionTime?: number;
+    successRate?: number;
+    satisfactionRating?: number;
+    lastUpdated?: string;
+  };
+  isActive: boolean;
+  establishedDate?: string;
+  lastInspectionDate?: string;
+  nextInspectionDate?: string;
+  organisationId: string;
+  createdBy: User | string;
+  lastModifiedBy?: User | string;
+  tags?: string[];
+  notes?: string;
+  metadata: {
+    createdAt: string;
+    updatedAt: string;
+    version: number;
+  };
+  // Virtual fields
+  fullAddress?: string;
+  utilizationRate?: number;
+}
+
+// Form data interfaces
+export interface OffenderFormData {
+  personalInfo: {
+    firstName: string;
+    lastName: string;
+    middleName?: string;
+    dateOfBirth: string;
+    gender: 'male' | 'female' | 'other';
+    nationality: string;
+    nationalId?: string;
+    passportNumber?: string;
+    phoneNumber?: string;
+    email?: string;
+  };
+  physicalDescription?: {
+    height?: number;
+    weight?: number;
+    eyeColor?: string;
+    hairColor?: string;
+    skinTone?: string;
+    distinguishingMarks?: string;
+  };
+  address?: {
+    current?: {
+      street?: string;
+      city?: string;
+      state?: string;
+      country?: string;
+      postalCode?: string;
+    };
+    permanent?: {
+      street?: string;
+      city?: string;
+      state?: string;
+      country?: string;
+      postalCode?: string;
+    };
+  };
+  familyInfo?: {
+    maritalStatus?: string;
+    spouse?: { name?: string; phone?: string; address?: string };
+    emergencyContact?: { name?: string; relationship?: string; phone?: string; address?: string };
+  };
+  riskAssessment?: {
+    level: 'low' | 'medium' | 'high' | 'critical';
+    notes?: string;
+  };
+  status?: {
+    isActive?: boolean;
+    isInCustody?: boolean;
+    custodyLocation?: string;
+  };
+  notes?: string;
+}
+
+export interface OffenceFormData {
+  name: string;
+  description: string;
+  code: string;
+  category: string;
+  severity: string;
+  legalDefinition: string;
+  penalties?: {
+    minimumSentence?: string;
+    maximumSentence?: string;
+    fineRange?: {
+      minimum?: number;
+      maximum?: number;
+    };
+  };
+  riskFactors?: {
+    violenceRisk: string;
+    recidivismRisk: string;
+    publicSafetyRisk: string;
+  };
+  notes?: string;
+}
+
+export interface CaseFormData {
+  caseNumber: string;
+  title: string;
+  description: string;
+  caseType: string;
+  priority: string;
+  offenders: Array<{
+    offenderId: string;
+    role: string;
+  }>;
+  offences: Array<{
+    offenceId: string;
+    count: number;
+    dateCommitted: string;
+    location?: string;
+  }>;
+  court?: {
+    courtId?: string;
+    judge?: string;
+    prosecutor?: string;
+    defenseAttorney?: string;
+  };
+  notes?: string;
+}
+
+export interface CourtFormData {
+  name: string;
+  code: string;
+  description?: string;
+  type: string;
+  jurisdiction: string;
+  level: string;
+  address?: {
+    street?: string;
+    city?: string;
+    state?: string;
+    country?: string;
+    postalCode?: string;
+  };
+  contactInfo?: {
+    phone?: string;
+    email?: string;
+    website?: string;
+  };
+  caseManagement?: {
+    maxCaseLoad?: number;
+  };
+  budget?: {
+    annual?: number;
+  };
+  notes?: string;
+}
