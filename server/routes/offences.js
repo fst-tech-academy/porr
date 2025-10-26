@@ -8,7 +8,7 @@ const Offence = require('../models/Offence');
 const router = express.Router();
 
 // Get all offences with search and filtering
-router.get('/', protect, authorize(['admin', 'manager', 'officer', 'super_admin']), [
+router.get('/', protect, authorize('admin', 'manager', 'officer', 'super_admin'), [
   query('page').optional().isInt({ min: 1 }).withMessage('Page must be a positive integer'),
   query('limit').optional().isInt({ min: 1, max: 100 }).withMessage('Limit must be between 1 and 100'),
   query('search').optional().trim().notEmpty().withMessage('Search term cannot be empty'),
@@ -56,7 +56,7 @@ router.get('/', protect, authorize(['admin', 'manager', 'officer', 'super_admin'
 });
 
 // Get single offence
-router.get('/:id', protect, authorize(['admin', 'manager', 'officer', 'super_admin']), [
+router.get('/:id', protect, authorize('admin', 'manager', 'officer', 'super_admin'), [
   param('id').isMongoId().withMessage('Invalid offence ID')
 ], async (req, res) => {
   try {
@@ -320,7 +320,7 @@ router.delete('/:id', protect, authorize(['admin']), [
 });
 
 // Get offence statistics
-router.get('/stats/overview', protect, authorize(['admin', 'manager', 'officer', 'super_admin']), async (req, res) => {
+router.get('/stats/overview', protect, authorize('admin', 'manager', 'officer', 'super_admin'), async (req, res) => {
   try {
     const organisationId = req.user.organisationId;
 
@@ -336,7 +336,7 @@ router.get('/stats/overview', protect, authorize(['admin', 'manager', 'officer',
 });
 
 // Get offence categories
-router.get('/categories/list', protect, authorize(['admin', 'manager', 'officer', 'super_admin']), async (req, res) => {
+router.get('/categories/list', protect, authorize('admin', 'manager', 'officer', 'super_admin'), async (req, res) => {
   try {
     const categories = [
       { value: 'violent_crime', label: 'Violent Crime', description: 'Crimes involving physical harm or threat of harm' },
@@ -361,7 +361,7 @@ router.get('/categories/list', protect, authorize(['admin', 'manager', 'officer'
 });
 
 // Get offence severities
-router.get('/severities/list', protect, authorize(['admin', 'manager', 'officer', 'super_admin']), async (req, res) => {
+router.get('/severities/list', protect, authorize('admin', 'manager', 'officer', 'super_admin'), async (req, res) => {
   try {
     const severities = [
       { value: 'minor', label: 'Minor', description: 'Minor offences with minimal penalties', color: 'green' },

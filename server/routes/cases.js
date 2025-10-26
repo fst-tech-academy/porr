@@ -10,7 +10,7 @@ const Offence = require('../models/Offence');
 const router = express.Router();
 
 // Get all cases with search and filtering
-router.get('/', protect, authorize(['admin', 'manager', 'officer', 'super_admin']), [
+router.get('/', protect, authorize('admin', 'manager', 'officer', 'super_admin'), [
   query('page').optional().isInt({ min: 1 }).withMessage('Page must be a positive integer'),
   query('limit').optional().isInt({ min: 1, max: 100 }).withMessage('Limit must be between 1 and 100'),
   query('search').optional().trim().notEmpty().withMessage('Search term cannot be empty'),
@@ -64,7 +64,7 @@ router.get('/', protect, authorize(['admin', 'manager', 'officer', 'super_admin'
 });
 
 // Get single case
-router.get('/:id', protect, authorize(['admin', 'manager', 'officer', 'super_admin']), [
+router.get('/:id', protect, authorize('admin', 'manager', 'officer', 'super_admin'), [
   param('id').isMongoId().withMessage('Invalid case ID')
 ], async (req, res) => {
   try {
@@ -101,7 +101,7 @@ router.get('/:id', protect, authorize(['admin', 'manager', 'officer', 'super_adm
 });
 
 // Create new case
-router.post('/', protect, authorize(['admin', 'manager', 'officer', 'super_admin']), [
+router.post('/', protect, authorize('admin', 'manager', 'officer', 'super_admin'), [
   body('caseNumber').trim().notEmpty().withMessage('Case number is required'),
   body('title').trim().notEmpty().withMessage('Case title is required'),
   body('description').trim().notEmpty().withMessage('Description is required'),
@@ -192,7 +192,7 @@ router.post('/', protect, authorize(['admin', 'manager', 'officer', 'super_admin
 });
 
 // Update case
-router.put('/:id', protect, authorize(['admin', 'manager', 'officer', 'super_admin']), [
+router.put('/:id', protect, authorize('admin', 'manager', 'officer', 'super_admin'), [
   param('id').isMongoId().withMessage('Invalid case ID'),
   body('title').optional().trim().notEmpty().withMessage('Case title cannot be empty'),
   body('description').optional().trim().notEmpty().withMessage('Description cannot be empty'),
@@ -243,7 +243,7 @@ router.put('/:id', protect, authorize(['admin', 'manager', 'officer', 'super_adm
 });
 
 // Update case status
-router.patch('/:id/status', protect, authorize(['admin', 'manager', 'officer', 'super_admin']), [
+router.patch('/:id/status', protect, authorize('admin', 'manager', 'officer', 'super_admin'), [
   param('id').isMongoId().withMessage('Invalid case ID'),
   body('status').isIn(['open', 'under_investigation', 'charges_pending', 'in_court', 'trial_in_progress', 'awaiting_sentencing', 'sentenced', 'appealed', 'closed', 'dismissed', 'acquitted']).withMessage('Valid status is required'),
   body('reason').optional().trim()
@@ -362,7 +362,7 @@ router.patch('/:id/assign', protect, authorize(['admin', 'manager']), [
 });
 
 // Add timeline event
-router.post('/:id/timeline', protect, authorize(['admin', 'manager', 'officer', 'super_admin']), [
+router.post('/:id/timeline', protect, authorize('admin', 'manager', 'officer', 'super_admin'), [
   param('id').isMongoId().withMessage('Invalid case ID'),
   body('event').isIn(['case_opened', 'investigation_started', 'arrest_made', 'charges_filed', 'arraignment', 'preliminary_hearing', 'trial_started', 'trial_completed', 'sentencing', 'appeal_filed', 'case_closed', 'other']).withMessage('Valid event type is required'),
   body('description').trim().notEmpty().withMessage('Description is required'),
@@ -462,7 +462,7 @@ router.delete('/:id', protect, authorize(['admin']), [
 });
 
 // Get case statistics
-router.get('/stats/overview', protect, authorize(['admin', 'manager', 'officer', 'super_admin']), async (req, res) => {
+router.get('/stats/overview', protect, authorize('admin', 'manager', 'officer', 'super_admin'), async (req, res) => {
   try {
     const organisationId = req.user.organisationId;
 

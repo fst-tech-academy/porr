@@ -10,7 +10,7 @@ const Case = require('../models/Case');
 const router = express.Router();
 
 // Get all offenders with search and filtering
-router.get('/', protect, authorize(['admin', 'manager', 'officer', 'super_admin']), [
+router.get('/', protect, authorize('admin', 'manager', 'officer', 'super_admin'), [
   query('page').optional().isInt({ min: 1 }).withMessage('Page must be a positive integer'),
   query('limit').optional().isInt({ min: 1, max: 100 }).withMessage('Limit must be between 1 and 100'),
   query('search').optional().trim().notEmpty().withMessage('Search term cannot be empty'),
@@ -61,7 +61,7 @@ router.get('/', protect, authorize(['admin', 'manager', 'officer', 'super_admin'
 });
 
 // Get single offender
-router.get('/:id', protect, authorize(['admin', 'manager', 'officer', 'super_admin']), [
+router.get('/:id', protect, authorize('admin', 'manager', 'officer', 'super_admin'), [
   param('id').isMongoId().withMessage('Invalid offender ID')
 ], async (req, res) => {
   try {
@@ -96,7 +96,7 @@ router.get('/:id', protect, authorize(['admin', 'manager', 'officer', 'super_adm
 });
 
 // Create new offender
-router.post('/', protect, authorize(['admin', 'manager', 'officer', 'super_admin']), [
+router.post('/', protect, authorize('admin', 'manager', 'officer', 'super_admin'), [
   body('personalInfo.firstName').trim().notEmpty().withMessage('First name is required'),
   body('personalInfo.lastName').trim().notEmpty().withMessage('Last name is required'),
   body('personalInfo.dateOfBirth').isISO8601().withMessage('Valid date of birth is required'),
@@ -150,7 +150,7 @@ router.post('/', protect, authorize(['admin', 'manager', 'officer', 'super_admin
 });
 
 // Update offender
-router.put('/:id', protect, authorize(['admin', 'manager', 'officer', 'super_admin']), [
+router.put('/:id', protect, authorize('admin', 'manager', 'officer', 'super_admin'), [
   param('id').isMongoId().withMessage('Invalid offender ID'),
   body('personalInfo.firstName').optional().trim().notEmpty().withMessage('First name cannot be empty'),
   body('personalInfo.lastName').optional().trim().notEmpty().withMessage('Last name cannot be empty'),
@@ -220,7 +220,7 @@ router.put('/:id', protect, authorize(['admin', 'manager', 'officer', 'super_adm
 });
 
 // Add offence to offender
-router.post('/:id/offences', protect, authorize(['admin', 'manager', 'officer', 'super_admin']), [
+router.post('/:id/offences', protect, authorize('admin', 'manager', 'officer', 'super_admin'), [
   param('id').isMongoId().withMessage('Invalid offender ID'),
   body('offenceId').isMongoId().withMessage('Valid offence ID is required'),
   body('caseId').isMongoId().withMessage('Valid case ID is required'),
@@ -315,7 +315,7 @@ router.post('/:id/offences', protect, authorize(['admin', 'manager', 'officer', 
 });
 
 // Update offender status
-router.patch('/:id/status', protect, authorize(['admin', 'manager', 'officer', 'super_admin']), [
+router.patch('/:id/status', protect, authorize('admin', 'manager', 'officer', 'super_admin'), [
   param('id').isMongoId().withMessage('Invalid offender ID'),
   body('isActive').optional().isBoolean().withMessage('isActive must be boolean'),
   body('isInCustody').optional().isBoolean().withMessage('isInCustody must be boolean'),
@@ -435,7 +435,7 @@ router.delete('/:id', protect, authorize(['admin']), [
 });
 
 // Get offender statistics
-router.get('/stats/overview', protect, authorize(['admin', 'manager', 'officer', 'super_admin']), async (req, res) => {
+router.get('/stats/overview', protect, authorize('admin', 'manager', 'officer', 'super_admin'), async (req, res) => {
   try {
     const organisationId = req.user.organisationId;
 
