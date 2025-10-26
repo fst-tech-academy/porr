@@ -72,7 +72,7 @@ const Login: React.FC = () => {
     defaultValues: {
       email: 'superadmin@default-org.com',
       password: 'SuperAdmin@2024!',
-      organisationId: '68fafcfc2eee45f3dd00ca65'
+      organisationId: '' // Will be set when organisations load
     }
   });
 
@@ -83,14 +83,19 @@ const Login: React.FC = () => {
     const fetchOrganisations = async () => {
       setLoadingOrganisations(true);
       try {
-        const response = await fetch('/api/auth/organisations');
-        const data = await response.json();
-        if (data.success) {
-          setOrganisations(data.data || []);
-          // Auto-select the default organisation if available
-          const defaultOrg = data.data?.find((org: any) => org.id === '68fafcfc2eee45f3dd00ca65');
-          if (defaultOrg) {
-            loginForm.setValue('organisationId', defaultOrg.id);
+        const response = await apiService.getLoginOrganisations();
+        if (response.success && response.data) {
+          // Map organisations to ensure consistent id field
+          const mappedOrgs = response.data.map((org: any) => ({
+            ...org,
+            id: org.id || org._id,
+          }));
+          setOrganisations(mappedOrgs);
+          
+          // Auto-select the first organisation if available
+          if (mappedOrgs.length > 0) {
+            const selectedOrg = mappedOrgs[0];
+            loginForm.setValue('organisationId', selectedOrg.id || selectedOrg._id);
           }
         }
       } catch (error) {
@@ -102,7 +107,8 @@ const Login: React.FC = () => {
     };
 
     fetchOrganisations();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Only run once on mount
 
   const handleLogin = async (data: LoginFormData) => {
     try {
@@ -420,18 +426,21 @@ const Login: React.FC = () => {
                         </div>
                       </SelectTrigger>
                       <SelectContent className="bg-white border-gray-200">
-                        {organisations.map((org) => (
-                          <SelectItem 
-                            key={org.id} 
-                            value={org.id}
-                            className="text-slate-900 data-[highlighted]:bg-blue-500 data-[highlighted]:text-white"
-                          >
-                            <div className="flex items-center">
-                              <Building2 className="mr-2 h-4 w-4" />
-                              {org.name}
-                            </div>
-                          </SelectItem>
-                        ))}
+                        {organisations.map((org) => {
+                          const orgId = (org as any).id || (org as any)._id;
+                          return (
+                            <SelectItem 
+                              key={orgId} 
+                              value={orgId}
+                              className="text-slate-900 data-[highlighted]:bg-blue-500 data-[highlighted]:text-white"
+                            >
+                              <div className="flex items-center">
+                                <Building2 className="mr-2 h-4 w-4" />
+                                {org.name}
+                              </div>
+                            </SelectItem>
+                          );
+                        })}
                       </SelectContent>
                     </Select>
                     {loginForm.formState.errors.organisationId && (

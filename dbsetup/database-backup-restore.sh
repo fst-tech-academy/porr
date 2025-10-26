@@ -164,7 +164,16 @@ restore_database() {
         mkdir -p "$EXTRACT_DIR"
         
         if tar -xzf "$BACKUP_FILE" -C "$EXTRACT_DIR"; then
-            EXTRACTED_BACKUP="$EXTRACT_DIR/$(basename "$BACKUP_FILE" .tar.gz)"
+            # Find the actual extracted directory (handle different naming conventions)
+            EXTRACTED_DIRS=($(find "$EXTRACT_DIR" -mindepth 1 -maxdepth 1 -type d))
+            if [ ${#EXTRACTED_DIRS[@]} -gt 0 ]; then
+                EXTRACTED_BACKUP="${EXTRACTED_DIRS[0]}"
+                print_status "Found extracted backup directory: $EXTRACTED_BACKUP"
+            else
+                print_error "No directory found in extracted backup"
+                rm -rf "$EXTRACT_DIR"
+                return 1
+            fi
         else
             print_error "Failed to extract backup file"
             rm -rf "$EXTRACT_DIR"
@@ -190,12 +199,49 @@ restore_database() {
         fi
     fi
     
-    if mongorestore \
-        --host "$DB_HOST" \
-        --port "$DB_PORT" \
-        --db "$DB_NAME" \
-        --drop \
-        "$DB_BACKUP_DIR"; then
+    # Verify the backup directory exists and contains .bson files
+    if [ ! -d "$DB_BACKUP_DIR" ]; then
+        print_error "Backup directory not found: $DB_BACKUP_DIR"
+        if [[ "$BACKUP_FILE" == *.tar.gz ]]; then
+            rm -rf "$EXTRACT_DIR"
+        fi
+        return 1
+    fi
+    
+    BSON_COUNT=$(find "$DB_BACKUP_DIR" -name "*.bson" | wc -l | tr -d ' ')
+    if [ "$BSON_COUNT" -eq 0 ]; then
+        print_error "No .bson files found in backup directory: $DB_BACKUP_DIR"
+        if [[ "$BACKUP_FILE" == *.tar.gz ]]; then
+            rm -rf "$EXTRACT_DIR"
+        fi
+        return 1
+    fi
+    print_status "Found $BSON_COUNT collection(s) to restore"
+    
+    # Get the original database name from the backup directory
+    ORIGINAL_DB_NAME=$(basename "$DB_BACKUP_DIR")
+    
+    # Build mongorestore arguments
+    RESTORE_ARGS=(
+        --host "$DB_HOST"
+        --port "$DB_PORT"
+        --drop
+    )
+    
+    # If database name changed, use namespace remapping
+    if [ "$ORIGINAL_DB_NAME" != "$DB_NAME" ]; then
+        print_status "Remapping database from '$ORIGINAL_DB_NAME' to '$DB_NAME'"
+        RESTORE_ARGS+=(
+            --nsFrom="${ORIGINAL_DB_NAME}.*"
+            --nsTo="${DB_NAME}.*"
+        )
+    fi
+    
+    RESTORE_ARGS+=("$DB_BACKUP_DIR")
+    
+    print_status "Executing mongorestore..."
+    
+    if mongorestore "${RESTORE_ARGS[@]}"; then
         
         print_success "Database restore completed successfully"
         

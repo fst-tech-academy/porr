@@ -14,11 +14,6 @@ const RoleBasedRoute: React.FC<RoleBasedRouteProps> = ({
   fallbackPath 
 }) => {
   const { user, isAuthenticated, loading } = useAuth();
-  
-  console.log('RoleBasedRoute - User:', user);
-  console.log('RoleBasedRoute - Allowed roles:', allowedRoles);
-  console.log('RoleBasedRoute - User role:', user?.role);
-  console.log('RoleBasedRoute - Is authenticated:', isAuthenticated);
 
   if (loading) {
     return (
@@ -32,7 +27,18 @@ const RoleBasedRoute: React.FC<RoleBasedRouteProps> = ({
     return <Navigate to="/login" replace />;
   }
 
-  if (!user || !allowedRoles.includes(user.role as any)) {
+  // Super admin has access to everything
+  if (!user) {
+    return <Navigate to={fallbackPath || "/"} replace />;
+  }
+
+  // If user is super_admin, allow access regardless of allowedRoles
+  if (user.role === 'super_admin') {
+    return <>{children}</>;
+  }
+
+  // Check if user's role is in the allowed roles list
+  if (!allowedRoles.includes(user.role as any)) {
     // Redirect based on user role
     return <Navigate to={fallbackPath || "/"} replace />;
   }

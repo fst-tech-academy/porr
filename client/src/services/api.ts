@@ -107,6 +107,12 @@ class ApiService {
     return response.data;
   }
 
+  async getLoginOrganisations(): Promise<ApiResponse<Organisation[]>> {
+    const response: AxiosResponse<ApiResponse<Organisation[]>> =
+      await this.api.get("/auth/organisations");
+    return response.data;
+  }
+
   // Forgot Password endpoints
   async forgotPassword(
     email: string

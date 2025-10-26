@@ -25,11 +25,18 @@ router.get('/organisations', async (req, res) => {
   try {
     const organisations = await Organisation.find({ 
       'settings.isActive': true 
-    }).select('name email id').sort({ name: 1 });
+    }).select('name email').sort({ name: 1 });
+
+    // Convert to plain objects to ensure _id is converted to id
+    const organisationsList = organisations.map(org => ({
+      id: org._id.toString(),
+      name: org.name,
+      email: org.email
+    }));
 
     res.json({
       success: true,
-      data: organisations
+      data: organisationsList
     });
   } catch (error) {
     console.error('Error fetching organisations:', error);
@@ -221,7 +228,7 @@ router.post('/login', [
     const { email, password, organisationId } = req.body;
 
     // Check for user and include password for comparison
-    const user = await User.findOne({ email }).select('+password').populate('organisationId');
+    const user = await User.findOne({ email }).select('+password');
 
     if (!user) {
       return res.status(401).json({
@@ -231,7 +238,9 @@ router.post('/login', [
     }
 
     // Validate user belongs to the selected organisation
-    if (!user.organisationId || user.organisationId._id.toString() !== organisationId) {
+    const userOrgId = user.organisationId?.toString();
+    
+    if (!userOrgId || userOrgId !== organisationId) {
       return res.status(401).json({
         success: false,
         message: 'User does not belong to the selected organisation'

@@ -10,7 +10,11 @@ const AuditEvent = require('../models/AuditEvent');
 // Connect to MongoDB
 const connectDB = async () => {
   try {
-    await mongoose.connect(process.env.MONGODB_URI || 'mongodb://cscs_user:Friday14=@130.255.30.153:27017/NPST?authSource=admin');
+    // Load environment variables
+    require('dotenv').config();
+    const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/new_project_starter_template';
+    console.log('🔗 Connecting to:', mongoUri.replace(/:[^:@]+@/, ':****@')); // Hide password in logs
+    await mongoose.connect(mongoUri);
     console.log('✅ Connected to MongoDB');
   } catch (error) {
     console.error('❌ MongoDB connection error:', error);

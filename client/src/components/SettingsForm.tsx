@@ -16,6 +16,7 @@ import { Separator } from './ui/separator';
 import { Alert, AlertDescription } from './ui/alert';
 import { Save, Settings, Users, Shield, Monitor, Wrench, RefreshCw, CheckCircle, AlertTriangle } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
+import apiService from '../services/api';
 
 interface SettingsData {
   systemName: string;
@@ -189,21 +190,17 @@ const SettingsForm: React.FC = () => {
   const fetchSettings = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/settings', {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      });
+      const response = await apiService.api.get('/settings');
       
-      if (response.ok) {
-        const data = await response.json();
-        setSettings(data.data.settings);
-        form.reset(data.data.settings);
+      if (response.data.success) {
+        setSettings(response.data.data.settings);
+        form.reset(response.data.data.settings);
       } else {
-        setMessage({ type: 'error', text: 'Failed to fetch settings' });
+        setMessage({ type: 'error', text: response.data.message || 'Failed to fetch settings' });
       }
-    } catch (error) {
-      setMessage({ type: 'error', text: 'Error fetching settings' });
+    } catch (error: any) {
+      console.error('Error fetching settings:', error);
+      setMessage({ type: 'error', text: error.response?.data?.message || 'Error fetching settings' });
     } finally {
       setLoading(false);
     }
@@ -214,24 +211,17 @@ const SettingsForm: React.FC = () => {
       setSaving(true);
       setMessage(null);
       
-      const response = await fetch('/api/settings', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify(data)
-      });
+      const response = await apiService.api.put('/settings', data);
       
-      if (response.ok) {
-        const responseData = await response.json();
+      if (response.data.success) {
         setMessage({ type: 'success', text: 'Settings updated successfully' });
-        setSettings(responseData.data.settings);
+        setSettings(response.data.data.settings);
+        form.reset(response.data.data.settings);
         
         // Clear any form errors
         form.clearErrors();
       } else {
-        const errorData = await response.json();
+        const errorData = response.data;
         let errorMessage = 'Failed to update settings';
         
         if (errorData.message) {
@@ -254,9 +244,22 @@ const SettingsForm: React.FC = () => {
           });
         }
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Settings update error:', error);
-      setMessage({ type: 'error', text: 'Network error. Please check your connection and try again.' });
+      const errorMessage = error.response?.data?.message || 'Network error. Please check your connection and try again.';
+      setMessage({ type: 'error', text: errorMessage });
+      
+      // Set form errors if validation errors are returned
+      if (error.response?.data?.errors && Array.isArray(error.response.data.errors)) {
+        error.response.data.errors.forEach((err: any) => {
+          if (err.path) {
+            form.setError(err.path as any, {
+              type: 'server',
+              message: err.msg || err.message
+            });
+          }
+        });
+      }
     } finally {
       setSaving(false);
     }
