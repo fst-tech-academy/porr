@@ -1202,6 +1202,184 @@ class ApiService {
       await this.api.get(`/organisations/${id}/users?${searchParams.toString()}`);
     return response.data;
   }
+
+  // Offender Registry System API Methods
+
+  // Offender endpoints
+  async getOffenders(params?: {
+    page?: number;
+    limit?: number;
+    search?: string;
+    riskLevel?: string;
+    custodyStatus?: string;
+    status?: string;
+  }): Promise<ApiResponse<{ offenders: any[]; pagination: any }>> {
+    const response: AxiosResponse<ApiResponse<{ offenders: any[]; pagination: any }>> =
+      await this.api.get("/offenders", { params });
+    return response.data;
+  }
+
+  async getOffender(id: string): Promise<ApiResponse<{ offender: any }>> {
+    const response: AxiosResponse<ApiResponse<{ offender: any }>> =
+      await this.api.get(`/offenders/${id}`);
+    return response.data;
+  }
+
+  async createOffender(offenderData: any): Promise<ApiResponse<{ offender: any }>> {
+    const response: AxiosResponse<ApiResponse<{ offender: any }>> =
+      await this.api.post("/offenders", offenderData);
+    return response.data;
+  }
+
+  async updateOffender(id: string, offenderData: any): Promise<ApiResponse<{ offender: any }>> {
+    const response: AxiosResponse<ApiResponse<{ offender: any }>> =
+      await this.api.put(`/offenders/${id}`, offenderData);
+    return response.data;
+  }
+
+  async deleteOffender(id: string): Promise<ApiResponse<null>> {
+    const response: AxiosResponse<ApiResponse<null>> =
+      await this.api.delete(`/offenders/${id}`);
+    return response.data;
+  }
+
+  async getOffenderStats(): Promise<ApiResponse<any>> {
+    const response: AxiosResponse<ApiResponse<any>> =
+      await this.api.get("/offenders/stats/overview");
+    return response.data;
+  }
+
+  // Case endpoints
+  async getCases(params?: {
+    page?: number;
+    limit?: number;
+    search?: string;
+    status?: string;
+    caseType?: string;
+    priority?: string;
+  }): Promise<ApiResponse<{ cases: any[]; pagination: any }>> {
+    const response: AxiosResponse<ApiResponse<{ cases: any[]; pagination: any }>> =
+      await this.api.get("/cases", { params });
+    return response.data;
+  }
+
+  async getCase(id: string): Promise<ApiResponse<{ case: any }>> {
+    const response: AxiosResponse<ApiResponse<{ case: any }>> =
+      await this.api.get(`/cases/${id}`);
+    return response.data;
+  }
+
+  async createCase(caseData: any): Promise<ApiResponse<{ case: any }>> {
+    const response: AxiosResponse<ApiResponse<{ case: any }>> =
+      await this.api.post("/cases", caseData);
+    return response.data;
+  }
+
+  async updateCase(id: string, caseData: any): Promise<ApiResponse<{ case: any }>> {
+    const response: AxiosResponse<ApiResponse<{ case: any }>> =
+      await this.api.put(`/cases/${id}`, caseData);
+    return response.data;
+  }
+
+  async deleteCase(id: string): Promise<ApiResponse<null>> {
+    const response: AxiosResponse<ApiResponse<null>> =
+      await this.api.delete(`/cases/${id}`);
+    return response.data;
+  }
+
+  async getCaseStats(): Promise<ApiResponse<any>> {
+    const response: AxiosResponse<ApiResponse<any>> =
+      await this.api.get("/cases/stats/overview");
+    return response.data;
+  }
+
+  // Offence endpoints
+  async getOffences(params?: {
+    page?: number;
+    limit?: number;
+    search?: string;
+    category?: string;
+    severity?: string;
+    status?: string;
+  }): Promise<ApiResponse<{ offences: any[]; pagination: any }>> {
+    const response: AxiosResponse<ApiResponse<{ offences: any[]; pagination: any }>> =
+      await this.api.get("/offences", { params });
+    return response.data;
+  }
+
+  async getOffence(id: string): Promise<ApiResponse<{ offence: any }>> {
+    const response: AxiosResponse<ApiResponse<{ offence: any }>> =
+      await this.api.get(`/offences/${id}`);
+    return response.data;
+  }
+
+  async createOffence(offenceData: any): Promise<ApiResponse<{ offence: any }>> {
+    const response: AxiosResponse<ApiResponse<{ offence: any }>> =
+      await this.api.post("/offences", offenceData);
+    return response.data;
+  }
+
+  async updateOffence(id: string, offenceData: any): Promise<ApiResponse<{ offence: any }>> {
+    const response: AxiosResponse<ApiResponse<{ offence: any }>> =
+      await this.api.put(`/offences/${id}`, offenceData);
+    return response.data;
+  }
+
+  async deleteOffence(id: string): Promise<ApiResponse<null>> {
+    const response: AxiosResponse<ApiResponse<null>> =
+      await this.api.delete(`/offences/${id}`);
+    return response.data;
+  }
+
+  async getOffenceStats(): Promise<ApiResponse<any>> {
+    const response: AxiosResponse<ApiResponse<any>> =
+      await this.api.get("/offences/stats/overview");
+    return response.data;
+  }
+
+  // Court endpoints
+  async getCourts(params?: {
+    page?: number;
+    limit?: number;
+    search?: string;
+    type?: string;
+    jurisdiction?: string;
+    status?: string;
+  }): Promise<ApiResponse<{ courts: any[]; pagination: any }>> {
+    const response: AxiosResponse<ApiResponse<{ courts: any[]; pagination: any }>> =
+      await this.api.get("/courts", { params });
+    return response.data;
+  }
+
+  async getCourt(id: string): Promise<ApiResponse<{ court: any }>> {
+    const response: AxiosResponse<ApiResponse<{ court: any }>> =
+      await this.api.get(`/courts/${id}`);
+    return response.data;
+  }
+
+  async createCourt(courtData: any): Promise<ApiResponse<{ court: any }>> {
+    const response: AxiosResponse<ApiResponse<{ court: any }>> =
+      await this.api.post("/courts", courtData);
+    return response.data;
+  }
+
+  async updateCourt(id: string, courtData: any): Promise<ApiResponse<{ court: any }>> {
+    const response: AxiosResponse<ApiResponse<{ court: any }>> =
+      await this.api.put(`/courts/${id}`, courtData);
+    return response.data;
+  }
+
+  async deleteCourt(id: string): Promise<ApiResponse<null>> {
+    const response: AxiosResponse<ApiResponse<null>> =
+      await this.api.delete(`/courts/${id}`);
+    return response.data;
+  }
+
+  async getCourtStats(): Promise<ApiResponse<any>> {
+    const response: AxiosResponse<ApiResponse<any>> =
+      await this.api.get("/courts/stats/overview");
+    return response.data;
+  }
 }
 
 export default new ApiService();

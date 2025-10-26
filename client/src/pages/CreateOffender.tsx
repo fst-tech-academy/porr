@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import { AlertCircle, ArrowLeft, Save } from 'lucide-react';
 import { OffenderFormData } from '../types';
-import { api } from '../services/api';
+import api from '../services/api';
 
 const CreateOffenderPage: React.FC = () => {
   const { t } = useLanguage();

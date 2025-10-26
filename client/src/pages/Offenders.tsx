@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../components/ui/dialog';
 import { AlertCircle, Plus, Search, Filter, Eye, Edit, Trash2, User } from 'lucide-react';
 import { Offender, OffenderFormData } from '../types';
-import { api } from '../services/api';
+import api from '../services/api';
 
 const OffendersPage: React.FC = () => {
   const { t } = useLanguage();
