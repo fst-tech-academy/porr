@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# NPST Database Backup and Restore Script
-# This script provides comprehensive backup and restore functionality for the remote NPST database
+# Puntland Offenders Registry and Records (PORR) Database Backup and Restore Script
+# This script provides comprehensive backup and restore functionality for the PORR database
 
 # Database configuration - will be loaded from server/.env
 DB_HOST=""
@@ -468,7 +468,7 @@ show_status() {
 
 # Function to show help
 show_help() {
-    echo "NPST Database Backup and Restore Script"
+    echo "Puntland Offenders Registry and Records (PORR) Database Backup and Restore Script"
     echo ""
     echo "Usage: $0 <command> [options]"
     echo ""

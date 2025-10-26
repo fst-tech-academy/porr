@@ -130,7 +130,7 @@ app.use("/api/organisations", organisationRoutes);
 app.get("/api/health", (req, res) => {
   res.status(200).json({
     status: "OK",
-    message: "New Project Starter Template API is running",
+    message: "Puntland Offenders Registry and Records (PORR) API is running",
     timestamp: new Date().toISOString(),
   });
 });

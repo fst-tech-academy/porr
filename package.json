@@ -1,7 +1,7 @@
 {
-  "name": "npst",
+  "name": "porr",
   "version": "1.0.0",
-  "description": "New Project Starter Template - A comprehensive system template for building enterprise applications",
+  "description": "Puntland Offenders Registry and Records - A comprehensive system for managing offender records and registry data",
   "main": "server/index.js",
   "scripts": {
     "dev": "concurrently \"npm run server\" \"npm run client\"",
@@ -11,15 +11,18 @@
     "install-all": "npm install && cd server && npm install && cd ../client && npm install"
   },
   "keywords": [
-    "npst",
-    "template",
-    "application",
+    "porr",
+    "puntland",
+    "offenders",
+    "registry",
+    "records",
+    "law-enforcement",
     "react",
     "nodejs",
     "mongodb",
     "typescript"
   ],
-  "author": "Local Authority Development Team",
+  "author": "Puntland Law Enforcement Development Team",
   "license": "MIT",
   "devDependencies": {
     "concurrently": "^8.2.2",

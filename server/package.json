@@ -1,7 +1,7 @@
 {
-  "name": "npst-server",
+  "name": "porr-server",
   "version": "1.0.0",
-  "description": "Backend API for New Project Starter Template",
+  "description": "Backend API for Puntland Offenders Registry and Records",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
@@ -36,9 +36,12 @@
     "api",
     "express",
     "mongodb",
-    "npst",
-    "template"
+    "porr",
+    "puntland",
+    "offenders",
+    "registry",
+    "law-enforcement"
   ],
-  "author": "Local Authority Development Team",
+  "author": "Puntland Law Enforcement Development Team",
   "license": "MIT"
 }

@@ -1,30 +1,30 @@
-# New Project Starter Template (NPST)
+# Puntland Offenders Registry and Records (PORR)
 
-A comprehensive full-stack system template for building enterprise applications, designed to provide a solid foundation for modern web applications with authentication, user management, and administrative features.
+A comprehensive full-stack system for managing offender records and registry data in Puntland, designed to provide a secure and efficient platform for law enforcement and judicial administration.
 
 ## Overview
 
-The New Project Starter Template (NPST) is a modern web application template built to provide a complete foundation for enterprise applications with user management, authentication, and administrative features.
+The Puntland Offenders Registry and Records (PORR) is a modern web application built to provide a comprehensive platform for managing offender records, case files, and judicial administration with secure user management, authentication, and administrative features.
 
 ## Features
 
 ### Core Functionality
-- **User Management**: Complete CRUD operations for user accounts
-- **Organisation Management**: Multi-tenant organisation support
-- **User Management**: Role-based access control for different user types
-- **Audit Logging**: Comprehensive audit trail for all system activities
-- **Dashboard Analytics**: Real-time statistics and reporting
+- **Offender Records Management**: Complete CRUD operations for offender profiles and case files
+- **Organisation Management**: Multi-tenant support for different law enforcement agencies
+- **User Management**: Role-based access control for law enforcement personnel
+- **Audit Logging**: Comprehensive audit trail for all system activities and data access
+- **Dashboard Analytics**: Real-time statistics and reporting for case management
 
 ### Authentication & Authorization
-- **Role-based Access Control**: Admin, Manager, Officer, and Viewer roles
-- **JWT Authentication**: Secure token-based authentication
-- **User Management**: Complete user management system
-- **Profile Management**: User profile and password management
+- **Role-based Access Control**: Admin, Manager, Officer, and Viewer roles for law enforcement personnel
+- **JWT Authentication**: Secure token-based authentication for sensitive data access
+- **User Management**: Complete user management system for authorized personnel
+- **Profile Management**: User profile and password management with security controls
 
 ### Dashboard & Analytics
-- **Comprehensive Dashboard**: Real-time statistics and charts
-- **User Analytics**: User activity and engagement tracking
-- **Organisation Analytics**: Multi-tenant organisation metrics and monitoring
+- **Comprehensive Dashboard**: Real-time statistics and charts for case management
+- **User Analytics**: Personnel activity and system engagement tracking
+- **Organisation Analytics**: Multi-tenant law enforcement agency metrics and monitoring
 
 ## Technology Stack
 
