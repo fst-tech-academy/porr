@@ -17,8 +17,8 @@ class SettingsManager {
       if (!settings) {
         console.log('📝 No settings found, creating default settings...');
         settings = new Settings({
-          systemName: 'New Project Starter Template',
-          systemDescription: 'A comprehensive system for managing offence records and legal proceedings',
+          systemName: 'Puntland Offenders Registry and Records (PORR)',
+          systemDescription: 'A comprehensive system for managing offender records, criminal cases, and legal proceedings in Puntland',
           registration: {
             publicRegistration: true,
             adminRegistration: true,

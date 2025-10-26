@@ -4,12 +4,12 @@ const settingsSchema = new mongoose.Schema({
   // System-wide settings
   systemName: {
     type: String,
-    default: 'New Project Starter Template',
+    default: 'Puntland Offenders Registry and Records (PORR)',
     trim: true
   },
   systemDescription: {
     type: String,
-    default: 'A comprehensive system for managing offence records and legal proceedings',
+    default: 'A comprehensive system for managing offender records, criminal cases, and legal proceedings in Puntland',
     trim: true
   },
   

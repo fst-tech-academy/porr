@@ -35,7 +35,7 @@ const NPSTLogo: React.FC<NPSTLogoProps> = ({
         <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent"></div>
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.2),transparent_50%)]"></div>
         
-        {/* NPST Text with Beautiful Typography */}
+        {/* PORR Text with Beautiful Typography */}
         <div className="relative z-10 flex items-center justify-center">
           <span className="font-black text-white tracking-wider text-shadow-lg" style={{
             fontFamily: 'Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
@@ -44,7 +44,7 @@ const NPSTLogo: React.FC<NPSTLogoProps> = ({
             fontSize: size === 'sm' ? '0.75rem' : size === 'md' ? '0.875rem' : size === 'lg' ? '1rem' : '1.125rem',
             fontWeight: '900'
           }}>
-            NPST
+            PORR
           </span>
         </div>
         

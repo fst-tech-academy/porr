@@ -87,11 +87,11 @@ export const useSettings = () => {
   };
 
   const getSystemName = () => {
-    return settings?.systemName ?? 'New Project Starter Template';
+    return settings?.systemName ?? 'Puntland Offenders Registry and Records (PORR)';
   };
 
   const getSystemDescription = () => {
-    return settings?.systemDescription ?? 'A comprehensive system for managing offence records and legal proceedings';
+    return settings?.systemDescription ?? 'A comprehensive system for managing offender records, criminal cases, and legal proceedings in Puntland';
   };
 
   const isFeatureEnabled = (featureName: keyof PublicSettings['features']) => {
