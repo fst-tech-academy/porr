@@ -21,3 +21,4 @@ yarn-error.log*
 
 # Local uploads (now using AWS S3)
 uploads/
+server/.env
