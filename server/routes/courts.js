@@ -8,7 +8,7 @@ const Court = require('../models/Court');
 const router = express.Router();
 
 // Get all courts with search and filtering
-router.get('/', protect, authorize(['admin', 'manager', 'officer']), [
+router.get('/', protect, authorize(['admin', 'manager', 'officer', 'super_admin']), [
   query('page').optional().isInt({ min: 1 }).withMessage('Page must be a positive integer'),
   query('limit').optional().isInt({ min: 1, max: 100 }).withMessage('Limit must be between 1 and 100'),
   query('search').optional().trim().notEmpty().withMessage('Search term cannot be empty'),
@@ -59,7 +59,7 @@ router.get('/', protect, authorize(['admin', 'manager', 'officer']), [
 });
 
 // Get single court
-router.get('/:id', protect, authorize(['admin', 'manager', 'officer']), [
+router.get('/:id', protect, authorize(['admin', 'manager', 'officer', 'super_admin']), [
   param('id').isMongoId().withMessage('Invalid court ID')
 ], async (req, res) => {
   try {
@@ -430,7 +430,7 @@ router.delete('/:id', protect, authorize(['admin']), [
 });
 
 // Get court statistics
-router.get('/stats/overview', protect, authorize(['admin', 'manager', 'officer']), async (req, res) => {
+router.get('/stats/overview', protect, authorize(['admin', 'manager', 'officer', 'super_admin']), async (req, res) => {
   try {
     const organisationId = req.user.organisationId;
 
@@ -446,7 +446,7 @@ router.get('/stats/overview', protect, authorize(['admin', 'manager', 'officer']
 });
 
 // Get court types
-router.get('/types/list', protect, authorize(['admin', 'manager', 'officer']), async (req, res) => {
+router.get('/types/list', protect, authorize(['admin', 'manager', 'officer', 'super_admin']), async (req, res) => {
   try {
     const types = [
       { value: 'supreme_court', label: 'Supreme Court', description: 'Highest court in the jurisdiction' },
@@ -469,7 +469,7 @@ router.get('/types/list', protect, authorize(['admin', 'manager', 'officer']), a
 });
 
 // Get court jurisdictions
-router.get('/jurisdictions/list', protect, authorize(['admin', 'manager', 'officer']), async (req, res) => {
+router.get('/jurisdictions/list', protect, authorize(['admin', 'manager', 'officer', 'super_admin']), async (req, res) => {
   try {
     const jurisdictions = [
       { value: 'federal', label: 'Federal', description: 'Federal jurisdiction' },

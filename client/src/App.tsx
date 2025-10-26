@@ -96,17 +96,17 @@ function App() {
                                 } />
                                 {/* Offender Registry Routes */}
                                 <Route path="/offenders" element={
-                                  <RoleBasedRoute allowedRoles={['admin', 'manager', 'officer']}>
+                                  <RoleBasedRoute allowedRoles={['admin', 'manager', 'officer', 'super_admin']}>
                                     <Offenders />
                                   </RoleBasedRoute>
                                 } />
                                 <Route path="/offenders/new" element={
-                                  <RoleBasedRoute allowedRoles={['admin', 'manager', 'officer']}>
+                                  <RoleBasedRoute allowedRoles={['admin', 'manager', 'officer', 'super_admin']}>
                                     <CreateOffender />
                                   </RoleBasedRoute>
                                 } />
                                 <Route path="/cases" element={
-                                  <RoleBasedRoute allowedRoles={['admin', 'manager', 'officer']}>
+                                  <RoleBasedRoute allowedRoles={['admin', 'manager', 'officer', 'super_admin']}>
                                     <Cases />
                                   </RoleBasedRoute>
                                 } />
@@ -159,21 +159,21 @@ function App() {
                         
                         {/* Direct offender registry routes */}
                         <Route path="/offenders" element={
-                          <RoleBasedRoute allowedRoles={['admin', 'manager', 'officer']}>
+                          <RoleBasedRoute allowedRoles={['admin', 'manager', 'officer', 'super_admin']}>
                             <Layout>
                               <Offenders />
                             </Layout>
                           </RoleBasedRoute>
                         } />
                         <Route path="/offenders/new" element={
-                          <RoleBasedRoute allowedRoles={['admin', 'manager', 'officer']}>
+                          <RoleBasedRoute allowedRoles={['admin', 'manager', 'officer', 'super_admin']}>
                             <Layout>
                               <CreateOffender />
                             </Layout>
                           </RoleBasedRoute>
                         } />
                         <Route path="/cases" element={
-                          <RoleBasedRoute allowedRoles={['admin', 'manager', 'officer']}>
+                          <RoleBasedRoute allowedRoles={['admin', 'manager', 'officer', 'super_admin']}>
                             <Layout>
                               <Cases />
                             </Layout>

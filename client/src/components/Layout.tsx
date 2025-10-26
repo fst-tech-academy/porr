@@ -51,8 +51,8 @@ const getMenuItems = (
     { text: t('navigation.dashboard'), icon: <LayoutDashboard className="h-5 w-5" />, path: '/dashboard' },
   ] : []),
   
-  // Offender Registry System - Show for admin, manager, officer roles
-  ...(userRole === 'admin' || userRole === 'manager' || userRole === 'officer' ? [
+  // Offender Registry System - Show for admin, manager, officer, super_admin roles
+  ...(userRole === 'admin' || userRole === 'manager' || userRole === 'officer' || userRole === 'super_admin' ? [
     { text: 'Offenders', icon: <UserCheck className="h-5 w-5" />, path: '/offenders' },
     { text: 'Cases', icon: <FileText className="h-5 w-5" />, path: '/cases' },
     { text: 'Offences', icon: <AlertTriangle className="h-5 w-5" />, path: '/offences' },
