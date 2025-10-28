@@ -27,6 +27,7 @@ import Offenders from './pages/Offenders';
 import CreateOffender from './pages/CreateOffender';
 import Cases from './pages/Cases';
 import Offences from './pages/Offences';
+import Courts from './pages/Courts';
 import NotFound from './pages/NotFound';
 import NotFoundTest from './pages/NotFoundTest';
 import NotFoundSimple from './pages/NotFoundSimple';
@@ -116,6 +117,11 @@ function App() {
                                     <Offences />
                                   </RoleBasedRoute>
                                 } />
+                                <Route path="/courts" element={
+                                  <RoleBasedRoute allowedRoles={['admin', 'manager', 'officer', 'super_admin']}>
+                                    <Courts />
+                                  </RoleBasedRoute>
+                                } />
                                 
                                 <Route path="/profile" element={<Profile />} />
                                 <Route path="/help" element={<Help />} />
@@ -189,6 +195,13 @@ function App() {
                           <RoleBasedRoute allowedRoles={['admin', 'manager', 'officer', 'super_admin']}>
                             <Layout>
                               <Offences />
+                            </Layout>
+                          </RoleBasedRoute>
+                        } />
+                        <Route path="/courts" element={
+                          <RoleBasedRoute allowedRoles={['admin', 'manager', 'officer', 'super_admin']}>
+                            <Layout>
+                              <Courts />
                             </Layout>
                           </RoleBasedRoute>
                         } />

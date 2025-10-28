@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
 import {
-  FileText,
+  Scale,
   Plus,
   Search,
   Filter,
@@ -12,7 +12,6 @@ import {
   Eye,
   ToggleLeft,
   ToggleRight,
-  Scale,
   Calendar,
   Shield,
   CheckCircle,
@@ -34,6 +33,7 @@ import {
   Activity,
   ChevronLeft,
   ChevronRight,
+  FileText,
   Gavel,
   Clock,
   MapPin,
@@ -47,7 +47,10 @@ import {
   Unlock,
   UserCheck,
   BookOpen,
-  Briefcase
+  Briefcase,
+  Landmark,
+  Home,
+  MapPin as LocationIcon
 } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
@@ -70,57 +73,57 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '../components/ui/dropdown-menu';
-import { Case, CaseFormData } from '../types';
+import { Court } from '../types';
 import api from '../services/api';
 
-const CasesPage: React.FC = () => {
+const CourtsPage: React.FC = () => {
   const { t } = useLanguage();
   const { user } = useAuth();
   const navigate = useNavigate();
   
-  const [cases, setCases] = useState<Case[]>([]);
+  const [courts, setCourts] = useState<Court[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>('');
   const [searchTerm, setSearchTerm] = useState('');
+  const [typeFilter, setTypeFilter] = useState<string>('all');
+  const [jurisdictionFilter, setJurisdictionFilter] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<string>('all');
-  const [caseTypeFilter, setCaseTypeFilter] = useState<string>('all');
-  const [priorityFilter, setPriorityFilter] = useState<string>('all');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [totalCases, setTotalCases] = useState(0);
-  const [selectedCase, setSelectedCase] = useState<Case | null>(null);
+  const [totalCourts, setTotalCourts] = useState(0);
+  const [selectedCourt, setSelectedCourt] = useState<Court | null>(null);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [showViewDialog, setShowViewDialog] = useState(false);
 
   const limit = 10;
 
   useEffect(() => {
-    fetchCases();
-  }, [currentPage, searchTerm, statusFilter, caseTypeFilter, priorityFilter]);
+    fetchCourts();
+  }, [currentPage, searchTerm, typeFilter, jurisdictionFilter, statusFilter]);
 
-  const fetchCases = async () => {
+  const fetchCourts = async () => {
     try {
       setLoading(true);
       const params = new URLSearchParams({
         page: currentPage.toString(),
         limit: limit.toString(),
         ...(searchTerm && { search: searchTerm }),
+        ...(typeFilter && typeFilter !== 'all' && { type: typeFilter }),
+        ...(jurisdictionFilter && jurisdictionFilter !== 'all' && { jurisdiction: jurisdictionFilter }),
         ...(statusFilter && statusFilter !== 'all' && { status: statusFilter }),
-        ...(caseTypeFilter && caseTypeFilter !== 'all' && { caseType: caseTypeFilter }),
-        ...(priorityFilter && priorityFilter !== 'all' && { priority: priorityFilter }),
       });
 
-      const response = await api.get(`/cases?${params}`);
+      const response = await api.get(`/courts?${params}`);
       
       if (response.data.success) {
-        setCases(response.data.data.cases);
+        setCourts(response.data.data.courts);
         setTotalPages(response.data.data.pagination.pages);
-        setTotalCases(response.data.data.pagination.total);
+        setTotalCourts(response.data.data.pagination.total);
       } else {
-        setError(response.data.message || 'Failed to fetch cases');
+        setError(response.data.message || 'Failed to fetch courts');
       }
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to fetch cases');
+      setError(err.response?.data?.message || 'Failed to fetch courts');
     } finally {
       setLoading(false);
     }
@@ -132,77 +135,67 @@ const CasesPage: React.FC = () => {
   };
 
   const handleFilterChange = (filterType: string, value: string) => {
-    if (filterType === 'status') {
+    if (filterType === 'type') {
+      setTypeFilter(value);
+    } else if (filterType === 'jurisdiction') {
+      setJurisdictionFilter(value);
+    } else if (filterType === 'status') {
       setStatusFilter(value);
-    } else if (filterType === 'caseType') {
-      setCaseTypeFilter(value);
-    } else if (filterType === 'priority') {
-      setPriorityFilter(value);
     }
     setCurrentPage(1);
   };
 
-  const handleViewCase = (caseItem: Case) => {
-    setSelectedCase(caseItem);
+  const handleViewCourt = (court: Court) => {
+    setSelectedCourt(court);
     setShowViewDialog(true);
   };
 
-  const handleEditCase = (caseItem: Case) => {
-    navigate(`/cases/${caseItem._id}/edit`);
+  const handleEditCourt = (court: Court) => {
+    navigate(`/courts/${court._id}/edit`);
   };
 
-  const handleDeleteCase = async (caseItem: Case) => {
-    if (window.confirm(`Are you sure you want to delete case ${caseItem.caseNumber}?`)) {
+  const handleDeleteCourt = async (court: Court) => {
+    if (window.confirm(`Are you sure you want to delete court ${court.name}?`)) {
       try {
-        await api.delete(`/cases/${caseItem._id}`);
-        fetchCases();
+        await api.delete(`/courts/${court._id}`);
+        fetchCourts();
       } catch (err: any) {
-        setError(err.response?.data?.message || 'Failed to delete case');
+        setError(err.response?.data?.message || 'Failed to delete court');
       }
     }
   };
 
-  const handleToggleStatus = async (caseItem: Case) => {
+  const handleToggleStatus = async (court: Court) => {
     try {
-      await api.put(`/cases/${caseItem._id}`, {
-        ...caseItem,
-        isActive: !caseItem.isActive
+      await api.put(`/courts/${court._id}`, {
+        ...court,
+        isActive: !court.isActive
       });
-      fetchCases();
+      fetchCourts();
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to update case status');
+      setError(err.response?.data?.message || 'Failed to update court status');
     }
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'open': return 'bg-green-100 text-green-800 border-green-200';
-      case 'investigation': return 'bg-blue-100 text-blue-800 border-blue-200';
-      case 'trial': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      case 'closed': return 'bg-gray-100 text-gray-800 border-gray-200';
-      case 'dismissed': return 'bg-red-100 text-red-800 border-red-200';
-      case 'settled': return 'bg-purple-100 text-purple-800 border-purple-200';
+  const getTypeColor = (type: string) => {
+    switch (type) {
+      case 'supreme': return 'bg-purple-100 text-purple-800 border-purple-200';
+      case 'high': return 'bg-blue-100 text-blue-800 border-blue-200';
+      case 'district': return 'bg-green-100 text-green-800 border-green-200';
+      case 'municipal': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      case 'special': return 'bg-orange-100 text-orange-800 border-orange-200';
+      case 'tribunal': return 'bg-red-100 text-red-800 border-red-200';
       default: return 'bg-gray-100 text-gray-800 border-gray-200';
     }
   };
 
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case 'low': return 'bg-green-100 text-green-800 border-green-200';
-      case 'medium': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      case 'high': return 'bg-orange-100 text-orange-800 border-orange-200';
-      case 'urgent': return 'bg-red-100 text-red-800 border-red-200';
-      default: return 'bg-gray-100 text-gray-800 border-gray-200';
-    }
-  };
-
-  const getCaseTypeColor = (caseType: string) => {
-    switch (caseType) {
-      case 'criminal': return 'bg-red-100 text-red-800 border-red-200';
-      case 'civil': return 'bg-blue-100 text-blue-800 border-blue-200';
+  const getJurisdictionColor = (jurisdiction: string) => {
+    switch (jurisdiction) {
+      case 'federal': return 'bg-blue-100 text-blue-800 border-blue-200';
+      case 'state': return 'bg-green-100 text-green-800 border-green-200';
+      case 'local': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      case 'military': return 'bg-red-100 text-red-800 border-red-200';
       case 'administrative': return 'bg-purple-100 text-purple-800 border-purple-200';
-      case 'family': return 'bg-pink-100 text-pink-800 border-pink-200';
-      case 'commercial': return 'bg-green-100 text-green-800 border-green-200';
       default: return 'bg-gray-100 text-gray-800 border-gray-200';
     }
   };
@@ -221,16 +214,12 @@ const CasesPage: React.FC = () => {
     );
   };
 
-  const formatStatus = (status: string) => {
-    return status.charAt(0).toUpperCase() + status.slice(1);
+  const formatType = (type: string) => {
+    return type.charAt(0).toUpperCase() + type.slice(1);
   };
 
-  const formatPriority = (priority: string) => {
-    return priority.charAt(0).toUpperCase() + priority.slice(1);
-  };
-
-  const formatCaseType = (caseType: string) => {
-    return caseType.charAt(0).toUpperCase() + caseType.slice(1);
+  const formatJurisdiction = (jurisdiction: string) => {
+    return jurisdiction.charAt(0).toUpperCase() + jurisdiction.slice(1);
   };
 
   const formatDate = (dateString: string) => {
@@ -244,10 +233,10 @@ const CasesPage: React.FC = () => {
           <div className="relative">
             <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-4"></div>
             <div className="absolute inset-0 flex items-center justify-center">
-              <FileText className="w-6 h-6 text-blue-600 animate-pulse" />
+              <Scale className="w-6 h-6 text-blue-600 animate-pulse" />
             </div>
           </div>
-          <h3 className="text-xl font-semibold text-gray-900 mb-2">Loading Cases</h3>
+          <h3 className="text-xl font-semibold text-gray-900 mb-2">Loading Courts</h3>
           <p className="text-gray-600">Please wait while we fetch your data...</p>
         </div>
       </div>
@@ -263,10 +252,10 @@ const CasesPage: React.FC = () => {
               <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <AlertCircle className="w-8 h-8 text-red-600" />
               </div>
-              <h3 className="text-xl font-semibold text-red-900 mb-2">Error Loading Cases</h3>
+              <h3 className="text-xl font-semibold text-red-900 mb-2">Error Loading Courts</h3>
               <p className="text-red-700 mb-6">{error}</p>
               <Button 
-                onClick={() => fetchCases()} 
+                onClick={() => fetchCourts()} 
                 className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
               >
                 <RefreshCw className="w-4 h-4 mr-2" />
@@ -296,35 +285,35 @@ const CasesPage: React.FC = () => {
             <div className="text-white">
               <div className="flex items-center space-x-3 mb-4">
                 <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
-                  <FileText className="w-6 h-6 text-white" />
+                  <Scale className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                  <h1 className="text-4xl font-bold">Case Management</h1>
-                  <p className="text-blue-100 text-lg">Manage and monitor all case files</p>
+                  <h1 className="text-4xl font-bold">Court Management</h1>
+                  <p className="text-blue-100 text-lg">Manage and monitor all court information</p>
                 </div>
               </div>
               <div className="flex items-center space-x-6 text-blue-100">
                 <div className="flex items-center space-x-2">
-                  <Briefcase className="w-5 h-5" />
-                  <span className="text-sm">{totalCases} Total Cases</span>
+                  <Landmark className="w-5 h-5" />
+                  <span className="text-sm">{totalCourts} Total Courts</span>
                 </div>
                 <div className="flex items-center space-x-2">
                   <Activity className="w-5 h-5" />
-                  <span className="text-sm">{cases.filter(c => c.isActive).length} Active</span>
+                  <span className="text-sm">{courts.filter(c => c.isActive).length} Active</span>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <AlertTriangle className="w-5 h-5" />
-                  <span className="text-sm">{cases.filter(c => c.priority === 'urgent').length} Urgent</span>
+                  <Gavel className="w-5 h-5" />
+                  <span className="text-sm">{courts.filter(c => c.type === 'supreme').length} Supreme Courts</span>
                 </div>
               </div>
             </div>
             <div className="flex items-center space-x-4">
               <Button
-                onClick={() => navigate('/cases/new')}
+                onClick={() => navigate('/courts/new')}
                 className="bg-white/20 hover:bg-white/30 text-white border-white/30 backdrop-blur-sm px-6 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
               >
                 <Plus className="w-5 h-5 mr-2" />
-                Add Case
+                Add Court
               </Button>
             </div>
           </div>
@@ -338,25 +327,62 @@ const CasesPage: React.FC = () => {
           <CardHeader>
             <CardTitle className="flex items-center text-gray-900">
               <Filter className="w-5 h-5 mr-2 text-blue-600" />
-              Search & Filter Cases
+              Search & Filter Courts
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div>
                 <Label htmlFor="search" className="text-sm font-medium text-gray-700 mb-2 block">
-                  Search Cases
+                  Search Courts
                 </Label>
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                   <Input
                     id="search"
-                    placeholder="Search by case number, title, or details..."
+                    placeholder="Search by name, code, or location..."
                     value={searchTerm}
                     onChange={(e) => handleSearch(e.target.value)}
                     className="pl-10 border-gray-200 focus:border-blue-500 focus:ring-blue-500"
                   />
                 </div>
+              </div>
+              <div>
+                <Label className="text-sm font-medium text-gray-700 mb-2 block">
+                  Court Type
+                </Label>
+                <Select value={typeFilter} onValueChange={(value) => handleFilterChange('type', value)}>
+                  <SelectTrigger className="border-gray-200 focus:border-blue-500 focus:ring-blue-500">
+                    <SelectValue placeholder="All Types" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Types</SelectItem>
+                    <SelectItem value="supreme">Supreme Court</SelectItem>
+                    <SelectItem value="high">High Court</SelectItem>
+                    <SelectItem value="district">District Court</SelectItem>
+                    <SelectItem value="municipal">Municipal Court</SelectItem>
+                    <SelectItem value="special">Special Court</SelectItem>
+                    <SelectItem value="tribunal">Tribunal</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label className="text-sm font-medium text-gray-700 mb-2 block">
+                  Jurisdiction
+                </Label>
+                <Select value={jurisdictionFilter} onValueChange={(value) => handleFilterChange('jurisdiction', value)}>
+                  <SelectTrigger className="border-gray-200 focus:border-blue-500 focus:ring-blue-500">
+                    <SelectValue placeholder="All Jurisdictions" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Jurisdictions</SelectItem>
+                    <SelectItem value="federal">Federal</SelectItem>
+                    <SelectItem value="state">State</SelectItem>
+                    <SelectItem value="local">Local</SelectItem>
+                    <SelectItem value="military">Military</SelectItem>
+                    <SelectItem value="administrative">Administrative</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
               <div>
                 <Label className="text-sm font-medium text-gray-700 mb-2 block">
@@ -368,47 +394,8 @@ const CasesPage: React.FC = () => {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Status</SelectItem>
-                    <SelectItem value="open">Open</SelectItem>
-                    <SelectItem value="investigation">Investigation</SelectItem>
-                    <SelectItem value="trial">Trial</SelectItem>
-                    <SelectItem value="closed">Closed</SelectItem>
-                    <SelectItem value="dismissed">Dismissed</SelectItem>
-                    <SelectItem value="settled">Settled</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label className="text-sm font-medium text-gray-700 mb-2 block">
-                  Case Type
-                </Label>
-                <Select value={caseTypeFilter} onValueChange={(value) => handleFilterChange('caseType', value)}>
-                  <SelectTrigger className="border-gray-200 focus:border-blue-500 focus:ring-blue-500">
-                    <SelectValue placeholder="All Types" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Types</SelectItem>
-                    <SelectItem value="criminal">Criminal</SelectItem>
-                    <SelectItem value="civil">Civil</SelectItem>
-                    <SelectItem value="administrative">Administrative</SelectItem>
-                    <SelectItem value="family">Family</SelectItem>
-                    <SelectItem value="commercial">Commercial</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label className="text-sm font-medium text-gray-700 mb-2 block">
-                  Priority
-                </Label>
-                <Select value={priorityFilter} onValueChange={(value) => handleFilterChange('priority', value)}>
-                  <SelectTrigger className="border-gray-200 focus:border-blue-500 focus:ring-blue-500">
-                    <SelectValue placeholder="All Priorities" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Priorities</SelectItem>
-                    <SelectItem value="low">Low</SelectItem>
-                    <SelectItem value="medium">Medium</SelectItem>
-                    <SelectItem value="high">High</SelectItem>
-                    <SelectItem value="urgent">Urgent</SelectItem>
+                    <SelectItem value="active">Active</SelectItem>
+                    <SelectItem value="inactive">Inactive</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -416,57 +403,64 @@ const CasesPage: React.FC = () => {
           </CardContent>
         </Card>
 
-        {/* Cases Table */}
+        {/* Courts Table */}
         <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-xl">
           <CardContent className="p-0">
             <div className="border border-gray-200 rounded-xl overflow-hidden">
               <Table>
                 <TableHeader className="bg-gray-50">
                   <TableRow>
-                    <TableHead className="font-semibold">Case</TableHead>
+                    <TableHead className="font-semibold">Court</TableHead>
                     <TableHead className="font-semibold">Type</TableHead>
+                    <TableHead className="font-semibold">Jurisdiction</TableHead>
                     <TableHead className="font-semibold">Status</TableHead>
-                    <TableHead className="font-semibold">Priority</TableHead>
+                    <TableHead className="font-semibold">Location</TableHead>
                     <TableHead className="font-semibold">Created</TableHead>
                     <TableHead className="font-semibold">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {cases.map((caseItem) => (
-                    <TableRow key={caseItem._id} className="hover:bg-gray-50">
+                  {courts.map((court) => (
+                    <TableRow key={court._id} className="hover:bg-gray-50">
                       <TableCell>
                         <div className="flex items-center space-x-3">
-                          <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center">
-                            <FileText className="w-5 h-5 text-white" />
+                          <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-full flex items-center justify-center">
+                            <Scale className="w-5 h-5 text-white" />
                           </div>
                           <div>
-                            <p className="font-semibold text-gray-900">{caseItem.title}</p>
+                            <p className="font-semibold text-gray-900">{court.name}</p>
                             <p className="text-sm text-gray-600">
-                              #{caseItem.caseNumber}
+                              Code: {court.code}
                             </p>
                           </div>
                         </div>
                       </TableCell>
                       <TableCell>
-                        <Badge className={getCaseTypeColor(caseItem.type)}>
-                          {formatCaseType(caseItem.type)}
+                        <Badge className={getTypeColor(court.type)}>
+                          {formatType(court.type)}
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        <Badge className={getStatusColor(caseItem.status)}>
-                          {formatStatus(caseItem.status)}
+                        <Badge className={getJurisdictionColor(court.jurisdiction)}>
+                          {formatJurisdiction(court.jurisdiction)}
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        <Badge className={getPriorityColor(caseItem.priority)}>
-                          {formatPriority(caseItem.priority)}
-                        </Badge>
+                        {getStatusBadge(court.isActive)}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center space-x-2">
+                          <LocationIcon className="w-4 h-4 text-gray-500" />
+                          <span className="text-sm text-gray-700">
+                            {court.address?.city || 'N/A'}
+                          </span>
+                        </div>
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center space-x-2">
                           <Calendar className="w-4 h-4 text-gray-500" />
                           <span className="text-sm text-gray-700">
-                            {formatDate(caseItem.createdAt)}
+                            {formatDate(court.createdAt)}
                           </span>
                         </div>
                       </TableCell>
@@ -475,7 +469,7 @@ const CasesPage: React.FC = () => {
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => handleViewCase(caseItem)}
+                            onClick={() => handleViewCourt(court)}
                             className="h-8 px-3 text-blue-600 hover:bg-blue-50"
                           >
                             <Eye className="w-4 h-4 mr-1" />
@@ -488,12 +482,12 @@ const CasesPage: React.FC = () => {
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" className="w-48">
-                              <DropdownMenuItem onClick={() => handleEditCase(caseItem)}>
+                              <DropdownMenuItem onClick={() => handleEditCourt(court)}>
                                 <Edit className="w-4 h-4 mr-2" />
-                                Edit Case
+                                Edit Court
                               </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => handleToggleStatus(caseItem)}>
-                                {caseItem.isActive ? (
+                              <DropdownMenuItem onClick={() => handleToggleStatus(court)}>
+                                {court.isActive ? (
                                   <>
                                     <ToggleLeft className="w-4 h-4 mr-2" />
                                     Deactivate
@@ -507,11 +501,11 @@ const CasesPage: React.FC = () => {
                               </DropdownMenuItem>
                               <DropdownMenuSeparator />
                               <DropdownMenuItem 
-                                onClick={() => handleDeleteCase(caseItem)}
+                                onClick={() => handleDeleteCourt(court)}
                                 className="text-red-600 focus:text-red-600"
                               >
                                 <Trash2 className="w-4 h-4 mr-2" />
-                                Delete Case
+                                Delete Court
                               </DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>
@@ -531,7 +525,7 @@ const CasesPage: React.FC = () => {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div className="text-sm text-gray-600">
-                  Showing {((currentPage - 1) * limit) + 1} to {Math.min(currentPage * limit, totalCases)} of {totalCases} cases
+                  Showing {((currentPage - 1) * limit) + 1} to {Math.min(currentPage * limit, totalCourts)} of {totalCourts} courts
                 </div>
                 <div className="flex items-center space-x-2">
                   <Button
@@ -564,24 +558,24 @@ const CasesPage: React.FC = () => {
         )}
 
         {/* Empty State */}
-        {cases.length === 0 && !loading && (
+        {courts.length === 0 && !loading && (
           <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-xl">
             <CardContent className="p-12 text-center">
               <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                <FileText className="w-10 h-10 text-gray-400" />
+                <Scale className="w-10 h-10 text-gray-400" />
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">No Cases Found</h3>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">No Courts Found</h3>
               <p className="text-gray-600 mb-6">
-                {searchTerm || statusFilter !== 'all' || caseTypeFilter !== 'all' || priorityFilter !== 'all'
+                {searchTerm || typeFilter !== 'all' || jurisdictionFilter !== 'all' || statusFilter !== 'all'
                   ? 'Try adjusting your search criteria or filters.'
-                  : 'Get started by adding your first case file.'}
+                  : 'Get started by adding your first court information.'}
               </p>
               <Button
-                onClick={() => navigate('/cases/new')}
+                onClick={() => navigate('/courts/new')}
                 className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
               >
                 <Plus className="w-5 h-5 mr-2" />
-                Add First Case
+                Add First Court
               </Button>
             </CardContent>
           </Card>
@@ -591,4 +585,4 @@ const CasesPage: React.FC = () => {
   );
 };
 
-export default CasesPage;
+export default CourtsPage;

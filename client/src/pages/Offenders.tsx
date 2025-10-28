@@ -2,14 +2,72 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
+import {
+  UserCheck,
+  Plus,
+  Search,
+  Filter,
+  Edit,
+  Trash2,
+  Eye,
+  ToggleLeft,
+  ToggleRight,
+  Scale,
+  Calendar,
+  Shield,
+  CheckCircle,
+  XCircle,
+  AlertCircle,
+  Star,
+  Crown,
+  Globe,
+  TrendingUp,
+  Settings,
+  MoreVertical,
+  Download,
+  Upload,
+  RefreshCw,
+  Zap,
+  Award,
+  Target,
+  BarChart3,
+  Activity,
+  ChevronLeft,
+  ChevronRight,
+  FileText,
+  Gavel,
+  Clock,
+  MapPin,
+  Phone,
+  Mail,
+  User,
+  Users,
+  Building2,
+  AlertTriangle,
+  Lock,
+  Unlock
+} from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
+import { Label } from '../components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Badge } from '../components/ui/badge';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../components/ui/dialog';
-import { AlertCircle, Plus, Search, Filter, Eye, Edit, Trash2, User } from 'lucide-react';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '../components/ui/table';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '../components/ui/dropdown-menu';
 import { Offender, OffenderFormData } from '../types';
 import api from '../services/api';
 
@@ -20,32 +78,34 @@ const OffendersPage: React.FC = () => {
   
   const [offenders, setOffenders] = useState<Offender[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string>('');
   const [searchTerm, setSearchTerm] = useState('');
   const [riskLevelFilter, setRiskLevelFilter] = useState<string>('all');
   const [custodyStatusFilter, setCustodyStatusFilter] = useState<string>('all');
+  const [statusFilter, setStatusFilter] = useState<string>('all');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [totalCount, setTotalCount] = useState(0);
+  const [totalOffenders, setTotalOffenders] = useState(0);
   const [selectedOffender, setSelectedOffender] = useState<Offender | null>(null);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [showViewDialog, setShowViewDialog] = useState(false);
 
-  const itemsPerPage = 10;
+  const limit = 10;
 
   useEffect(() => {
     fetchOffenders();
-  }, [currentPage, searchTerm, riskLevelFilter, custodyStatusFilter]);
+  }, [currentPage, searchTerm, riskLevelFilter, custodyStatusFilter, statusFilter]);
 
   const fetchOffenders = async () => {
     try {
       setLoading(true);
       const params = new URLSearchParams({
         page: currentPage.toString(),
-        limit: itemsPerPage.toString(),
+        limit: limit.toString(),
         ...(searchTerm && { search: searchTerm }),
         ...(riskLevelFilter && riskLevelFilter !== 'all' && { riskLevel: riskLevelFilter }),
         ...(custodyStatusFilter && custodyStatusFilter !== 'all' && { custodyStatus: custodyStatusFilter }),
+        ...(statusFilter && statusFilter !== 'all' && { status: statusFilter }),
       });
 
       const response = await api.get(`/offenders?${params}`);
@@ -53,7 +113,7 @@ const OffendersPage: React.FC = () => {
       if (response.data.success) {
         setOffenders(response.data.data.offenders);
         setTotalPages(response.data.data.pagination.pages);
-        setTotalCount(response.data.data.pagination.total);
+        setTotalOffenders(response.data.data.pagination.total);
       } else {
         setError(response.data.message || 'Failed to fetch offenders');
       }
@@ -74,6 +134,8 @@ const OffendersPage: React.FC = () => {
       setRiskLevelFilter(value);
     } else if (filterType === 'custodyStatus') {
       setCustodyStatusFilter(value);
+    } else if (filterType === 'status') {
+      setStatusFilter(value);
     }
     setCurrentPage(1);
   };
@@ -88,7 +150,7 @@ const OffendersPage: React.FC = () => {
   };
 
   const handleDeleteOffender = async (offender: Offender) => {
-    if (window.confirm(`Are you sure you want to delete ${offender.personalInfo.firstName} ${offender.personalInfo.lastName}?`)) {
+    if (window.confirm(`Are you sure you want to delete offender ${offender.personalInfo.firstName} ${offender.personalInfo.lastName}?`)) {
       try {
         await api.delete(`/offenders/${offender._id}`);
         fetchOffenders();
@@ -98,388 +160,429 @@ const OffendersPage: React.FC = () => {
     }
   };
 
-  const getRiskLevelBadge = (level: string) => {
-    const colors = {
-      low: 'bg-green-100 text-green-800',
-      medium: 'bg-yellow-100 text-yellow-800',
-      high: 'bg-orange-100 text-orange-800',
-      critical: 'bg-red-100 text-red-800'
-    };
-    return colors[level as keyof typeof colors] || 'bg-gray-100 text-gray-800';
+  const handleToggleStatus = async (offender: Offender) => {
+    try {
+      await api.put(`/offenders/${offender._id}`, {
+        ...offender,
+        isActive: !offender.isActive
+      });
+      fetchOffenders();
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Failed to update offender status');
+    }
   };
 
-  const getCustodyStatusBadge = (isInCustody: boolean) => {
-    return isInCustody 
-      ? 'bg-red-100 text-red-800' 
-      : 'bg-green-100 text-green-800';
+  const getRiskLevelColor = (riskLevel: string) => {
+    switch (riskLevel) {
+      case 'low': return 'bg-green-100 text-green-800 border-green-200';
+      case 'medium': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      case 'high': return 'bg-orange-100 text-orange-800 border-orange-200';
+      case 'critical': return 'bg-red-100 text-red-800 border-red-200';
+      default: return 'bg-gray-100 text-gray-800 border-gray-200';
+    }
   };
 
-  const calculateAge = (dateOfBirth: string) => {
+  const getCustodyStatusColor = (custodyStatus: string) => {
+    switch (custodyStatus) {
+      case 'in_custody': return 'bg-red-100 text-red-800 border-red-200';
+      case 'released': return 'bg-green-100 text-green-800 border-green-200';
+      case 'probation': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      case 'parole': return 'bg-blue-100 text-blue-800 border-blue-200';
+      case 'community_service': return 'bg-purple-100 text-purple-800 border-purple-200';
+      default: return 'bg-gray-100 text-gray-800 border-gray-200';
+    }
+  };
+
+  const getStatusBadge = (isActive: boolean) => {
+    return isActive ? (
+      <Badge className="bg-green-100 text-green-800 border-green-200">
+        <CheckCircle className="h-3 w-3 mr-1" />
+        Active
+      </Badge>
+    ) : (
+      <Badge className="bg-red-100 text-red-800 border-red-200">
+        <XCircle className="h-3 w-3 mr-1" />
+        Inactive
+      </Badge>
+    );
+  };
+
+  const formatRiskLevel = (riskLevel: string) => {
+    return riskLevel.charAt(0).toUpperCase() + riskLevel.slice(1);
+  };
+
+  const formatCustodyStatus = (custodyStatus: string) => {
+    return custodyStatus.split('_').map(word => 
+      word.charAt(0).toUpperCase() + word.slice(1)
+    ).join(' ');
+  };
+
+  const getAge = (dateOfBirth: string) => {
     const today = new Date();
     const birthDate = new Date(dateOfBirth);
     let age = today.getFullYear() - birthDate.getFullYear();
     const monthDiff = today.getMonth() - birthDate.getMonth();
-    
     if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
       age--;
     }
-    
     return age;
   };
 
-  if (loading && offenders.length === 0) {
+  if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-2 text-gray-600">Loading offenders...</p>
+          <div className="relative">
+            <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-4"></div>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <UserCheck className="w-6 h-6 text-blue-600 animate-pulse" />
+            </div>
+          </div>
+          <h3 className="text-xl font-semibold text-gray-900 mb-2">Loading Offenders</h3>
+          <p className="text-gray-600">Please wait while we fetch your data...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 flex items-center justify-center p-6">
+        <div className="max-w-md w-full">
+          <Card className="border-red-200 bg-red-50/50">
+            <CardContent className="p-8 text-center">
+              <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <AlertCircle className="w-8 h-8 text-red-600" />
+              </div>
+              <h3 className="text-xl font-semibold text-red-900 mb-2">Error Loading Offenders</h3>
+              <p className="text-red-700 mb-6">{error}</p>
+              <Button 
+                onClick={() => fetchOffenders()} 
+                className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
+              >
+                <RefreshCw className="w-4 h-4 mr-2" />
+                Try Again
+              </Button>
+            </CardContent>
+          </Card>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Offender Management</h1>
-          <p className="text-gray-600 mt-1">Manage offender records and profiles</p>
-        </div>
-        <Button onClick={() => setShowCreateDialog(true)} className="flex items-center gap-2">
-          <Plus className="h-4 w-4" />
-          Add Offender
-        </Button>
-      </div>
-
-      {/* Error Message */}
-      {error && (
-        <div className="bg-red-50 border border-red-200 rounded-md p-4">
-          <div className="flex">
-            <AlertCircle className="h-5 w-5 text-red-400" />
-            <div className="ml-3">
-              <h3 className="text-sm font-medium text-red-800">Error</h3>
-              <p className="text-sm text-red-700 mt-1">{error}</p>
-            </div>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
+      {/* Hero Section */}
+      <div className="relative overflow-hidden bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600">
+        <div className="absolute inset-0 bg-black/10"></div>
+        <div className="absolute inset-0">
+          <div className="absolute top-0 left-0 w-full h-full">
+            <div className="absolute top-10 left-10 w-20 h-20 bg-white/10 rounded-full animate-pulse"></div>
+            <div className="absolute top-20 right-20 w-16 h-16 bg-white/10 rounded-full animate-pulse delay-1000"></div>
+            <div className="absolute bottom-20 left-1/4 w-12 h-12 bg-white/10 rounded-full animate-pulse delay-2000"></div>
           </div>
         </div>
-      )}
-
-      {/* Search and Filters */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Search className="h-5 w-5" />
-            Search & Filters
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div>
-              <Input
-                placeholder="Search by name, ID, or passport..."
-                value={searchTerm}
-                onChange={(e) => handleSearch(e.target.value)}
-                className="w-full"
-              />
+        <div className="relative max-w-7xl mx-auto px-6 py-12">
+          <div className="flex items-center justify-between">
+            <div className="text-white">
+              <div className="flex items-center space-x-3 mb-4">
+                <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
+                  <UserCheck className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-4xl font-bold">Offender Management</h1>
+                  <p className="text-blue-100 text-lg">Manage and monitor all offender records</p>
+                </div>
+              </div>
+              <div className="flex items-center space-x-6 text-blue-100">
+                <div className="flex items-center space-x-2">
+                  <Users className="w-5 h-5" />
+                  <span className="text-sm">{totalOffenders} Total Offenders</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Activity className="w-5 h-5" />
+                  <span className="text-sm">{offenders.filter(o => o.isActive).length} Active</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Lock className="w-5 h-5" />
+                  <span className="text-sm">{offenders.filter(o => o.custodyStatus === 'in_custody').length} In Custody</span>
+                </div>
+              </div>
             </div>
-            <div>
-              <Select value={riskLevelFilter} onValueChange={(value) => handleFilterChange('riskLevel', value)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Risk Level" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Risk Levels</SelectItem>
-                  <SelectItem value="low">Low</SelectItem>
-                  <SelectItem value="medium">Medium</SelectItem>
-                  <SelectItem value="high">High</SelectItem>
-                  <SelectItem value="critical">Critical</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Select value={custodyStatusFilter} onValueChange={(value) => handleFilterChange('custodyStatus', value)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Custody Status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Status</SelectItem>
-                  <SelectItem value="in_custody">In Custody</SelectItem>
-                  <SelectItem value="released">Released</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="flex items-center gap-2">
-              <Button variant="outline" onClick={fetchOffenders} className="flex items-center gap-2">
-                <Filter className="h-4 w-4" />
-                Apply Filters
+            <div className="flex items-center space-x-4">
+              <Button
+                onClick={() => navigate('/offenders/new')}
+                className="bg-white/20 hover:bg-white/30 text-white border-white/30 backdrop-blur-sm px-6 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
+              >
+                <Plus className="w-5 h-5 mr-2" />
+                Add Offender
               </Button>
             </div>
           </div>
-        </CardContent>
-      </Card>
-
-      {/* Statistics */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center">
-              <User className="h-8 w-8 text-blue-600" />
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Total Offenders</p>
-                <p className="text-2xl font-bold text-gray-900">{totalCount}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center">
-              <div className="h-8 w-8 bg-red-100 rounded-full flex items-center justify-center">
-                <span className="text-red-600 font-bold">!</span>
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">In Custody</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {offenders.filter(o => o.status.isInCustody).length}
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center">
-              <div className="h-8 w-8 bg-orange-100 rounded-full flex items-center justify-center">
-                <span className="text-orange-600 font-bold">H</span>
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">High Risk</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {offenders.filter(o => o.riskAssessment.level === 'high' || o.riskAssessment.level === 'critical').length}
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center">
-              <div className="h-8 w-8 bg-green-100 rounded-full flex items-center justify-center">
-                <span className="text-green-600 font-bold">✓</span>
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Active</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {offenders.filter(o => o.status.isActive).length}
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        </div>
       </div>
 
-      {/* Offenders Table */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Offender Records</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Age</TableHead>
-                <TableHead>National ID</TableHead>
-                <TableHead>Risk Level</TableHead>
-                <TableHead>Custody Status</TableHead>
-                <TableHead>Total Offences</TableHead>
-                <TableHead>Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {offenders.map((offender) => (
-                <TableRow key={offender._id}>
-                  <TableCell className="font-medium">
-                    {offender.personalInfo.firstName} {offender.personalInfo.lastName}
-                  </TableCell>
-                  <TableCell>{calculateAge(offender.personalInfo.dateOfBirth)}</TableCell>
-                  <TableCell>{offender.personalInfo.nationalId || 'N/A'}</TableCell>
-                  <TableCell>
-                    <Badge className={getRiskLevelBadge(offender.riskAssessment.level)}>
-                      {offender.riskAssessment.level.toUpperCase()}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <Badge className={getCustodyStatusBadge(offender.status.isInCustody)}>
-                      {offender.status.isInCustody ? 'IN CUSTODY' : 'RELEASED'}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>{offender.criminalHistory.totalOffences}</TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleViewOffender(offender)}
-                      >
-                        <Eye className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleEditOffender(offender)}
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleDeleteOffender(offender)}
-                        className="text-red-600 hover:text-red-700"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-
-          {offenders.length === 0 && !loading && (
-            <div className="text-center py-8">
-              <User className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-500">No offenders found</p>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="flex justify-center items-center gap-2">
-          <Button
-            variant="outline"
-            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-            disabled={currentPage === 1}
-          >
-            Previous
-          </Button>
-          <span className="text-sm text-gray-600">
-            Page {currentPage} of {totalPages}
-          </span>
-          <Button
-            variant="outline"
-            onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-            disabled={currentPage === totalPages}
-          >
-            Next
-          </Button>
-        </div>
-      )}
-
-      {/* View Offender Dialog */}
-      <Dialog open={showViewDialog} onOpenChange={setShowViewDialog}>
-        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Offender Details</DialogTitle>
-          </DialogHeader>
-          {selectedOffender && (
-            <div className="space-y-6">
-              {/* Personal Information */}
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-6 py-8 space-y-8">
+        {/* Filters */}
+        <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-xl">
+          <CardHeader>
+            <CardTitle className="flex items-center text-gray-900">
+              <Filter className="w-5 h-5 mr-2 text-blue-600" />
+              Search & Filter Offenders
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div>
-                <h3 className="text-lg font-semibold mb-3">Personal Information</h3>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-sm font-medium text-gray-600">Full Name</label>
-                    <p className="text-sm">{selectedOffender.personalInfo.firstName} {selectedOffender.personalInfo.lastName}</p>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-gray-600">Date of Birth</label>
-                    <p className="text-sm">{new Date(selectedOffender.personalInfo.dateOfBirth).toLocaleDateString()}</p>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-gray-600">Gender</label>
-                    <p className="text-sm">{selectedOffender.personalInfo.gender}</p>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-gray-600">Nationality</label>
-                    <p className="text-sm">{selectedOffender.personalInfo.nationality}</p>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-gray-600">National ID</label>
-                    <p className="text-sm">{selectedOffender.personalInfo.nationalId || 'N/A'}</p>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-gray-600">Phone</label>
-                    <p className="text-sm">{selectedOffender.personalInfo.phoneNumber || 'N/A'}</p>
-                  </div>
+                <Label htmlFor="search" className="text-sm font-medium text-gray-700 mb-2 block">
+                  Search Offenders
+                </Label>
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  <Input
+                    id="search"
+                    placeholder="Search by name, ID, or details..."
+                    value={searchTerm}
+                    onChange={(e) => handleSearch(e.target.value)}
+                    className="pl-10 border-gray-200 focus:border-blue-500 focus:ring-blue-500"
+                  />
                 </div>
               </div>
-
-              {/* Risk Assessment */}
               <div>
-                <h3 className="text-lg font-semibold mb-3">Risk Assessment</h3>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-sm font-medium text-gray-600">Risk Level</label>
-                    <Badge className={getRiskLevelBadge(selectedOffender.riskAssessment.level)}>
-                      {selectedOffender.riskAssessment.level.toUpperCase()}
-                    </Badge>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-gray-600">Last Assessment</label>
-                    <p className="text-sm">
-                      {selectedOffender.riskAssessment.lastAssessment 
-                        ? new Date(selectedOffender.riskAssessment.lastAssessment).toLocaleDateString()
-                        : 'N/A'
-                      }
-                    </p>
-                  </div>
-                </div>
+                <Label className="text-sm font-medium text-gray-700 mb-2 block">
+                  Risk Level
+                </Label>
+                <Select value={riskLevelFilter} onValueChange={(value) => handleFilterChange('riskLevel', value)}>
+                  <SelectTrigger className="border-gray-200 focus:border-blue-500 focus:ring-blue-500">
+                    <SelectValue placeholder="All Risk Levels" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Risk Levels</SelectItem>
+                    <SelectItem value="low">Low</SelectItem>
+                    <SelectItem value="medium">Medium</SelectItem>
+                    <SelectItem value="high">High</SelectItem>
+                    <SelectItem value="critical">Critical</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
-
-              {/* Criminal History */}
               <div>
-                <h3 className="text-lg font-semibold mb-3">Criminal History</h3>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-sm font-medium text-gray-600">Total Offences</label>
-                    <p className="text-sm font-bold">{selectedOffender.criminalHistory.totalOffences}</p>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-gray-600">First Offence</label>
-                    <p className="text-sm">
-                      {selectedOffender.criminalHistory.firstOffenceDate 
-                        ? new Date(selectedOffender.criminalHistory.firstOffenceDate).toLocaleDateString()
-                        : 'N/A'
-                      }
-                    </p>
-                  </div>
-                </div>
+                <Label className="text-sm font-medium text-gray-700 mb-2 block">
+                  Custody Status
+                </Label>
+                <Select value={custodyStatusFilter} onValueChange={(value) => handleFilterChange('custodyStatus', value)}>
+                  <SelectTrigger className="border-gray-200 focus:border-blue-500 focus:ring-blue-500">
+                    <SelectValue placeholder="All Custody Status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Custody Status</SelectItem>
+                    <SelectItem value="in_custody">In Custody</SelectItem>
+                    <SelectItem value="released">Released</SelectItem>
+                    <SelectItem value="probation">Probation</SelectItem>
+                    <SelectItem value="parole">Parole</SelectItem>
+                    <SelectItem value="community_service">Community Service</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
-
-              {/* Status */}
               <div>
-                <h3 className="text-lg font-semibold mb-3">Current Status</h3>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-sm font-medium text-gray-600">Custody Status</label>
-                    <Badge className={getCustodyStatusBadge(selectedOffender.status.isInCustody)}>
-                      {selectedOffender.status.isInCustody ? 'IN CUSTODY' : 'RELEASED'}
-                    </Badge>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-gray-600">Custody Location</label>
-                    <p className="text-sm">{selectedOffender.status.custodyLocation || 'N/A'}</p>
-                  </div>
-                </div>
+                <Label className="text-sm font-medium text-gray-700 mb-2 block">
+                  Status
+                </Label>
+                <Select value={statusFilter} onValueChange={(value) => handleFilterChange('status', value)}>
+                  <SelectTrigger className="border-gray-200 focus:border-blue-500 focus:ring-blue-500">
+                    <SelectValue placeholder="All Status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Status</SelectItem>
+                    <SelectItem value="active">Active</SelectItem>
+                    <SelectItem value="inactive">Inactive</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
-          )}
-        </DialogContent>
-      </Dialog>
+          </CardContent>
+        </Card>
+
+        {/* Offenders Table */}
+        <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-xl">
+          <CardContent className="p-0">
+            <div className="border border-gray-200 rounded-xl overflow-hidden">
+              <Table>
+                <TableHeader className="bg-gray-50">
+                  <TableRow>
+                    <TableHead className="font-semibold">Offender</TableHead>
+                    <TableHead className="font-semibold">Risk Level</TableHead>
+                    <TableHead className="font-semibold">Custody Status</TableHead>
+                    <TableHead className="font-semibold">Status</TableHead>
+                    <TableHead className="font-semibold">Age</TableHead>
+                    <TableHead className="font-semibold">Created</TableHead>
+                    <TableHead className="font-semibold">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {offenders.map((offender) => (
+                    <TableRow key={offender._id} className="hover:bg-gray-50">
+                      <TableCell>
+                        <div className="flex items-center space-x-3">
+                          <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center">
+                            <User className="w-5 h-5 text-white" />
+                          </div>
+                          <div>
+                            <p className="font-semibold text-gray-900">
+                              {offender.personalInfo.firstName} {offender.personalInfo.lastName}
+                            </p>
+                            <p className="text-sm text-gray-600">
+                              ID: {offender.personalInfo.nationalId || 'N/A'}
+                            </p>
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge className={getRiskLevelColor(offender.riskAssessment.level)}>
+                          {formatRiskLevel(offender.riskAssessment.level)}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge className={getCustodyStatusColor(offender.custodyStatus)}>
+                          {formatCustodyStatus(offender.custodyStatus)}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        {getStatusBadge(offender.isActive)}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center space-x-2">
+                          <Calendar className="w-4 h-4 text-gray-500" />
+                          <span className="text-sm text-gray-700">
+                            {getAge(offender.personalInfo.dateOfBirth)} years
+                          </span>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center space-x-2">
+                          <Calendar className="w-4 h-4 text-gray-500" />
+                          <span className="text-sm text-gray-700">
+                            {new Date(offender.createdAt).toLocaleDateString()}
+                          </span>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center space-x-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleViewOffender(offender)}
+                            className="h-8 px-3 text-blue-600 hover:bg-blue-50"
+                          >
+                            <Eye className="w-4 h-4 mr-1" />
+                            View
+                          </Button>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                                <MoreVertical className="w-4 h-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="w-48">
+                              <DropdownMenuItem onClick={() => handleEditOffender(offender)}>
+                                <Edit className="w-4 h-4 mr-2" />
+                                Edit Offender
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleToggleStatus(offender)}>
+                                {offender.isActive ? (
+                                  <>
+                                    <ToggleLeft className="w-4 h-4 mr-2" />
+                                    Deactivate
+                                  </>
+                                ) : (
+                                  <>
+                                    <ToggleRight className="w-4 h-4 mr-2" />
+                                    Activate
+                                  </>
+                                )}
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem 
+                                onClick={() => handleDeleteOffender(offender)}
+                                className="text-red-600 focus:text-red-600"
+                              >
+                                <Trash2 className="w-4 h-4 mr-2" />
+                                Delete Offender
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-xl">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div className="text-sm text-gray-600">
+                  Showing {((currentPage - 1) * limit) + 1} to {Math.min(currentPage * limit, totalOffenders)} of {totalOffenders} offenders
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                    disabled={currentPage === 1}
+                    className="border-gray-200 hover:bg-gray-50"
+                  >
+                    <ChevronLeft className="w-4 h-4 mr-1" />
+                    Previous
+                  </Button>
+                  <span className="text-sm text-gray-600 px-3">
+                    Page {currentPage} of {totalPages}
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCurrentPage(prev => prev + 1)}
+                    disabled={currentPage >= totalPages}
+                    className="border-gray-200 hover:bg-gray-50"
+                  >
+                    Next
+                    <ChevronRight className="w-4 h-4 ml-1" />
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Empty State */}
+        {offenders.length === 0 && !loading && (
+          <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-xl">
+            <CardContent className="p-12 text-center">
+              <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <UserCheck className="w-10 h-10 text-gray-400" />
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">No Offenders Found</h3>
+              <p className="text-gray-600 mb-6">
+                {searchTerm || riskLevelFilter !== 'all' || custodyStatusFilter !== 'all' || statusFilter !== 'all'
+                  ? 'Try adjusting your search criteria or filters.'
+                  : 'Get started by adding your first offender record.'}
+              </p>
+              <Button
+                onClick={() => navigate('/offenders/new')}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
+              >
+                <Plus className="w-5 h-5 mr-2" />
+                Add First Offender
+              </Button>
+            </CardContent>
+          </Card>
+        )}
+      </div>
     </div>
   );
 };
