@@ -26,6 +26,7 @@ import OrganisationProfile from './pages/OrganisationProfile';
 import Offenders from './pages/Offenders';
 import CreateOffender from './pages/CreateOffender';
 import Cases from './pages/Cases';
+import Offences from './pages/Offences';
 import NotFound from './pages/NotFound';
 import NotFoundTest from './pages/NotFoundTest';
 import NotFoundSimple from './pages/NotFoundSimple';
@@ -110,6 +111,11 @@ function App() {
                                     <Cases />
                                   </RoleBasedRoute>
                                 } />
+                                <Route path="/offences" element={
+                                  <RoleBasedRoute allowedRoles={['admin', 'manager', 'officer', 'super_admin']}>
+                                    <Offences />
+                                  </RoleBasedRoute>
+                                } />
                                 
                                 <Route path="/profile" element={<Profile />} />
                                 <Route path="/help" element={<Help />} />
@@ -176,6 +182,13 @@ function App() {
                           <RoleBasedRoute allowedRoles={['admin', 'manager', 'officer', 'super_admin']}>
                             <Layout>
                               <Cases />
+                            </Layout>
+                          </RoleBasedRoute>
+                        } />
+                        <Route path="/offences" element={
+                          <RoleBasedRoute allowedRoles={['admin', 'manager', 'officer', 'super_admin']}>
+                            <Layout>
+                              <Offences />
                             </Layout>
                           </RoleBasedRoute>
                         } />
