@@ -78,10 +78,7 @@ const getMenuItems = (
   ] : userRole === 'admin' ? [
     { text: 'My Organisation', icon: <Building2 className="h-5 w-5" />, path: userOrgId ? `/organisations/${userOrgId}` : '/organisations' },
   ] : []),
-  // Show settings only for admin/super_admin roles
-  ...(userRole === 'admin' || userRole === 'super_admin' ? [
-    { text: 'Settings', icon: <Settings className="h-5 w-5" />, path: userOrgId ? `/organisations/${userOrgId}?tab=settings` : '/settings' },
-  ] : []),
+  // Settings moved under organisation profile; menu item removed
   // Show audit logs only for admin/super_admin roles
   ...(userRole === 'admin' || userRole === 'super_admin' ? [
     { text: 'Audit Logs', icon: <FileText className="h-5 w-5" />, path: '/audit' },
