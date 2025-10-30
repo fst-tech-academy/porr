@@ -80,7 +80,7 @@ const getMenuItems = (
   ] : []),
   // Show settings only for admin/super_admin roles
   ...(userRole === 'admin' || userRole === 'super_admin' ? [
-    { text: 'Settings', icon: <Settings className="h-5 w-5" />, path: '/settings' },
+    { text: 'Settings', icon: <Settings className="h-5 w-5" />, path: userOrgId ? `/organisations/${userOrgId}?tab=settings` : '/settings' },
   ] : []),
   // Show audit logs only for admin/super_admin roles
   ...(userRole === 'admin' || userRole === 'super_admin' ? [

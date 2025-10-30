@@ -50,6 +50,12 @@ function App() {
     if (!orgId) return <Navigate to="/organisations" replace />;
     return <Navigate to={`/organisations/${orgId}?tab=users`} replace />;
   };
+  const SettingsRedirect: React.FC = () => {
+    const { user } = useAuth();
+    const orgId = user?.organisationId;
+    if (!orgId) return <Navigate to="/organisations" replace />;
+    return <Navigate to={`/organisations/${orgId}?tab=settings`} replace />;
+  };
   return (
     <ThemeProvider>
       <LanguageProvider>
@@ -97,7 +103,7 @@ function App() {
                                 } />
                                 <Route path="/settings" element={
                                   <RoleBasedRoute allowedRoles={['admin', 'super_admin']}>
-                                    <Settings />
+                                    <SettingsRedirect />
                                   </RoleBasedRoute>
                                 } />
                                 <Route path="/organisations" element={
@@ -160,7 +166,7 @@ function App() {
                         <Route path="/settings" element={
                           <RoleBasedRoute allowedRoles={['admin', 'super_admin']}>
                             <Layout>
-                              <Settings />
+                              <SettingsRedirect />
                             </Layout>
                           </RoleBasedRoute>
                         } />
