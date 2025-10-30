@@ -33,6 +33,8 @@ import {
   Activity,
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
+  ChevronUp,
   FileText,
   Gavel,
   Clock,
@@ -94,6 +96,7 @@ const CourtsPage: React.FC = () => {
   const [selectedCourt, setSelectedCourt] = useState<Court | null>(null);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [showViewDialog, setShowViewDialog] = useState(false);
+  const [isFiltersExpanded, setIsFiltersExpanded] = useState(false);
 
   const limit = 10;
 
@@ -324,83 +327,95 @@ const CourtsPage: React.FC = () => {
       <div className="max-w-7xl mx-auto px-6 py-8 space-y-8">
         {/* Filters */}
         <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-xl">
-          <CardHeader>
-            <CardTitle className="flex items-center text-gray-900">
-              <Filter className="w-5 h-5 mr-2 text-blue-600" />
-              Search & Filter Courts
+          <CardHeader 
+            className="cursor-pointer hover:bg-gray-50/50 transition-colors"
+            onClick={() => setIsFiltersExpanded(!isFiltersExpanded)}
+          >
+            <CardTitle className="flex items-center justify-between text-gray-900">
+              <div className="flex items-center">
+                <Filter className="w-5 h-5 mr-2 text-blue-600" />
+                Search & Filter Courts
+              </div>
+              {isFiltersExpanded ? (
+                <ChevronUp className="w-5 h-5 text-gray-600" />
+              ) : (
+                <ChevronDown className="w-5 h-5 text-gray-600" />
+              )}
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <div>
-                <Label htmlFor="search" className="text-sm font-medium text-gray-700 mb-2 block">
-                  Search Courts
-                </Label>
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                  <Input
-                    id="search"
-                    placeholder="Search by name, code, or location..."
-                    value={searchTerm}
-                    onChange={(e) => handleSearch(e.target.value)}
-                    className="pl-10 border-gray-200 focus:border-blue-500 focus:ring-blue-500"
-                  />
+          {isFiltersExpanded && (
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div>
+                  <Label htmlFor="search" className="text-sm font-medium text-gray-700 mb-2 block">
+                    Search Courts
+                  </Label>
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                    <Input
+                      id="search"
+                      placeholder="Search by name, code, or location..."
+                      value={searchTerm}
+                      onChange={(e) => handleSearch(e.target.value)}
+                      className="pl-10 border border-gray-300 bg-white text-black focus:border-blue-500 focus:ring-blue-500"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <Label className="text-sm font-medium text-gray-700 mb-2 block">
+                    Court Type
+                  </Label>
+                  <Select value={typeFilter} onValueChange={(value) => handleFilterChange('type', value)}>
+                    <SelectTrigger className="border border-gray-300 bg-white text-black focus:border-blue-500 focus:ring-blue-500">
+                      <SelectValue placeholder="All Types" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-white border border-gray-200 shadow-lg">
+                      <SelectItem value="all" className="text-black hover:bg-blue-600 hover:text-white focus:bg-blue-600 focus:text-white cursor-pointer">All Types</SelectItem>
+                      <SelectItem value="supreme" className="text-black hover:bg-blue-600 hover:text-white focus:bg-blue-600 focus:text-white cursor-pointer">Supreme Court</SelectItem>
+                      <SelectItem value="high" className="text-black hover:bg-blue-600 hover:text-white focus:bg-blue-600 focus:text-white cursor-pointer">High Court</SelectItem>
+                      <SelectItem value="district" className="text-black hover:bg-blue-600 hover:text-white focus:bg-blue-600 focus:text-white cursor-pointer">District Court</SelectItem>
+                      <SelectItem value="municipal" className="text-black hover:bg-blue-600 hover:text-white focus:bg-blue-600 focus:text-white cursor-pointer">Municipal Court</SelectItem>
+                      <SelectItem value="special" className="text-black hover:bg-blue-600 hover:text-white focus:bg-blue-600 focus:text-white cursor-pointer">Special Court</SelectItem>
+                      <SelectItem value="tribunal" className="text-black hover:bg-blue-600 hover:text-white focus:bg-blue-600 focus:text-white cursor-pointer">Tribunal</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label className="text-sm font-medium text-gray-700 mb-2 block">
+                    Jurisdiction
+                  </Label>
+                  <Select value={jurisdictionFilter} onValueChange={(value) => handleFilterChange('jurisdiction', value)}>
+                    <SelectTrigger className="border border-gray-300 bg-white text-black focus:border-blue-500 focus:ring-blue-500">
+                      <SelectValue placeholder="All Jurisdictions" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-white border border-gray-200 shadow-lg">
+                      <SelectItem value="all" className="text-black hover:bg-blue-600 hover:text-white focus:bg-blue-600 focus:text-white cursor-pointer">All Jurisdictions</SelectItem>
+                      <SelectItem value="federal" className="text-black hover:bg-blue-600 hover:text-white focus:bg-blue-600 focus:text-white cursor-pointer">Federal</SelectItem>
+                      <SelectItem value="state" className="text-black hover:bg-blue-600 hover:text-white focus:bg-blue-600 focus:text-white cursor-pointer">State</SelectItem>
+                      <SelectItem value="local" className="text-black hover:bg-blue-600 hover:text-white focus:bg-blue-600 focus:text-white cursor-pointer">Local</SelectItem>
+                      <SelectItem value="military" className="text-black hover:bg-blue-600 hover:text-white focus:bg-blue-600 focus:text-white cursor-pointer">Military</SelectItem>
+                      <SelectItem value="administrative" className="text-black hover:bg-blue-600 hover:text-white focus:bg-blue-600 focus:text-white cursor-pointer">Administrative</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label className="text-sm font-medium text-gray-700 mb-2 block">
+                    Status
+                  </Label>
+                  <Select value={statusFilter} onValueChange={(value) => handleFilterChange('status', value)}>
+                    <SelectTrigger className="border border-gray-300 bg-white text-black focus:border-blue-500 focus:ring-blue-500">
+                      <SelectValue placeholder="All Status" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-white border border-gray-200 shadow-lg">
+                      <SelectItem value="all" className="text-black hover:bg-blue-600 hover:text-white focus:bg-blue-600 focus:text-white cursor-pointer">All Status</SelectItem>
+                      <SelectItem value="active" className="text-black hover:bg-blue-600 hover:text-white focus:bg-blue-600 focus:text-white cursor-pointer">Active</SelectItem>
+                      <SelectItem value="inactive" className="text-black hover:bg-blue-600 hover:text-white focus:bg-blue-600 focus:text-white cursor-pointer">Inactive</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
-              <div>
-                <Label className="text-sm font-medium text-gray-700 mb-2 block">
-                  Court Type
-                </Label>
-                <Select value={typeFilter} onValueChange={(value) => handleFilterChange('type', value)}>
-                  <SelectTrigger className="border-gray-200 focus:border-blue-500 focus:ring-blue-500">
-                    <SelectValue placeholder="All Types" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Types</SelectItem>
-                    <SelectItem value="supreme">Supreme Court</SelectItem>
-                    <SelectItem value="high">High Court</SelectItem>
-                    <SelectItem value="district">District Court</SelectItem>
-                    <SelectItem value="municipal">Municipal Court</SelectItem>
-                    <SelectItem value="special">Special Court</SelectItem>
-                    <SelectItem value="tribunal">Tribunal</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label className="text-sm font-medium text-gray-700 mb-2 block">
-                  Jurisdiction
-                </Label>
-                <Select value={jurisdictionFilter} onValueChange={(value) => handleFilterChange('jurisdiction', value)}>
-                  <SelectTrigger className="border-gray-200 focus:border-blue-500 focus:ring-blue-500">
-                    <SelectValue placeholder="All Jurisdictions" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Jurisdictions</SelectItem>
-                    <SelectItem value="federal">Federal</SelectItem>
-                    <SelectItem value="state">State</SelectItem>
-                    <SelectItem value="local">Local</SelectItem>
-                    <SelectItem value="military">Military</SelectItem>
-                    <SelectItem value="administrative">Administrative</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label className="text-sm font-medium text-gray-700 mb-2 block">
-                  Status
-                </Label>
-                <Select value={statusFilter} onValueChange={(value) => handleFilterChange('status', value)}>
-                  <SelectTrigger className="border-gray-200 focus:border-blue-500 focus:ring-blue-500">
-                    <SelectValue placeholder="All Status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Status</SelectItem>
-                    <SelectItem value="active">Active</SelectItem>
-                    <SelectItem value="inactive">Inactive</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          </CardContent>
+            </CardContent>
+          )}
         </Card>
 
         {/* Courts Table */}
@@ -481,12 +496,18 @@ const CourtsPage: React.FC = () => {
                                 <MoreVertical className="w-4 h-4" />
                               </Button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="w-48">
-                              <DropdownMenuItem onClick={() => handleEditCourt(court)}>
+                            <DropdownMenuContent align="end" className="w-48 bg-white border border-gray-200 shadow-lg">
+                              <DropdownMenuItem 
+                                onClick={() => handleEditCourt(court)}
+                                className="text-black hover:bg-blue-600 hover:text-white focus:bg-blue-600 focus:text-white cursor-pointer"
+                              >
                                 <Edit className="w-4 h-4 mr-2" />
                                 Edit Court
                               </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => handleToggleStatus(court)}>
+                              <DropdownMenuItem 
+                                onClick={() => handleToggleStatus(court)}
+                                className="text-black hover:bg-blue-600 hover:text-white focus:bg-blue-600 focus:text-white cursor-pointer"
+                              >
                                 {court.isActive ? (
                                   <>
                                     <ToggleLeft className="w-4 h-4 mr-2" />
@@ -499,10 +520,10 @@ const CourtsPage: React.FC = () => {
                                   </>
                                 )}
                               </DropdownMenuItem>
-                              <DropdownMenuSeparator />
+                              <DropdownMenuSeparator className="bg-gray-200" />
                               <DropdownMenuItem 
                                 onClick={() => handleDeleteCourt(court)}
-                                className="text-red-600 focus:text-red-600"
+                                className="text-red-600 hover:bg-blue-600 hover:text-white focus:bg-blue-600 focus:text-white cursor-pointer"
                               >
                                 <Trash2 className="w-4 h-4 mr-2" />
                                 Delete Court

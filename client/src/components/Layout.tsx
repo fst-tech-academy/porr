@@ -33,7 +33,11 @@ import {
   UserCheck,
   Scale,
   Gavel,
-  AlertTriangle
+  AlertTriangle,
+  ChevronLeft,
+  ChevronRight,
+  Heart,
+  ShieldAlert
 } from 'lucide-react';
 
 interface LayoutProps {
@@ -56,6 +60,8 @@ const getMenuItems = (
     { text: 'Offenders', icon: <UserCheck className="h-5 w-5" />, path: '/offenders' },
     { text: 'Cases', icon: <FileText className="h-5 w-5" />, path: '/cases' },
     { text: 'Offences', icon: <AlertTriangle className="h-5 w-5" />, path: '/offences' },
+    { text: 'Crimes', icon: <ShieldAlert className="h-5 w-5" />, path: '/crimes' },
+    { text: 'Victims', icon: <Heart className="h-5 w-5" />, path: '/victims' },
     { text: 'Courts', icon: <Scale className="h-5 w-5" />, path: '/courts' },
   ] : []),
   
@@ -85,6 +91,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [changePasswordModalOpen, setChangePasswordModalOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
+    const saved = localStorage.getItem('sidebarCollapsed');
+    return saved ? JSON.parse(saved) : false;
+  });
   const { user, logout, refreshUser } = useAuth();
   const { t } = useLanguage();
   const { isDashboardAnalyticsEnabled, isUserManagementEnabled } = useSettings();
@@ -94,11 +104,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   
   const menuItems = getMenuItems(t, user?.role || '', isDashboardAnalyticsEnabled(), isUserManagementEnabled());
 
-  // Debug user data
-  useEffect(() => {
-    console.log('Layout - User data:', user);
-    console.log('Layout - Profile photo:', user?.profilePhoto);
-  }, [user]);
 
   // Handle click outside to close profile menu
   useEffect(() => {
@@ -119,6 +124,12 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
+  };
+
+  const handleSidebarToggle = () => {
+    const newState = !sidebarCollapsed;
+    setSidebarCollapsed(newState);
+    localStorage.setItem('sidebarCollapsed', JSON.stringify(newState));
   };
 
   const handleLogout = () => {
@@ -143,8 +154,36 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       <header className="bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700 sticky top-0 z-40 shadow-sm transition-colors">
         <div className="flex">
           {/* Logo section - positioned in sidebar area */}
-          <div className="w-72 bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700 flex items-center px-6">
-            <NPSTLogo size="md" showText={true} />
+          <div className={`${sidebarCollapsed ? 'w-16' : 'w-72'} bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700 flex items-center px-6 transition-all duration-300`}>
+            {sidebarCollapsed ? (
+              <div className="flex items-center justify-center w-full">
+                <NPSTLogo size="sm" showText={false} />
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="hover:bg-slate-100 dark:hover:bg-slate-700 ml-1"
+                  onClick={handleSidebarToggle}
+                >
+                  <ChevronRight className="h-3 w-3" />
+                </Button>
+              </div>
+            ) : (
+              <div className="flex items-center justify-between w-full">
+                <NPSTLogo size="md" showText={true} />
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="hover:bg-slate-100 dark:hover:bg-slate-700 ml-2"
+                  onClick={handleSidebarToggle}
+                >
+                  {sidebarCollapsed ? (
+                    <ChevronRight className="h-4 w-4" />
+                  ) : (
+                    <ChevronLeft className="h-4 w-4" />
+                  )}
+                </Button>
+              </div>
+            )}
           </div>
           
           {/* Header content section */}
@@ -154,7 +193,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="md:hidden hover:bg-slate-100 dark:hover:bg-slate-700"
+                  className="md:hidden hover:bg-slate-100 dark:hover:bg-slate-700 mr-2"
                   onClick={handleDrawerToggle}
                 >
                   <Menu className="h-5 w-5" />
@@ -236,7 +275,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
       <div className="flex">
         {/* Sidebar */}
-        <aside className={`${mobileOpen ? 'translate-x-0' : '-translate-x-full'} fixed top-16 left-0 bottom-0 z-50 w-72 bg-white dark:bg-slate-800 shadow-lg transform transition-all duration-300 ease-in-out md:translate-x-0`}>
+        <aside className={`${mobileOpen ? 'translate-x-0' : '-translate-x-full'} fixed top-16 left-0 bottom-0 z-50 ${sidebarCollapsed ? 'w-16' : 'w-72'} bg-white dark:bg-slate-800 shadow-lg transform transition-all duration-300 ease-in-out md:translate-x-0`}>
           <div className="flex items-center justify-end h-16 px-6 border-b border-gray-200 dark:border-slate-700 md:hidden">
             <Button
               variant="ghost"
@@ -248,7 +287,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             </Button>
           </div>
           
-          <nav className="px-4 py-6">
+          <nav className={`${sidebarCollapsed ? 'px-2' : 'px-4'} py-6`}>
             {menuItems.map((item) => (
               <button
                 key={item.path}
@@ -256,27 +295,30 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   navigate(item.path);
                   setMobileOpen(false);
                 }}
-                className={`w-full flex items-center px-4 py-3 text-left rounded-lg transition-all duration-200 mb-1 group ${
+                className={`w-full flex items-center ${sidebarCollapsed ? 'justify-center px-2' : 'px-4'} py-3 text-left rounded-lg transition-all duration-200 mb-1 group ${
                   location.pathname === item.path
                     ? 'bg-blue-900 dark:bg-blue-800 text-white shadow-sm'
                     : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700 hover:text-gray-900 dark:hover:text-white'
                 }`}
+                title={sidebarCollapsed ? item.text : undefined}
               >
-                <span className={`mr-3 transition-colors ${
+                <span className={`${sidebarCollapsed ? '' : 'mr-3'} transition-colors ${
                   location.pathname === item.path
                     ? 'text-white' 
                     : 'text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300'
                 }`}>
                   {item.icon}
                 </span>
-                <span className="font-medium">{item.text}</span>
+                {!sidebarCollapsed && (
+                  <span className="font-medium">{item.text}</span>
+                )}
               </button>
             ))}
           </nav>
         </aside>
 
         {/* Main content */}
-        <main className="flex-1 md:ml-72">
+        <main className={`flex-1 transition-all duration-300 ${sidebarCollapsed ? 'md:ml-16' : 'md:ml-72'}`}>
           <div className="px-2 py-8 md:px-4 lg:px-8">
             {/* Show resend verification if user is logged in but not verified */}
             {user && user.emailVerified === false && (

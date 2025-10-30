@@ -34,6 +34,8 @@ import {
   Activity,
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
+  ChevronUp,
   Gavel,
   Clock,
   MapPin,
@@ -91,6 +93,7 @@ const CasesPage: React.FC = () => {
   const [selectedCase, setSelectedCase] = useState<Case | null>(null);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [showViewDialog, setShowViewDialog] = useState(false);
+  const [isFiltersExpanded, setIsFiltersExpanded] = useState(false);
 
   const limit = 10;
 
@@ -335,85 +338,97 @@ const CasesPage: React.FC = () => {
       <div className="max-w-7xl mx-auto px-6 py-8 space-y-8">
         {/* Filters */}
         <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-xl">
-          <CardHeader>
-            <CardTitle className="flex items-center text-gray-900">
-              <Filter className="w-5 h-5 mr-2 text-blue-600" />
-              Search & Filter Cases
+          <CardHeader 
+            className="cursor-pointer hover:bg-gray-50/50 transition-colors"
+            onClick={() => setIsFiltersExpanded(!isFiltersExpanded)}
+          >
+            <CardTitle className="flex items-center justify-between text-gray-900">
+              <div className="flex items-center">
+                <Filter className="w-5 h-5 mr-2 text-blue-600" />
+                Search & Filter Cases
+              </div>
+              {isFiltersExpanded ? (
+                <ChevronUp className="w-5 h-5 text-gray-600" />
+              ) : (
+                <ChevronDown className="w-5 h-5 text-gray-600" />
+              )}
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <div>
-                <Label htmlFor="search" className="text-sm font-medium text-gray-700 mb-2 block">
-                  Search Cases
-                </Label>
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                  <Input
-                    id="search"
-                    placeholder="Search by case number, title, or details..."
-                    value={searchTerm}
-                    onChange={(e) => handleSearch(e.target.value)}
-                    className="pl-10 border-gray-200 focus:border-blue-500 focus:ring-blue-500"
-                  />
+          {isFiltersExpanded && (
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div>
+                  <Label htmlFor="search" className="text-sm font-medium text-gray-700 mb-2 block">
+                    Search Cases
+                  </Label>
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                    <Input
+                      id="search"
+                      placeholder="Search by case number, title, or details..."
+                      value={searchTerm}
+                      onChange={(e) => handleSearch(e.target.value)}
+                      className="pl-10 border border-gray-300 bg-white text-black focus:border-blue-500 focus:ring-blue-500"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <Label className="text-sm font-medium text-gray-700 mb-2 block">
+                    Status
+                  </Label>
+                  <Select value={statusFilter} onValueChange={(value) => handleFilterChange('status', value)}>
+                    <SelectTrigger className="border border-gray-300 bg-white text-black focus:border-blue-500 focus:ring-blue-500">
+                      <SelectValue placeholder="All Status" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-white border border-gray-200 shadow-lg">
+                      <SelectItem value="all" className="text-black hover:bg-blue-600 hover:text-white focus:bg-blue-600 focus:text-white cursor-pointer">All Status</SelectItem>
+                      <SelectItem value="open" className="text-black hover:bg-blue-600 hover:text-white focus:bg-blue-600 focus:text-white cursor-pointer">Open</SelectItem>
+                      <SelectItem value="investigation" className="text-black hover:bg-blue-600 hover:text-white focus:bg-blue-600 focus:text-white cursor-pointer">Investigation</SelectItem>
+                      <SelectItem value="trial" className="text-black hover:bg-blue-600 hover:text-white focus:bg-blue-600 focus:text-white cursor-pointer">Trial</SelectItem>
+                      <SelectItem value="closed" className="text-black hover:bg-blue-600 hover:text-white focus:bg-blue-600 focus:text-white cursor-pointer">Closed</SelectItem>
+                      <SelectItem value="dismissed" className="text-black hover:bg-blue-600 hover:text-white focus:bg-blue-600 focus:text-white cursor-pointer">Dismissed</SelectItem>
+                      <SelectItem value="settled" className="text-black hover:bg-blue-600 hover:text-white focus:bg-blue-600 focus:text-white cursor-pointer">Settled</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label className="text-sm font-medium text-gray-700 mb-2 block">
+                    Case Type
+                  </Label>
+                  <Select value={caseTypeFilter} onValueChange={(value) => handleFilterChange('caseType', value)}>
+                    <SelectTrigger className="border border-gray-300 bg-white text-black focus:border-blue-500 focus:ring-blue-500">
+                      <SelectValue placeholder="All Types" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-white border border-gray-200 shadow-lg">
+                      <SelectItem value="all" className="text-black hover:bg-blue-600 hover:text-white focus:bg-blue-600 focus:text-white cursor-pointer">All Types</SelectItem>
+                      <SelectItem value="criminal" className="text-black hover:bg-blue-600 hover:text-white focus:bg-blue-600 focus:text-white cursor-pointer">Criminal</SelectItem>
+                      <SelectItem value="civil" className="text-black hover:bg-blue-600 hover:text-white focus:bg-blue-600 focus:text-white cursor-pointer">Civil</SelectItem>
+                      <SelectItem value="administrative" className="text-black hover:bg-blue-600 hover:text-white focus:bg-blue-600 focus:text-white cursor-pointer">Administrative</SelectItem>
+                      <SelectItem value="family" className="text-black hover:bg-blue-600 hover:text-white focus:bg-blue-600 focus:text-white cursor-pointer">Family</SelectItem>
+                      <SelectItem value="commercial" className="text-black hover:bg-blue-600 hover:text-white focus:bg-blue-600 focus:text-white cursor-pointer">Commercial</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label className="text-sm font-medium text-gray-700 mb-2 block">
+                    Priority
+                  </Label>
+                  <Select value={priorityFilter} onValueChange={(value) => handleFilterChange('priority', value)}>
+                    <SelectTrigger className="border border-gray-300 bg-white text-black focus:border-blue-500 focus:ring-blue-500">
+                      <SelectValue placeholder="All Priorities" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-white border border-gray-200 shadow-lg">
+                      <SelectItem value="all" className="text-black hover:bg-blue-600 hover:text-white focus:bg-blue-600 focus:text-white cursor-pointer">All Priorities</SelectItem>
+                      <SelectItem value="low" className="text-black hover:bg-blue-600 hover:text-white focus:bg-blue-600 focus:text-white cursor-pointer">Low</SelectItem>
+                      <SelectItem value="medium" className="text-black hover:bg-blue-600 hover:text-white focus:bg-blue-600 focus:text-white cursor-pointer">Medium</SelectItem>
+                      <SelectItem value="high" className="text-black hover:bg-blue-600 hover:text-white focus:bg-blue-600 focus:text-white cursor-pointer">High</SelectItem>
+                      <SelectItem value="urgent" className="text-black hover:bg-blue-600 hover:text-white focus:bg-blue-600 focus:text-white cursor-pointer">Urgent</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
-              <div>
-                <Label className="text-sm font-medium text-gray-700 mb-2 block">
-                  Status
-                </Label>
-                <Select value={statusFilter} onValueChange={(value) => handleFilterChange('status', value)}>
-                  <SelectTrigger className="border-gray-200 focus:border-blue-500 focus:ring-blue-500">
-                    <SelectValue placeholder="All Status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Status</SelectItem>
-                    <SelectItem value="open">Open</SelectItem>
-                    <SelectItem value="investigation">Investigation</SelectItem>
-                    <SelectItem value="trial">Trial</SelectItem>
-                    <SelectItem value="closed">Closed</SelectItem>
-                    <SelectItem value="dismissed">Dismissed</SelectItem>
-                    <SelectItem value="settled">Settled</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label className="text-sm font-medium text-gray-700 mb-2 block">
-                  Case Type
-                </Label>
-                <Select value={caseTypeFilter} onValueChange={(value) => handleFilterChange('caseType', value)}>
-                  <SelectTrigger className="border-gray-200 focus:border-blue-500 focus:ring-blue-500">
-                    <SelectValue placeholder="All Types" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Types</SelectItem>
-                    <SelectItem value="criminal">Criminal</SelectItem>
-                    <SelectItem value="civil">Civil</SelectItem>
-                    <SelectItem value="administrative">Administrative</SelectItem>
-                    <SelectItem value="family">Family</SelectItem>
-                    <SelectItem value="commercial">Commercial</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label className="text-sm font-medium text-gray-700 mb-2 block">
-                  Priority
-                </Label>
-                <Select value={priorityFilter} onValueChange={(value) => handleFilterChange('priority', value)}>
-                  <SelectTrigger className="border-gray-200 focus:border-blue-500 focus:ring-blue-500">
-                    <SelectValue placeholder="All Priorities" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Priorities</SelectItem>
-                    <SelectItem value="low">Low</SelectItem>
-                    <SelectItem value="medium">Medium</SelectItem>
-                    <SelectItem value="high">High</SelectItem>
-                    <SelectItem value="urgent">Urgent</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          </CardContent>
+            </CardContent>
+          )}
         </Card>
 
         {/* Cases Table */}
@@ -487,12 +502,18 @@ const CasesPage: React.FC = () => {
                                 <MoreVertical className="w-4 h-4" />
                               </Button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="w-48">
-                              <DropdownMenuItem onClick={() => handleEditCase(caseItem)}>
+                            <DropdownMenuContent align="end" className="w-48 bg-white border border-gray-200 shadow-lg">
+                              <DropdownMenuItem 
+                                onClick={() => handleEditCase(caseItem)}
+                                className="text-black hover:bg-blue-600 hover:text-white focus:bg-blue-600 focus:text-white cursor-pointer"
+                              >
                                 <Edit className="w-4 h-4 mr-2" />
                                 Edit Case
                               </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => handleToggleStatus(caseItem)}>
+                              <DropdownMenuItem 
+                                onClick={() => handleToggleStatus(caseItem)}
+                                className="text-black hover:bg-blue-600 hover:text-white focus:bg-blue-600 focus:text-white cursor-pointer"
+                              >
                                 {caseItem.isActive ? (
                                   <>
                                     <ToggleLeft className="w-4 h-4 mr-2" />
@@ -505,10 +526,10 @@ const CasesPage: React.FC = () => {
                                   </>
                                 )}
                               </DropdownMenuItem>
-                              <DropdownMenuSeparator />
+                              <DropdownMenuSeparator className="bg-gray-200" />
                               <DropdownMenuItem 
                                 onClick={() => handleDeleteCase(caseItem)}
-                                className="text-red-600 focus:text-red-600"
+                                className="text-red-600 hover:bg-blue-600 hover:text-white focus:bg-blue-600 focus:text-white cursor-pointer"
                               >
                                 <Trash2 className="w-4 h-4 mr-2" />
                                 Delete Case

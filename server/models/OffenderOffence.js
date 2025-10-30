@@ -1,0 +1,411 @@
+const mongoose = require('mongoose');
+
+const offenderOffenceSchema = new mongoose.Schema({
+  // Crime Information
+  crimeInfo: {
+    crimeId: {
+      type: String,
+      unique: true,
+      required: true
+    },
+    caseNumber: {
+      type: String,
+      required: true,
+      trim: true,
+      index: true
+    },
+    title: {
+      type: String,
+      required: true,
+      trim: true
+    },
+    description: {
+      type: String,
+      required: true,
+      trim: true
+    },
+    category: {
+      type: String,
+      required: true,
+      trim: true
+    },
+    subcategory: {
+      type: String,
+      trim: true
+    }
+  },
+
+  // Date and Time Information
+  dateTime: {
+    dateCommitted: {
+      type: Date,
+      required: true,
+      index: true
+    },
+    timeCommitted: {
+      type: String, // HH:MM format
+      trim: true
+    },
+    dateReported: {
+      type: Date,
+      required: true
+    },
+    dateArrested: {
+      type: Date
+    },
+    dateCharged: {
+      type: Date
+    },
+    dateConvicted: {
+      type: Date
+    },
+    dateSentenced: {
+      type: Date
+    }
+  },
+
+  // Location Information
+  location: {
+    street: {
+      type: String,
+      trim: true
+    },
+    city: {
+      type: String,
+      required: true,
+      trim: true
+    },
+    state: {
+      type: String,
+      required: true,
+      trim: true
+    },
+    country: {
+      type: String,
+      required: true,
+      trim: true
+    },
+    postalCode: {
+      type: String,
+      trim: true
+    },
+    coordinates: {
+      latitude: Number,
+      longitude: Number
+    },
+    locationType: {
+      type: String,
+      enum: ['residential', 'commercial', 'public', 'private', 'vehicle', 'online', 'other'],
+      default: 'other'
+    },
+    specificLocation: {
+      type: String,
+      trim: true // e.g., "Main Street Mall, 2nd Floor"
+    }
+  },
+
+  // Relationships
+  offender: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Offender',
+    required: true,
+    index: true
+  },
+
+  offenceCatalogue: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'OffenceCatalogue',
+    required: true,
+    index: true
+  },
+
+  victims: [{
+    victim: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Victim',
+      required: true
+    },
+    relationshipToOffender: {
+      type: String,
+      enum: ['stranger', 'acquaintance', 'family', 'friend', 'colleague', 'neighbor', 'romantic', 'other'],
+      default: 'stranger'
+    },
+    victimImpact: {
+      physicalInjury: {
+        type: Boolean,
+        default: false
+      },
+      psychologicalImpact: {
+        type: String,
+        enum: ['none', 'mild', 'moderate', 'severe'],
+        default: 'none'
+      },
+      financialLoss: {
+        type: Number,
+        default: 0
+      }
+    }
+  }],
+
+  // Legal Information
+  legal: {
+    status: {
+      type: String,
+      enum: ['reported', 'under_investigation', 'charged', 'trial', 'convicted', 'acquitted', 'dismissed', 'plea_bargain'],
+      default: 'reported',
+      required: true
+    },
+    severity: {
+      type: String,
+      enum: ['minor', 'moderate', 'serious', 'major', 'felony'],
+      required: true
+    },
+    charges: [{
+      charge: {
+        type: String,
+        required: true,
+        trim: true
+      },
+      statute: {
+        type: String,
+        trim: true
+      },
+      penalty: {
+        type: String,
+        trim: true
+      }
+    }],
+    court: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Court'
+    },
+    judge: {
+      name: String,
+      id: String
+    },
+    prosecutor: {
+      name: String,
+      id: String
+    },
+    defenseAttorney: {
+      name: String,
+      id: String
+    },
+    verdict: {
+      type: String,
+      enum: ['guilty', 'not_guilty', 'no_contest', 'dismissed', 'pending']
+    },
+    sentence: {
+      type: {
+        type: String,
+        enum: ['prison', 'probation', 'fine', 'community_service', 'suspended', 'dismissed', 'other']
+      },
+      duration: String, // e.g., "5 years", "6 months"
+      fine: Number,
+      conditions: [String]
+    }
+  },
+
+  // Investigation Details
+  investigation: {
+    assignedOfficer: {
+      type: String,
+      trim: true
+    },
+    assignedDetective: {
+      type: String,
+      trim: true
+    },
+    evidence: [{
+      type: {
+        type: String,
+        enum: ['physical', 'digital', 'witness', 'documentary', 'forensic', 'other']
+      },
+      description: String,
+      collectedDate: Date,
+      location: String,
+      status: {
+        type: String,
+        enum: ['collected', 'analyzed', 'presented', 'dismissed']
+      }
+    }],
+    witnesses: [{
+      name: String,
+      contactInfo: String,
+      statement: String,
+      credibility: {
+        type: String,
+        enum: ['high', 'medium', 'low']
+      }
+    }],
+    suspects: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Offender'
+    }],
+    motive: {
+      type: String,
+      trim: true
+    },
+    method: {
+      type: String,
+      trim: true
+    }
+  },
+
+  // Financial Impact
+  financialImpact: {
+    propertyDamage: {
+      type: Number,
+      default: 0
+    },
+    stolenValue: {
+      type: Number,
+      default: 0
+    },
+    investigationCost: {
+      type: Number,
+      default: 0
+    },
+    courtCosts: {
+      type: Number,
+      default: 0
+    },
+    victimCompensation: {
+      type: Number,
+      default: 0
+    }
+  },
+
+  // Media and Public Information
+  media: {
+    isPublic: {
+      type: Boolean,
+      default: false
+    },
+    mediaCoverage: {
+      type: String,
+      enum: ['none', 'local', 'national', 'international']
+    },
+    pressReleases: [{
+      date: Date,
+      content: String,
+      issuedBy: String
+    }]
+  },
+
+  // Risk Assessment
+  riskAssessment: {
+    threatLevel: {
+      type: String,
+      enum: ['low', 'medium', 'high', 'critical']
+    },
+    recidivismRisk: {
+      type: String,
+      enum: ['low', 'medium', 'high']
+    },
+    publicSafetyRisk: {
+      type: String,
+      enum: ['low', 'medium', 'high', 'critical']
+    }
+  },
+
+  // Notes and Additional Information
+  notes: {
+    type: String,
+    trim: true
+  },
+
+  tags: [{
+    type: String,
+    trim: true
+  }],
+
+  // Status
+  isActive: {
+    type: Boolean,
+    default: true
+  },
+
+  // Metadata
+  organisationId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Organisation',
+    required: true,
+    index: true
+  },
+
+  createdBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
+  },
+
+  lastModifiedBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  },
+
+  metadata: {
+    createdAt: {
+      type: Date,
+      default: Date.now
+    },
+    updatedAt: {
+      type: Date,
+      default: Date.now
+    },
+    version: {
+      type: Number,
+      default: 1
+    }
+  }
+}, {
+  timestamps: true
+});
+
+// Indexes
+offenderOffenceSchema.index({ 'crimeInfo.caseNumber': 1 });
+offenderOffenceSchema.index({ 'dateTime.dateCommitted': -1 });
+offenderOffenceSchema.index({ offender: 1, 'dateTime.dateCommitted': -1 });
+offenderOffenceSchema.index({ offenceCatalogue: 1 });
+offenderOffenceSchema.index({ 'legal.status': 1 });
+offenderOffenceSchema.index({ 'legal.severity': 1 });
+offenderOffenceSchema.index({ 'location.city': 1, 'location.state': 1 });
+offenderOffenceSchema.index({ 'victims.victim': 1 });
+offenderOffenceSchema.index({ organisationId: 1 });
+offenderOffenceSchema.index({ isActive: 1 });
+
+// Pre-save middleware
+offenderOffenceSchema.pre('save', function(next) {
+  this.metadata.updatedAt = new Date();
+  this.metadata.version += 1;
+  next();
+});
+
+// Generate crime ID
+offenderOffenceSchema.pre('save', async function(next) {
+  if (!this.crimeInfo.crimeId) {
+    const count = await this.constructor.countDocuments();
+    this.crimeInfo.crimeId = `CRIME-${String(count + 1).padStart(6, '0')}`;
+  }
+  next();
+});
+
+// Virtual for full case reference
+offenderOffenceSchema.virtual('caseReference').get(function() {
+  return `${this.crimeInfo.caseNumber} - ${this.crimeInfo.title}`;
+});
+
+// Virtual for age at time of crime
+offenderOffenceSchema.virtual('offenderAgeAtCrime').get(function() {
+  if (this.offender && this.offender.personalInfo && this.offender.personalInfo.dateOfBirth) {
+    const birthDate = new Date(this.offender.personalInfo.dateOfBirth);
+    const crimeDate = new Date(this.dateTime.dateCommitted);
+    const age = crimeDate.getFullYear() - birthDate.getFullYear();
+    const monthDiff = crimeDate.getMonth() - birthDate.getMonth();
+    return monthDiff < 0 ? age - 1 : age;
+  }
+  return null;
+});
+
+module.exports = mongoose.model('OffenderOffence', offenderOffenceSchema);

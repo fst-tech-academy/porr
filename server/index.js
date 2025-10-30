@@ -29,9 +29,11 @@ const uploadRoutes = require("./routes/upload");
 const settingsRoutes = require("./routes/settings");
 const organisationRoutes = require("./routes/organisations");
 const offenderRoutes = require("./routes/offenders");
-const offenceRoutes = require("./routes/offences");
+const offenceCatalogueRoutes = require("./routes/offenceCatalogues");
 const caseRoutes = require("./routes/cases");
 const courtRoutes = require("./routes/courts");
+const victimRoutes = require("./routes/victims");
+const offenderOffenceRoutes = require("./routes/offenderOffences");
 const settingsManager = require("./utils/settingsManager");
 const { auditMiddleware } = require("./middleware/audit");
 
@@ -130,9 +132,11 @@ app.use("/api/upload", uploadRoutes);
 app.use("/api/settings", settingsRoutes);
 app.use("/api/organisations", organisationRoutes);
 app.use("/api/offenders", offenderRoutes);
-app.use("/api/offences", offenceRoutes);
+app.use("/api/offence-catalogues", offenceCatalogueRoutes);
 app.use("/api/cases", caseRoutes);
 app.use("/api/courts", courtRoutes);
+app.use("/api/victims", victimRoutes);
+app.use("/api/crimes", offenderOffenceRoutes);
 
 // Health check endpoint
 app.get("/api/health", (req, res) => {

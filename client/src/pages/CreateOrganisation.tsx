@@ -13,6 +13,7 @@ import Stepper from '../components/ui/stepper';
 import { Building2, User, Settings, CheckCircle, ArrowLeft, ArrowRight, X, Eye, EyeOff } from 'lucide-react';
 import { OrganisationFormData } from '../types';
 import apiService from '../services/api';
+import { getErrorMessage } from '../utils/errorHandler';
 
 const organisationSchema = yup.object({
   name: yup.string().required('Organisation name is required'),
@@ -159,7 +160,7 @@ const CreateOrganisation: React.FC = () => {
         setError(response.message || 'Failed to create organisation');
       }
     } catch (err: any) {
-      setError(err.message || 'Failed to create organisation');
+      setError(getErrorMessage(err));
     } finally {
       setIsLoading(false);
     }

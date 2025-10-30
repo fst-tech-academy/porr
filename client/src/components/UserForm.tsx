@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import ImageUpload from './ImageUpload';
 import { useAuth } from '../contexts/AuthContext';
+import { getErrorMessage } from '../utils/errorHandler';
 
 // Role hierarchy (higher number = higher privilege)
 const ROLE_HIERARCHY = {
@@ -225,20 +226,7 @@ const UserForm: React.FC<UserFormProps> = ({
       handleClose();
     } catch (err: any) {
       console.error('UserForm error:', err);
-      
-      // Handle validation errors with specific field messages
-      if (err.response?.status === 400 && err.response?.data?.errors) {
-        // Display the first validation error message
-        const firstError = err.response.data.errors[0];
-        setError(firstError.msg || firstError.message || 'Validation failed');
-      } else if (err.response?.status === 400 && err.response?.data?.message) {
-        // Handle specific backend error messages (like duplicate username/email)
-        setError(err.response.data.message);
-      } else if (err.response?.data?.message) {
-        setError(err.response.data.message);
-      } else {
-        setError(err.message || 'An error occurred');
-      }
+      setError(getErrorMessage(err));
     }
   };
 

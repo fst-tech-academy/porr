@@ -85,7 +85,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
     };
   }, [localPreview]);
 
-  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
     event.preventDefault(); // Prevent form submission
     event.stopPropagation(); // Stop event bubbling
     
@@ -108,8 +108,24 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
     console.log('Preview URL created:', previewUrl);
     setLocalPreview(previewUrl);
 
-    // Pass the file to parent component for later upload
-    if (onFileSelected) {
+    // If onImageUploaded is provided, upload the file immediately
+    if (onImageUploaded) {
+      setUploading(true);
+      try {
+        const response = await uploadService.uploadSingleImage(file);
+        const imageUrl = response.data.imageUrl;
+        console.log('Image uploaded successfully:', imageUrl);
+        onImageUploaded(imageUrl);
+        setUploadedImages(prev => [...prev, imageUrl]);
+      } catch (err) {
+        console.error('Upload failed:', err);
+        setError('Failed to upload image');
+        setLocalPreview('');
+      } finally {
+        setUploading(false);
+      }
+    } else if (onFileSelected) {
+      // Pass the file to parent component for later upload
       onFileSelected(file);
     }
 

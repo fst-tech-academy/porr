@@ -84,7 +84,8 @@ router.get('/:id', protect, authorize('admin', 'manager', 'officer', 'super_admi
     }
 
     // Check if user has access to this case
-    if (caseDoc.organisationId.toString() !== req.user.organisationId.toString()) {
+    const userOrgId = req.user.organisationId._id || req.user.organisationId;
+    if (caseDoc.organisationId.toString() !== userOrgId.toString()) {
       return res.status(403).json({
         success: false,
         message: 'Access denied'
@@ -210,7 +211,8 @@ router.put('/:id', protect, authorize('admin', 'manager', 'officer', 'super_admi
     }
 
     // Check if user has access to this case
-    if (caseDoc.organisationId.toString() !== req.user.organisationId.toString()) {
+    const userOrgId = req.user.organisationId._id || req.user.organisationId;
+    if (caseDoc.organisationId.toString() !== userOrgId.toString()) {
       return res.status(403).json({
         success: false,
         message: 'Access denied'
@@ -259,7 +261,8 @@ router.patch('/:id/status', protect, authorize('admin', 'manager', 'officer', 's
     }
 
     // Check if user has access to this case
-    if (caseDoc.organisationId.toString() !== req.user.organisationId.toString()) {
+    const userOrgId = req.user.organisationId._id || req.user.organisationId;
+    if (caseDoc.organisationId.toString() !== userOrgId.toString()) {
       return res.status(403).json({
         success: false,
         message: 'Access denied'
@@ -323,7 +326,8 @@ router.patch('/:id/assign', protect, authorize(['admin', 'manager']), [
     }
 
     // Check if user has access to this case
-    if (caseDoc.organisationId.toString() !== req.user.organisationId.toString()) {
+    const userOrgId = req.user.organisationId._id || req.user.organisationId;
+    if (caseDoc.organisationId.toString() !== userOrgId.toString()) {
       return res.status(403).json({
         success: false,
         message: 'Access denied'
@@ -382,7 +386,8 @@ router.post('/:id/timeline', protect, authorize('admin', 'manager', 'officer', '
     }
 
     // Check if user has access to this case
-    if (caseDoc.organisationId.toString() !== req.user.organisationId.toString()) {
+    const userOrgId = req.user.organisationId._id || req.user.organisationId;
+    if (caseDoc.organisationId.toString() !== userOrgId.toString()) {
       return res.status(403).json({
         success: false,
         message: 'Access denied'
@@ -435,7 +440,8 @@ router.delete('/:id', protect, authorize(['admin']), [
     }
 
     // Check if user has access to this case
-    if (caseDoc.organisationId.toString() !== req.user.organisationId.toString()) {
+    const userOrgId = req.user.organisationId._id || req.user.organisationId;
+    if (caseDoc.organisationId.toString() !== userOrgId.toString()) {
       return res.status(403).json({
         success: false,
         message: 'Access denied'

@@ -9,6 +9,7 @@ import RoleBasedRoute from './components/RoleBasedRoute';
 import FeatureBasedRoute from './components/FeatureBasedRoute';
 import RoleBasedRedirect from './components/RoleBasedRedirect';
 import Layout from './components/Layout';
+import { useAuth } from './contexts/AuthContext';
 import Login from './pages/Login';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
@@ -24,16 +25,31 @@ import Organisations from './pages/Organisations';
 import CreateOrganisation from './pages/CreateOrganisation';
 import OrganisationProfile from './pages/OrganisationProfile';
 import Offenders from './pages/Offenders';
+import OffenderView from './pages/OffenderView';
 import CreateOffender from './pages/CreateOffender';
+import EditOffender from './pages/EditOffender';
 import Cases from './pages/Cases';
+import CreateCase from './pages/CreateCase';
 import Offences from './pages/Offences';
+import CreateOffence from './pages/CreateOffence';
 import Courts from './pages/Courts';
+import CreateCourt from './pages/CreateCourt';
+import Victims from './pages/Victims';
+import Crimes from './pages/Crimes';
+import CreateCrime from './pages/CreateCrime';
+import CreateVictim from './pages/CreateVictim';
 import NotFound from './pages/NotFound';
 import NotFoundTest from './pages/NotFoundTest';
 import NotFoundSimple from './pages/NotFoundSimple';
 import ErrorBoundary from './components/ErrorBoundary';
 
 function App() {
+  const UsersRedirect: React.FC = () => {
+    const { user } = useAuth();
+    const orgId = user?.organisationId;
+    if (!orgId) return <Navigate to="/organisations" replace />;
+    return <Navigate to={`/organisations/${orgId}?tab=users`} replace />;
+  };
   return (
     <ThemeProvider>
       <LanguageProvider>
@@ -68,7 +84,7 @@ function App() {
                                 <Route path="/users" element={
                                   <RoleBasedRoute allowedRoles={['admin', 'manager']}>
                                     <FeatureBasedRoute feature="userManagement">
-                                      <Users />
+                                      <UsersRedirect />
                                     </FeatureBasedRoute>
                                   </RoleBasedRoute>
                                 } />
@@ -105,6 +121,16 @@ function App() {
                                 <Route path="/offenders/new" element={
                                   <RoleBasedRoute allowedRoles={['admin', 'manager', 'officer', 'super_admin']}>
                                     <CreateOffender />
+                                  </RoleBasedRoute>
+                                } />
+                                <Route path="/offenders/:id" element={
+                                  <RoleBasedRoute allowedRoles={['admin', 'manager', 'officer', 'super_admin']}>
+                                    <OffenderView />
+                                  </RoleBasedRoute>
+                                } />
+                                <Route path="/offenders/:id/edit" element={
+                                  <RoleBasedRoute allowedRoles={['admin', 'manager', 'officer', 'super_admin']}>
+                                    <EditOffender />
                                   </RoleBasedRoute>
                                 } />
                                 <Route path="/cases" element={
@@ -184,10 +210,31 @@ function App() {
                             </Layout>
                           </RoleBasedRoute>
                         } />
+                        <Route path="/offenders/:id" element={
+                          <RoleBasedRoute allowedRoles={['admin', 'manager', 'officer', 'super_admin']}>
+                            <Layout>
+                              <OffenderView />
+                            </Layout>
+                          </RoleBasedRoute>
+                        } />
+                        <Route path="/offenders/:id/edit" element={
+                          <RoleBasedRoute allowedRoles={['admin', 'manager', 'officer', 'super_admin']}>
+                            <Layout>
+                              <EditOffender />
+                            </Layout>
+                          </RoleBasedRoute>
+                        } />
                         <Route path="/cases" element={
                           <RoleBasedRoute allowedRoles={['admin', 'manager', 'officer', 'super_admin']}>
                             <Layout>
                               <Cases />
+                            </Layout>
+                          </RoleBasedRoute>
+                        } />
+                        <Route path="/cases/new" element={
+                          <RoleBasedRoute allowedRoles={['admin', 'manager', 'officer', 'super_admin']}>
+                            <Layout>
+                              <CreateCase />
                             </Layout>
                           </RoleBasedRoute>
                         } />
@@ -198,10 +245,52 @@ function App() {
                             </Layout>
                           </RoleBasedRoute>
                         } />
+                        <Route path="/offences/new" element={
+                          <RoleBasedRoute allowedRoles={['admin', 'manager', 'officer', 'super_admin']}>
+                            <Layout>
+                              <CreateOffence />
+                            </Layout>
+                          </RoleBasedRoute>
+                        } />
                         <Route path="/courts" element={
                           <RoleBasedRoute allowedRoles={['admin', 'manager', 'officer', 'super_admin']}>
                             <Layout>
                               <Courts />
+                            </Layout>
+                          </RoleBasedRoute>
+                        } />
+                        <Route path="/courts/new" element={
+                          <RoleBasedRoute allowedRoles={['admin', 'manager', 'officer', 'super_admin']}>
+                            <Layout>
+                              <CreateCourt />
+                            </Layout>
+                          </RoleBasedRoute>
+                        } />
+                        <Route path="/victims" element={
+                          <RoleBasedRoute allowedRoles={['admin', 'manager', 'officer', 'super_admin']}>
+                            <Layout>
+                              <Victims />
+                            </Layout>
+                          </RoleBasedRoute>
+                        } />
+                        <Route path="/crimes" element={
+                          <RoleBasedRoute allowedRoles={['admin', 'manager', 'officer', 'super_admin']}>
+                            <Layout>
+                              <Crimes />
+                            </Layout>
+                          </RoleBasedRoute>
+                        } />
+                        <Route path="/crimes/new" element={
+                          <RoleBasedRoute allowedRoles={['admin', 'manager', 'officer', 'super_admin']}>
+                            <Layout>
+                              <CreateCrime />
+                            </Layout>
+                          </RoleBasedRoute>
+                        } />
+                        <Route path="/victims/new" element={
+                          <RoleBasedRoute allowedRoles={['admin', 'manager', 'officer', 'super_admin']}>
+                            <Layout>
+                              <CreateVictim />
                             </Layout>
                           </RoleBasedRoute>
                         } />
@@ -230,7 +319,7 @@ function App() {
                           <RoleBasedRoute allowedRoles={['admin', 'manager']}>
                             <Layout>
                               <FeatureBasedRoute feature="userManagement">
-                                <Users />
+                                <UsersRedirect />
                               </FeatureBasedRoute>
                             </Layout>
                           </RoleBasedRoute>

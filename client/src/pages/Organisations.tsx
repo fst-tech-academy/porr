@@ -37,7 +37,9 @@ import {
   BarChart3,
   Activity,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
@@ -114,6 +116,7 @@ const Organisations: React.FC = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [totalOrganisations, setTotalOrganisations] = useState(0);
   const [limit] = useState(10);
+  const [isFiltersExpanded, setIsFiltersExpanded] = useState(false);
 
   const form = useForm<OrganisationFormData>({
     resolver: yupResolver(organisationSchema),
@@ -390,51 +393,69 @@ const Organisations: React.FC = () => {
 
         {/* Search and Filter Bar */}
         <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-xl mb-8">
-          <CardContent className="p-6">
-            <div className="flex flex-col lg:flex-row gap-4">
-              <div className="flex-1 relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                <Input
-                  placeholder="Search organisations..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 h-12 border-0 bg-gray-50/50 focus:bg-white focus:ring-2 focus:ring-blue-500 rounded-xl"
-                />
+          <CardHeader 
+            className="cursor-pointer hover:bg-gray-50/50 transition-colors"
+            onClick={() => setIsFiltersExpanded(!isFiltersExpanded)}
+          >
+            <CardTitle className="flex items-center justify-between text-gray-900">
+              <div className="flex items-center">
+                <Filter className="w-5 h-5 mr-2 text-blue-600" />
+                Search & Filter Organisations
               </div>
-              <div className="flex gap-3">
-                <Select value={statusFilter} onValueChange={setStatusFilter}>
-                  <SelectTrigger className="w-40 h-12 border-0 bg-gray-50/50 focus:bg-white focus:ring-2 focus:ring-blue-500 rounded-xl">
-                    <SelectValue placeholder="Status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Status</SelectItem>
-                    <SelectItem value="active">Active</SelectItem>
-                    <SelectItem value="inactive">Inactive</SelectItem>
-                  </SelectContent>
-                </Select>
-                <Select value={planFilter} onValueChange={setPlanFilter}>
-                  <SelectTrigger className="w-40 h-12 border-0 bg-gray-50/50 focus:bg-white focus:ring-2 focus:ring-blue-500 rounded-xl">
-                    <SelectValue placeholder="Plan" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Plans</SelectItem>
-                    <SelectItem value="free">Free</SelectItem>
-                    <SelectItem value="basic">Basic</SelectItem>
-                    <SelectItem value="premium">Premium</SelectItem>
-                    <SelectItem value="enterprise">Enterprise</SelectItem>
-                  </SelectContent>
-                </Select>
-                <Button
-                  onClick={() => fetchOrganisations()}
-                  variant="outline"
-                  className="h-12 px-6 border-0 bg-gray-50/50 hover:bg-gray-100 rounded-xl"
-                >
-                  <RefreshCw className="w-4 h-4 mr-2" />
-                  Refresh
-                </Button>
+              {isFiltersExpanded ? (
+                <ChevronUp className="w-5 h-5 text-gray-600" />
+              ) : (
+                <ChevronDown className="w-5 h-5 text-gray-600" />
+              )}
+            </CardTitle>
+          </CardHeader>
+          {isFiltersExpanded && (
+            <CardContent className="p-6">
+              <div className="flex flex-col lg:flex-row gap-4">
+                <div className="flex-1 relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                  <Input
+                    placeholder="Search organisations..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10 h-12 border border-gray-300 bg-white text-black focus:border-blue-500 focus:ring-blue-500 rounded-xl"
+                  />
+                </div>
+                <div className="flex gap-3">
+                  <Select value={statusFilter} onValueChange={setStatusFilter}>
+                    <SelectTrigger className="w-40 h-12 border border-gray-300 bg-white text-black focus:border-blue-500 focus:ring-blue-500 rounded-xl">
+                      <SelectValue placeholder="Status" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-white border border-gray-200 shadow-lg">
+                      <SelectItem value="all" className="text-black hover:bg-blue-600 hover:text-white focus:bg-blue-600 focus:text-white cursor-pointer">All Status</SelectItem>
+                      <SelectItem value="active" className="text-black hover:bg-blue-600 hover:text-white focus:bg-blue-600 focus:text-white cursor-pointer">Active</SelectItem>
+                      <SelectItem value="inactive" className="text-black hover:bg-blue-600 hover:text-white focus:bg-blue-600 focus:text-white cursor-pointer">Inactive</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Select value={planFilter} onValueChange={setPlanFilter}>
+                    <SelectTrigger className="w-40 h-12 border border-gray-300 bg-white text-black focus:border-blue-500 focus:ring-blue-500 rounded-xl">
+                      <SelectValue placeholder="Plan" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-white border border-gray-200 shadow-lg">
+                      <SelectItem value="all" className="text-black hover:bg-blue-600 hover:text-white focus:bg-blue-600 focus:text-white cursor-pointer">All Plans</SelectItem>
+                      <SelectItem value="free" className="text-black hover:bg-blue-600 hover:text-white focus:bg-blue-600 focus:text-white cursor-pointer">Free</SelectItem>
+                      <SelectItem value="basic" className="text-black hover:bg-blue-600 hover:text-white focus:bg-blue-600 focus:text-white cursor-pointer">Basic</SelectItem>
+                      <SelectItem value="premium" className="text-black hover:bg-blue-600 hover:text-white focus:bg-blue-600 focus:text-white cursor-pointer">Premium</SelectItem>
+                      <SelectItem value="enterprise" className="text-black hover:bg-blue-600 hover:text-white focus:bg-blue-600 focus:text-white cursor-pointer">Enterprise</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Button
+                    onClick={() => fetchOrganisations()}
+                    variant="outline"
+                    className="h-12 px-6 border border-gray-300 bg-white text-black hover:bg-gray-100 rounded-xl"
+                  >
+                    <RefreshCw className="w-4 h-4 mr-2" />
+                    Refresh
+                  </Button>
+                </div>
               </div>
-            </div>
-          </CardContent>
+            </CardContent>
+          )}
         </Card>
 
         {/* Organisations Table */}
@@ -518,12 +539,18 @@ const Organisations: React.FC = () => {
                                 <MoreVertical className="w-4 h-4" />
                               </Button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="w-48">
-                              <DropdownMenuItem onClick={() => handleEditOrganisation(organisation)}>
+                            <DropdownMenuContent align="end" className="w-48 bg-white border border-gray-200 shadow-lg">
+                              <DropdownMenuItem 
+                                onClick={() => handleEditOrganisation(organisation)}
+                                className="text-black hover:bg-blue-600 hover:text-white focus:bg-blue-600 focus:text-white cursor-pointer"
+                              >
                                 <Edit className="w-4 h-4 mr-2" />
                                 Edit Organisation
                               </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => handleToggleStatus(organisation)}>
+                              <DropdownMenuItem 
+                                onClick={() => handleToggleStatus(organisation)}
+                                className="text-black hover:bg-blue-600 hover:text-white focus:bg-blue-600 focus:text-white cursor-pointer"
+                              >
                                 {organisation.settings.isActive ? (
                                   <>
                                     <ToggleLeft className="w-4 h-4 mr-2" />
@@ -536,10 +563,10 @@ const Organisations: React.FC = () => {
                                   </>
                                 )}
                               </DropdownMenuItem>
-                              <DropdownMenuSeparator />
+                              <DropdownMenuSeparator className="bg-gray-200" />
                               <DropdownMenuItem 
                                 onClick={() => handleDeleteOrganisation(organisation)}
-                                className="text-red-600 focus:text-red-600"
+                                className="text-red-600 hover:bg-blue-600 hover:text-white focus:bg-blue-600 focus:text-white cursor-pointer"
                               >
                                 <Trash2 className="w-4 h-4 mr-2" />
                                 Delete Organisation

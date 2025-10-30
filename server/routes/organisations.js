@@ -427,4 +427,60 @@ router.get('/:id/stats', protect, authorize('super_admin'), [
   }
 });
 
+// Get users for an organisation
+router.get('/:id/users', protect, authorize('super_admin'), [
+  param('id').isMongoId().withMessage('Invalid organisation ID'),
+  query('page').optional().isInt({ min: 1 }).withMessage('Page must be a positive integer'),
+  query('limit').optional().isInt({ min: 1, max: 100 }).withMessage('Limit must be between 1 and 100'),
+  query('search').optional().trim(),
+  query('role').optional().isIn(['super_admin', 'admin', 'manager', 'officer', 'viewer']).withMessage('Invalid role'),
+  query('status').optional().isIn(['active', 'inactive']).withMessage('Invalid status')
+], async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+    const search = req.query.search || '';
+    const role = req.query.role;
+    const status = req.query.status;
+
+    const filter = { organisationId: req.params.id };
+    if (search) {
+      filter.$or = [
+        { firstName: { $regex: search, $options: 'i' } },
+        { lastName: { $regex: search, $options: 'i' } },
+        { email: { $regex: search, $options: 'i' } },
+        { username: { $regex: search, $options: 'i' } }
+      ];
+    }
+    if (role) {
+      filter.role = role;
+    }
+    if (status) {
+      filter.isActive = status === 'active';
+    }
+
+    const [users, total] = await Promise.all([
+      User.find(filter)
+        .select('firstName lastName email role isActive emailVerified lastLogin')
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .lean(),
+      User.countDocuments(filter)
+    ]);
+
+    res.json({
+      success: true,
+      data: {
+        users,
+        total,
+        pagination: { current: page, pages: Math.ceil(total / limit), total, limit }
+      }
+    });
+  } catch (error) {
+    return handleMongooseError(error, res, 'Failed to fetch organisation users');
+  }
+});
+
 module.exports = router;

@@ -34,6 +34,8 @@ import {
   Activity,
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
+  ChevronUp,
   FileText,
   Gavel,
   Clock,
@@ -70,6 +72,7 @@ import {
 } from '../components/ui/dropdown-menu';
 import { Offender, OffenderFormData } from '../types';
 import api from '../services/api';
+import SignedImage from '../components/SignedImage';
 
 const OffendersPage: React.FC = () => {
   const { t } = useLanguage();
@@ -86,9 +89,8 @@ const OffendersPage: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalOffenders, setTotalOffenders] = useState(0);
-  const [selectedOffender, setSelectedOffender] = useState<Offender | null>(null);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
-  const [showViewDialog, setShowViewDialog] = useState(false);
+  const [isFiltersExpanded, setIsFiltersExpanded] = useState(false);
 
   const limit = 10;
 
@@ -141,8 +143,7 @@ const OffendersPage: React.FC = () => {
   };
 
   const handleViewOffender = (offender: Offender) => {
-    setSelectedOffender(offender);
-    setShowViewDialog(true);
+    navigate(`/offenders/${offender._id}`);
   };
 
   const handleEditOffender = (offender: Offender) => {
@@ -152,7 +153,7 @@ const OffendersPage: React.FC = () => {
   const handleDeleteOffender = async (offender: Offender) => {
     if (window.confirm(`Are you sure you want to delete offender ${offender.personalInfo.firstName} ${offender.personalInfo.lastName}?`)) {
       try {
-        await api.delete(`/offenders/${offender._id}`);
+      await api.deleteOffender(offender._id);
         fetchOffenders();
       } catch (err: any) {
         setError(err.response?.data?.message || 'Failed to delete offender');
@@ -162,9 +163,12 @@ const OffendersPage: React.FC = () => {
 
   const handleToggleStatus = async (offender: Offender) => {
     try {
-      await api.put(`/offenders/${offender._id}`, {
+      await api.updateOffender(offender._id, {
         ...offender,
-        isActive: !offender.isActive
+        status: {
+          ...offender.status,
+          isActive: !offender.status.isActive
+        }
       });
       fetchOffenders();
     } catch (err: any) {
@@ -211,13 +215,11 @@ const OffendersPage: React.FC = () => {
     return riskLevel.charAt(0).toUpperCase() + riskLevel.slice(1);
   };
 
-  const formatCustodyStatus = (custodyStatus: string) => {
-    return custodyStatus.split('_').map(word => 
-      word.charAt(0).toUpperCase() + word.slice(1)
-    ).join(' ');
+  const formatCustodyStatus = (isInCustody: boolean) => {
+    return isInCustody ? 'In Custody' : 'Released';
   };
 
-  const getAge = (dateOfBirth: string) => {
+  const getAge = (dateOfBirth: Date | string) => {
     const today = new Date();
     const birthDate = new Date(dateOfBirth);
     let age = today.getFullYear() - birthDate.getFullYear();
@@ -326,81 +328,93 @@ const OffendersPage: React.FC = () => {
       <div className="max-w-7xl mx-auto px-6 py-8 space-y-8">
         {/* Filters */}
         <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-xl">
-          <CardHeader>
-            <CardTitle className="flex items-center text-gray-900">
-              <Filter className="w-5 h-5 mr-2 text-blue-600" />
-              Search & Filter Offenders
+          <CardHeader 
+            className="cursor-pointer hover:bg-gray-50/50 transition-colors"
+            onClick={() => setIsFiltersExpanded(!isFiltersExpanded)}
+          >
+            <CardTitle className="flex items-center justify-between text-gray-900">
+              <div className="flex items-center">
+                <Filter className="w-5 h-5 mr-2 text-blue-600" />
+                Search & Filter Offenders
+              </div>
+              {isFiltersExpanded ? (
+                <ChevronUp className="w-5 h-5 text-gray-600" />
+              ) : (
+                <ChevronDown className="w-5 h-5 text-gray-600" />
+              )}
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <div>
-                <Label htmlFor="search" className="text-sm font-medium text-gray-700 mb-2 block">
-                  Search Offenders
-                </Label>
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                  <Input
-                    id="search"
-                    placeholder="Search by name, ID, or details..."
-                    value={searchTerm}
-                    onChange={(e) => handleSearch(e.target.value)}
-                    className="pl-10 border-gray-200 focus:border-blue-500 focus:ring-blue-500"
-                  />
+          {isFiltersExpanded && (
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div>
+                  <Label htmlFor="search" className="text-sm font-medium text-gray-700 mb-2 block">
+                    Search Offenders
+                  </Label>
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                    <Input
+                      id="search"
+                      placeholder="Search by name, ID, or details..."
+                      value={searchTerm}
+                      onChange={(e) => handleSearch(e.target.value)}
+                      className="pl-10 border border-gray-300 bg-white text-black focus:border-blue-500 focus:ring-blue-500"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <Label className="text-sm font-medium text-gray-700 mb-2 block">
+                    Risk Level
+                  </Label>
+                  <Select value={riskLevelFilter} onValueChange={(value) => handleFilterChange('riskLevel', value)}>
+                    <SelectTrigger className="border border-gray-300 bg-white text-black focus:border-blue-500 focus:ring-blue-500">
+                      <SelectValue placeholder="All Risk Levels" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-white border border-gray-200 shadow-lg">
+                      <SelectItem value="all" className="text-black hover:bg-blue-600 hover:text-white focus:bg-blue-600 focus:text-white cursor-pointer">All Risk Levels</SelectItem>
+                      <SelectItem value="low" className="text-black hover:bg-blue-600 hover:text-white focus:bg-blue-600 focus:text-white cursor-pointer">Low</SelectItem>
+                      <SelectItem value="medium" className="text-black hover:bg-blue-600 hover:text-white focus:bg-blue-600 focus:text-white cursor-pointer">Medium</SelectItem>
+                      <SelectItem value="high" className="text-black hover:bg-blue-600 hover:text-white focus:bg-blue-600 focus:text-white cursor-pointer">High</SelectItem>
+                      <SelectItem value="critical" className="text-black hover:bg-blue-600 hover:text-white focus:bg-blue-600 focus:text-white cursor-pointer">Critical</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label className="text-sm font-medium text-gray-700 mb-2 block">
+                    Custody Status
+                  </Label>
+                  <Select value={custodyStatusFilter} onValueChange={(value) => handleFilterChange('custodyStatus', value)}>
+                    <SelectTrigger className="border border-gray-300 bg-white text-black focus:border-blue-500 focus:ring-blue-500">
+                      <SelectValue placeholder="All Custody Status" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-white border border-gray-200 shadow-lg">
+                      <SelectItem value="all" className="text-black hover:bg-blue-600 hover:text-white focus:bg-blue-600 focus:text-white cursor-pointer">All Custody Status</SelectItem>
+                      <SelectItem value="in_custody" className="text-black hover:bg-blue-600 hover:text-white focus:bg-blue-600 focus:text-white cursor-pointer">In Custody</SelectItem>
+                      <SelectItem value="released" className="text-black hover:bg-blue-600 hover:text-white focus:bg-blue-600 focus:text-white cursor-pointer">Released</SelectItem>
+                      <SelectItem value="probation" className="text-black hover:bg-blue-600 hover:text-white focus:bg-blue-600 focus:text-white cursor-pointer">Probation</SelectItem>
+                      <SelectItem value="parole" className="text-black hover:bg-blue-600 hover:text-white focus:bg-blue-600 focus:text-white cursor-pointer">Parole</SelectItem>
+                      <SelectItem value="community_service" className="text-black hover:bg-blue-600 hover:text-white focus:bg-blue-600 focus:text-white cursor-pointer">Community Service</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label className="text-sm font-medium text-gray-700 mb-2 block">
+                    Status
+                  </Label>
+                  <Select value={statusFilter} onValueChange={(value) => handleFilterChange('status', value)}>
+                    <SelectTrigger className="border border-gray-300 bg-white text-black focus:border-blue-500 focus:ring-blue-500">
+                      <SelectValue placeholder="All Status" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-white border border-gray-200 shadow-lg">
+                      <SelectItem value="all" className="text-black hover:bg-blue-600 hover:text-white focus:bg-blue-600 focus:text-white cursor-pointer">All Status</SelectItem>
+                      <SelectItem value="active" className="text-black hover:bg-blue-600 hover:text-white focus:bg-blue-600 focus:text-white cursor-pointer">Active</SelectItem>
+                      <SelectItem value="inactive" className="text-black hover:bg-blue-600 hover:text-white focus:bg-blue-600 focus:text-white cursor-pointer">Inactive</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
-              <div>
-                <Label className="text-sm font-medium text-gray-700 mb-2 block">
-                  Risk Level
-                </Label>
-                <Select value={riskLevelFilter} onValueChange={(value) => handleFilterChange('riskLevel', value)}>
-                  <SelectTrigger className="border-gray-200 focus:border-blue-500 focus:ring-blue-500">
-                    <SelectValue placeholder="All Risk Levels" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Risk Levels</SelectItem>
-                    <SelectItem value="low">Low</SelectItem>
-                    <SelectItem value="medium">Medium</SelectItem>
-                    <SelectItem value="high">High</SelectItem>
-                    <SelectItem value="critical">Critical</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label className="text-sm font-medium text-gray-700 mb-2 block">
-                  Custody Status
-                </Label>
-                <Select value={custodyStatusFilter} onValueChange={(value) => handleFilterChange('custodyStatus', value)}>
-                  <SelectTrigger className="border-gray-200 focus:border-blue-500 focus:ring-blue-500">
-                    <SelectValue placeholder="All Custody Status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Custody Status</SelectItem>
-                    <SelectItem value="in_custody">In Custody</SelectItem>
-                    <SelectItem value="released">Released</SelectItem>
-                    <SelectItem value="probation">Probation</SelectItem>
-                    <SelectItem value="parole">Parole</SelectItem>
-                    <SelectItem value="community_service">Community Service</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label className="text-sm font-medium text-gray-700 mb-2 block">
-                  Status
-                </Label>
-                <Select value={statusFilter} onValueChange={(value) => handleFilterChange('status', value)}>
-                  <SelectTrigger className="border-gray-200 focus:border-blue-500 focus:ring-blue-500">
-                    <SelectValue placeholder="All Status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Status</SelectItem>
-                    <SelectItem value="active">Active</SelectItem>
-                    <SelectItem value="inactive">Inactive</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          </CardContent>
+            </CardContent>
+          )}
         </Card>
 
         {/* Offenders Table */}
@@ -424,9 +438,18 @@ const OffendersPage: React.FC = () => {
                     <TableRow key={offender._id} className="hover:bg-gray-50">
                       <TableCell>
                         <div className="flex items-center space-x-3">
-                          <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center">
-                            <User className="w-5 h-5 text-white" />
-                          </div>
+                          {offender.profilePhoto ? (
+                            <SignedImage
+                              src={offender.profilePhoto}
+                              alt={`${offender.personalInfo.firstName} ${offender.personalInfo.lastName}`}
+                              className="w-10 h-10 rounded-full object-cover border-2 border-gray-200"
+                              fallback=""
+                            />
+                          ) : (
+                            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center">
+                              <User className="w-5 h-5 text-white" />
+                            </div>
+                          )}
                           <div>
                             <p className="font-semibold text-gray-900">
                               {offender.personalInfo.firstName} {offender.personalInfo.lastName}
@@ -443,12 +466,12 @@ const OffendersPage: React.FC = () => {
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        <Badge className={getCustodyStatusColor(offender.custodyStatus)}>
-                          {formatCustodyStatus(offender.custodyStatus)}
+                        <Badge className={getCustodyStatusColor(offender.status.isInCustody ? 'in_custody' : 'released')}>
+                          {formatCustodyStatus(offender.status.isInCustody)}
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        {getStatusBadge(offender.isActive)}
+                        {getStatusBadge(offender.status.isActive)}
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center space-x-2">
@@ -483,13 +506,19 @@ const OffendersPage: React.FC = () => {
                                 <MoreVertical className="w-4 h-4" />
                               </Button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="w-48">
-                              <DropdownMenuItem onClick={() => handleEditOffender(offender)}>
+                            <DropdownMenuContent align="end" className="w-48 bg-white border border-gray-200 shadow-lg">
+                              <DropdownMenuItem 
+                                onClick={() => handleEditOffender(offender)}
+                                className="text-black hover:bg-blue-600 hover:text-white focus:bg-blue-600 focus:text-white cursor-pointer"
+                              >
                                 <Edit className="w-4 h-4 mr-2" />
                                 Edit Offender
                               </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => handleToggleStatus(offender)}>
-                                {offender.isActive ? (
+                              <DropdownMenuItem 
+                                onClick={() => handleToggleStatus(offender)}
+                                className="text-black hover:bg-blue-600 hover:text-white focus:bg-blue-600 focus:text-white cursor-pointer"
+                              >
+                                {offender.status.isActive ? (
                                   <>
                                     <ToggleLeft className="w-4 h-4 mr-2" />
                                     Deactivate
@@ -501,10 +530,10 @@ const OffendersPage: React.FC = () => {
                                   </>
                                 )}
                               </DropdownMenuItem>
-                              <DropdownMenuSeparator />
+                              <DropdownMenuSeparator className="bg-gray-200" />
                               <DropdownMenuItem 
                                 onClick={() => handleDeleteOffender(offender)}
-                                className="text-red-600 focus:text-red-600"
+                                className="text-red-600 hover:bg-blue-600 hover:text-white focus:bg-blue-600 focus:text-white cursor-pointer"
                               >
                                 <Trash2 className="w-4 h-4 mr-2" />
                                 Delete Offender

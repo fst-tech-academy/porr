@@ -1293,47 +1293,48 @@ class ApiService {
     return response.data;
   }
 
-  // Offence endpoints
-  async getOffences(params?: {
+  // OffenceCatalogue endpoints
+  async getOffenceCatalogues(params?: {
     page?: number;
     limit?: number;
     search?: string;
     category?: string;
     severity?: string;
+    riskLevel?: string;
     status?: string;
-  }): Promise<ApiResponse<{ offences: any[]; pagination: any }>> {
-    const response: AxiosResponse<ApiResponse<{ offences: any[]; pagination: any }>> =
-      await this.api.get("/offences", { params });
+  }): Promise<ApiResponse<{ offenceCatalogues: any[]; pagination: any }>> {
+    const response: AxiosResponse<ApiResponse<{ offenceCatalogues: any[]; pagination: any }>> =
+      await this.api.get("/offence-catalogues", { params });
     return response.data;
   }
 
-  async getOffence(id: string): Promise<ApiResponse<{ offence: any }>> {
-    const response: AxiosResponse<ApiResponse<{ offence: any }>> =
-      await this.api.get(`/offences/${id}`);
+  async getOffenceCatalogue(id: string): Promise<ApiResponse<{ offenceCatalogue: any }>> {
+    const response: AxiosResponse<ApiResponse<{ offenceCatalogue: any }>> =
+      await this.api.get(`/offence-catalogues/${id}`);
     return response.data;
   }
 
-  async createOffence(offenceData: any): Promise<ApiResponse<{ offence: any }>> {
-    const response: AxiosResponse<ApiResponse<{ offence: any }>> =
-      await this.api.post("/offences", offenceData);
+  async createOffenceCatalogue(offenceCatalogueData: any): Promise<ApiResponse<{ offenceCatalogue: any }>> {
+    const response: AxiosResponse<ApiResponse<{ offenceCatalogue: any }>> =
+      await this.api.post("/offence-catalogues", offenceCatalogueData);
     return response.data;
   }
 
-  async updateOffence(id: string, offenceData: any): Promise<ApiResponse<{ offence: any }>> {
-    const response: AxiosResponse<ApiResponse<{ offence: any }>> =
-      await this.api.put(`/offences/${id}`, offenceData);
+  async updateOffenceCatalogue(id: string, offenceCatalogueData: any): Promise<ApiResponse<{ offenceCatalogue: any }>> {
+    const response: AxiosResponse<ApiResponse<{ offenceCatalogue: any }>> =
+      await this.api.put(`/offence-catalogues/${id}`, offenceCatalogueData);
     return response.data;
   }
 
-  async deleteOffence(id: string): Promise<ApiResponse<null>> {
+  async deleteOffenceCatalogue(id: string): Promise<ApiResponse<null>> {
     const response: AxiosResponse<ApiResponse<null>> =
-      await this.api.delete(`/offences/${id}`);
+      await this.api.delete(`/offence-catalogues/${id}`);
     return response.data;
   }
 
-  async getOffenceStats(): Promise<ApiResponse<any>> {
+  async getOffenceCatalogueStats(): Promise<ApiResponse<any>> {
     const response: AxiosResponse<ApiResponse<any>> =
-      await this.api.get("/offences/stats/overview");
+      await this.api.get("/offence-catalogues/stats/overview");
     return response.data;
   }
 
@@ -1378,6 +1379,73 @@ class ApiService {
   async getCourtStats(): Promise<ApiResponse<any>> {
     const response: AxiosResponse<ApiResponse<any>> =
       await this.api.get("/courts/stats/overview");
+    return response.data;
+  }
+
+  // Victim API methods
+  async getVictims(params?: any): Promise<PaginatedResponse> {
+    const response = await this.api.get("/victims", { params });
+    return response.data;
+  }
+
+  async getVictim(id: string): Promise<ApiResponse> {
+    const response = await this.api.get(`/victims/${id}`);
+    return response.data;
+  }
+
+  async createVictim(data: any): Promise<ApiResponse> {
+    const response = await this.api.post("/victims", data);
+    return response.data;
+  }
+
+  async updateVictim(id: string, data: any): Promise<ApiResponse> {
+    const response = await this.api.put(`/victims/${id}`, data);
+    return response.data;
+  }
+
+  async deleteVictim(id: string): Promise<ApiResponse> {
+    const response = await this.api.delete(`/victims/${id}`);
+    return response.data;
+  }
+
+  async getVictimStats(): Promise<StatsResponse> {
+    const response = await this.api.get("/victims/stats/overview");
+    return response.data;
+  }
+
+  // OffenderOffence (Crime) API methods
+  async getCrimes(params?: any): Promise<PaginatedResponse> {
+    const response = await this.api.get("/crimes", { params });
+    return response.data;
+  }
+
+  async getCrime(id: string): Promise<ApiResponse> {
+    const response = await this.api.get(`/crimes/${id}`);
+    return response.data;
+  }
+
+  async createCrime(data: any): Promise<ApiResponse> {
+    const response = await this.api.post("/crimes", data);
+    return response.data;
+  }
+
+  async updateCrime(id: string, data: any): Promise<ApiResponse> {
+    const response = await this.api.put(`/crimes/${id}`, data);
+    return response.data;
+  }
+
+  async deleteCrime(id: string): Promise<ApiResponse> {
+    const response = await this.api.delete(`/crimes/${id}`);
+    return response.data;
+  }
+
+  async getCrimesByOffender(offenderId: string, params?: any): Promise<PaginatedResponse> {
+    const response = await this.api.get(`/crimes/offender/${offenderId}`, { params });
+    return response.data;
+  }
+
+  async getCrimeStats(): Promise<StatsResponse> {
+    const response = await this.api.get("/crimes/stats/overview");
     return response.data;
   }
 }

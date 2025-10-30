@@ -6,6 +6,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useNavigate, Link } from 'react-router-dom';
 import { useSettings } from '../hooks/useSettings';
+import { getErrorMessage } from '../utils/errorHandler';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
@@ -171,14 +172,7 @@ const Login: React.FC = () => {
       // Redirect to root - RoleBasedRedirect will handle the proper destination
       navigate('/');
     } catch (err: any) {
-      // Handle validation errors with specific field messages
-      if (err.response?.status === 400 && err.response?.data?.errors) {
-        // Display the first validation error message
-        const firstError = err.response.data.errors[0];
-        setError(firstError.msg || firstError.message || 'Validation failed');
-      } else {
-        setError(err.response?.data?.message || err.message || 'Registration failed');
-      }
+      setError(getErrorMessage(err));
     } finally {
       setLoading(false);
     }

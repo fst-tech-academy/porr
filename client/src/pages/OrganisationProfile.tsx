@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import {
   Building2,
   Users,
@@ -76,7 +76,9 @@ const OrganisationProfile: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState('overview');
+  const location = useLocation();
+  const initialTab = new URLSearchParams(location.search).get('tab') || 'overview';
+  const [activeTab, setActiveTab] = useState(initialTab);
   const [usersPage, setUsersPage] = useState(1);
   const [usersLimit] = useState(10);
   const [usersTotal, setUsersTotal] = useState(0);
@@ -153,6 +155,13 @@ const OrganisationProfile: React.FC = () => {
   useEffect(() => {
     fetchOrganisation();
   }, [id]);
+
+  useEffect(() => {
+    const tab = new URLSearchParams(location.search).get('tab');
+    if (tab && tab !== activeTab) {
+      setActiveTab(tab);
+    }
+  }, [location.search]);
 
   useEffect(() => {
     if (organisation) {
@@ -535,22 +544,22 @@ const OrganisationProfile: React.FC = () => {
                       <SelectTrigger className="w-40 h-12 border-0 bg-gray-50/50 focus:bg-white focus:ring-2 focus:ring-blue-500 rounded-xl">
                         <SelectValue placeholder="Role" />
                       </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">All Roles</SelectItem>
-                        <SelectItem value="admin">Admin</SelectItem>
-                        <SelectItem value="manager">Manager</SelectItem>
-                        <SelectItem value="officer">Officer</SelectItem>
-                        <SelectItem value="viewer">Viewer</SelectItem>
+                      <SelectContent className="bg-white border border-gray-200 shadow-lg">
+                        <SelectItem value="all" className="text-black hover:bg-blue-600 hover:text-white focus:bg-blue-600 focus:text-white cursor-pointer">All Roles</SelectItem>
+                        <SelectItem value="admin" className="text-black hover:bg-blue-600 hover:text-white focus:bg-blue-600 focus:text-white cursor-pointer">Admin</SelectItem>
+                        <SelectItem value="manager" className="text-black hover:bg-blue-600 hover:text-white focus:bg-blue-600 focus:text-white cursor-pointer">Manager</SelectItem>
+                        <SelectItem value="officer" className="text-black hover:bg-blue-600 hover:text-white focus:bg-blue-600 focus:text-white cursor-pointer">Officer</SelectItem>
+                        <SelectItem value="viewer" className="text-black hover:bg-blue-600 hover:text-white focus:bg-blue-600 focus:text-white cursor-pointer">Viewer</SelectItem>
                       </SelectContent>
                     </Select>
                     <Select value={statusFilter} onValueChange={setStatusFilter}>
                       <SelectTrigger className="w-40 h-12 border-0 bg-gray-50/50 focus:bg-white focus:ring-2 focus:ring-blue-500 rounded-xl">
                         <SelectValue placeholder="Status" />
                       </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">All Status</SelectItem>
-                        <SelectItem value="active">Active</SelectItem>
-                        <SelectItem value="inactive">Inactive</SelectItem>
+                      <SelectContent className="bg-white border border-gray-200 shadow-lg">
+                        <SelectItem value="all" className="text-black hover:bg-blue-600 hover:text-white focus:bg-blue-600 focus:text-white cursor-pointer">All Status</SelectItem>
+                        <SelectItem value="active" className="text-black hover:bg-blue-600 hover:text-white focus:bg-blue-600 focus:text-white cursor-pointer">Active</SelectItem>
+                        <SelectItem value="inactive" className="text-black hover:bg-blue-600 hover:text-white focus:bg-blue-600 focus:text-white cursor-pointer">Inactive</SelectItem>
                       </SelectContent>
                     </Select>
                     <Button

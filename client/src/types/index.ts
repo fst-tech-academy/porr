@@ -1,3 +1,9 @@
+export interface EntityOption {
+  _id: string;
+  display: string;
+  type?: string;
+}
+
 export interface User {
   id: string;
   _id?: string; // MongoDB _id field
@@ -248,6 +254,7 @@ export interface Offender {
     lastName: string;
     middleName?: string;
     dateOfBirth: string;
+    placeOfBirth?: string;
     gender: 'male' | 'female' | 'other';
     nationality: string;
     nationalId?: string;
@@ -319,12 +326,9 @@ export interface Offender {
       endDate?: string;
     }>;
   };
-  criminalHistory: {
-    totalOffences: number;
-    firstOffenceDate?: string;
-    lastOffenceDate?: string;
-    offences: Array<{
-      offenceId: Offence | string;
+  criminalHistory?: {
+    offences?: Array<{
+      offenceCatalogueId: OffenceCatalogue | string;
       caseId: Case | string;
       dateCommitted: string;
       dateArrested?: string;
@@ -360,6 +364,10 @@ export interface Offender {
     paroleStatus?: 'none' | 'eligible' | 'on_parole' | 'parole_violated' | 'completed';
     probationStatus?: 'none' | 'active' | 'completed' | 'violated';
   };
+  // Direct access properties for frontend compatibility
+  isActive: boolean;
+  custodyStatus: 'in_custody' | 'released' | 'probation' | 'parole' | 'community_service';
+  profilePhoto?: string;
   photos?: Array<{
     url: string;
     type: 'mugshot' | 'profile' | 'identification' | 'other';
@@ -382,61 +390,29 @@ export interface Offender {
     updatedAt: string;
     version: number;
   };
+  // Direct access properties for frontend compatibility
+  createdAt: string;
+  updatedAt: string;
   // Virtual fields
   fullName?: string;
   age?: number;
 }
 
-export interface Offence {
+export interface OffenceCatalogue {
   _id: string;
   name: string;
   description: string;
   code: string;
-  category: 'violent_crime' | 'property_crime' | 'drug_offence' | 'white_collar_crime' | 'cyber_crime' | 'traffic_violation' | 'public_order' | 'sexual_offence' | 'terrorism' | 'other';
+  category: 'violent_crime' | 'property_crime' | 'white_collar_crime' | 'drug_crime' | 'cyber_crime' | 'traffic_violation' | 'public_order' | 'sexual_crime' | 'terrorism' | 'other';
   subcategory?: string;
-  severity: 'minor' | 'moderate' | 'serious' | 'major' | 'felony';
-  legalDefinition: string;
-  applicableLaws?: Array<{ law: string; section: string; description: string }>;
-  statuteOfLimitations?: number;
-  penalties: {
-    minimumSentence?: string;
-    maximumSentence?: string;
-    fineRange?: {
-      minimum?: number;
-      maximum?: number;
-      currency?: string;
-    };
-    communityService?: {
-      minimum?: number;
-      maximum?: number;
-    };
-    probation?: {
-      minimum?: number;
-      maximum?: number;
-    };
-    parole?: {
-      eligible?: boolean;
-      minimum?: number;
-      maximum?: number;
-    };
-  };
-  aggravatingFactors?: Array<{ factor: string; description: string; impact: 'low' | 'medium' | 'high' }>;
-  mitigatingFactors?: Array<{ factor: string; description: string; impact: 'low' | 'medium' | 'high' }>;
-  riskFactors: {
-    violenceRisk: 'low' | 'medium' | 'high';
-    recidivismRisk: 'low' | 'medium' | 'high';
-    publicSafetyRisk: 'low' | 'medium' | 'high';
-  };
-  reportingRequirements?: {
-    mandatoryReporting?: boolean;
-    reportingPeriod?: number;
-    reportingAuthority?: string;
-    specialRequirements?: string;
+  severity: 'minor' | 'moderate' | 'serious' | 'major' | 'severe';
+  riskLevel: 'low' | 'medium' | 'high' | 'critical';
+  penaltyRange?: {
+    min?: number;
+    max?: number;
+    currency?: string;
   };
   isActive: boolean;
-  effectiveDate: string;
-  repealedDate?: string;
-  repealedReason?: string;
   organisationId: string;
   createdBy: User | string;
   lastModifiedBy?: User | string;
@@ -462,7 +438,7 @@ export interface Case {
     offenderId: Offender | string;
     role: 'primary' | 'secondary' | 'accomplice' | 'witness';
     charges: Array<{
-      offenceId: Offence | string;
+      offenceCatalogueId: OffenceCatalogue | string;
       count: number;
       description?: string;
       dateCommitted: string;
@@ -482,7 +458,7 @@ export interface Case {
     credibility?: 'high' | 'medium' | 'low';
   }>;
   offences: Array<{
-    offenceId: Offence | string;
+    offenceCatalogueId: OffenceCatalogue | string;
     count: number;
     description?: string;
     dateCommitted: string;
@@ -681,6 +657,7 @@ export interface OffenderFormData {
     lastName: string;
     middleName?: string;
     dateOfBirth: string;
+    placeOfBirth?: string;
     gender: 'male' | 'female' | 'other';
     nationality: string;
     nationalId?: string;
@@ -729,25 +706,17 @@ export interface OffenderFormData {
   notes?: string;
 }
 
-export interface OffenceFormData {
+export interface OffenceCatalogueFormData {
   name: string;
   description: string;
   code: string;
   category: string;
   severity: string;
-  legalDefinition: string;
-  penalties?: {
-    minimumSentence?: string;
-    maximumSentence?: string;
-    fineRange?: {
-      minimum?: number;
-      maximum?: number;
-    };
-  };
-  riskFactors?: {
-    violenceRisk: string;
-    recidivismRisk: string;
-    publicSafetyRisk: string;
+  riskLevel: string;
+  penaltyRange?: {
+    min?: number;
+    max?: number;
+    currency?: string;
   };
   notes?: string;
 }
@@ -763,7 +732,7 @@ export interface CaseFormData {
     role: string;
   }>;
   offences: Array<{
-    offenceId: string;
+    offenceCatalogueId: string;
     count: number;
     dateCommitted: string;
     location?: string;
@@ -803,4 +772,413 @@ export interface CourtFormData {
     annual?: number;
   };
   notes?: string;
+}
+
+// Victim Interface
+export interface Victim {
+  _id: string;
+  personalInfo: {
+    firstName: string;
+    middleName?: string;
+    lastName: string;
+    dateOfBirth: string;
+    gender: 'male' | 'female' | 'other';
+    nationality: string;
+    nationalId?: string;
+    passportNumber?: string;
+    phoneNumber?: string;
+    email?: string;
+  };
+  physicalDescription?: {
+    height?: number;
+    weight?: number;
+    eyeColor?: string;
+    hairColor?: string;
+    skinTone?: string;
+    distinguishingMarks?: string;
+  };
+  address?: {
+    current?: {
+      street?: string;
+      city?: string;
+      state?: string;
+      country?: string;
+      postalCode?: string;
+      coordinates?: {
+        latitude?: number;
+        longitude?: number;
+      };
+    };
+    permanent?: {
+      street?: string;
+      city?: string;
+      state?: string;
+      country?: string;
+      postalCode?: string;
+      coordinates?: {
+        latitude?: number;
+        longitude?: number;
+      };
+    };
+  };
+  status: {
+    isActive: boolean;
+    isDeceased: boolean;
+    dateOfDeath?: string;
+    causeOfDeath?: string;
+    isMinor: boolean;
+    guardianInfo?: {
+      name?: string;
+      relationship?: string;
+      contactInfo?: {
+        phone?: string;
+        email?: string;
+      };
+    };
+  };
+  impactAssessment?: {
+    physicalInjuries?: Array<{
+      type?: string;
+      severity?: 'minor' | 'moderate' | 'severe' | 'critical';
+      description?: string;
+      medicalTreatment?: string;
+      recoveryStatus?: 'recovered' | 'ongoing' | 'permanent';
+    }>;
+    psychologicalImpact?: {
+      traumaLevel?: 'none' | 'mild' | 'moderate' | 'severe';
+      counselingRequired?: boolean;
+      notes?: string;
+    };
+    financialImpact?: {
+      medicalExpenses?: number;
+      lostWages?: number;
+      propertyDamage?: number;
+      otherExpenses?: number;
+    };
+  };
+  emergencyContact?: {
+    name?: string;
+    relationship?: string;
+    phone?: string;
+    email?: string;
+  };
+  caseInfo: {
+    victimId: string;
+    caseNumbers?: string[];
+    assignedOfficer?: string;
+    assignedProsecutor?: string;
+    assignedSocialWorker?: string;
+  };
+  notes?: string;
+  tags?: string[];
+  organisationId: string;
+  createdBy: string;
+  lastModifiedBy?: string;
+  metadata: {
+    createdAt: string;
+    updatedAt: string;
+    version: number;
+  };
+}
+
+// OffenderOffence (Crime) Interface
+export interface OffenderOffence {
+  _id: string;
+  crimeInfo: {
+    crimeId: string;
+    caseNumber: string;
+    title: string;
+    description: string;
+    category: string;
+    subcategory?: string;
+  };
+  dateTime: {
+    dateCommitted: string;
+    timeCommitted?: string;
+    dateReported: string;
+    dateArrested?: string;
+    dateCharged?: string;
+    dateConvicted?: string;
+    dateSentenced?: string;
+  };
+  location: {
+    street?: string;
+    city: string;
+    state: string;
+    country: string;
+    postalCode?: string;
+    coordinates?: {
+      latitude?: number;
+      longitude?: number;
+    };
+    locationType?: 'residential' | 'commercial' | 'public' | 'private' | 'vehicle' | 'online' | 'other';
+    specificLocation?: string;
+  };
+  offender: string | Offender;
+  offenceCatalogue: string | OffenceCatalogue;
+  victims?: Array<{
+    victim: string | Victim;
+    relationshipToOffender?: 'stranger' | 'acquaintance' | 'family' | 'friend' | 'colleague' | 'neighbor' | 'romantic' | 'other';
+    victimImpact?: {
+      physicalInjury?: boolean;
+      psychologicalImpact?: 'none' | 'mild' | 'moderate' | 'severe';
+      financialLoss?: number;
+    };
+  }>;
+  legal: {
+    status: 'reported' | 'under_investigation' | 'charged' | 'trial' | 'convicted' | 'acquitted' | 'dismissed' | 'plea_bargain';
+    severity: 'minor' | 'moderate' | 'serious' | 'major' | 'felony';
+    charges?: Array<{
+      charge: string;
+      statute?: string;
+      penalty?: string;
+    }>;
+    court?: string | Court;
+    judge?: {
+      name?: string;
+      id?: string;
+    };
+    prosecutor?: {
+      name?: string;
+      id?: string;
+    };
+    defenseAttorney?: {
+      name?: string;
+      id?: string;
+    };
+    verdict?: 'guilty' | 'not_guilty' | 'no_contest' | 'dismissed' | 'pending';
+    sentence?: {
+      type?: 'prison' | 'probation' | 'fine' | 'community_service' | 'suspended' | 'dismissed' | 'other';
+      duration?: string;
+      fine?: number;
+      conditions?: string[];
+    };
+  };
+  investigation?: {
+    assignedOfficer?: string;
+    assignedDetective?: string;
+    evidence?: Array<{
+      type?: 'physical' | 'digital' | 'witness' | 'documentary' | 'forensic' | 'other';
+      description?: string;
+      collectedDate?: string;
+      location?: string;
+      status?: 'collected' | 'analyzed' | 'presented' | 'dismissed';
+    }>;
+    witnesses?: Array<{
+      name?: string;
+      contactInfo?: string;
+      statement?: string;
+      credibility?: 'high' | 'medium' | 'low';
+    }>;
+    suspects?: string[];
+    motive?: string;
+    method?: string;
+  };
+  financialImpact?: {
+    propertyDamage?: number;
+    stolenValue?: number;
+    investigationCost?: number;
+    courtCosts?: number;
+    victimCompensation?: number;
+  };
+  media?: {
+    isPublic?: boolean;
+    mediaCoverage?: 'none' | 'local' | 'national' | 'international';
+    pressReleases?: Array<{
+      date?: string;
+      content?: string;
+      issuedBy?: string;
+    }>;
+  };
+  riskAssessment?: {
+    threatLevel?: 'low' | 'medium' | 'high' | 'critical';
+    recidivismRisk?: 'low' | 'medium' | 'high';
+    publicSafetyRisk?: 'low' | 'medium' | 'high' | 'critical';
+  };
+  notes?: string;
+  tags?: string[];
+  isActive: boolean;
+  organisationId: string;
+  createdBy: string;
+  lastModifiedBy?: string;
+  metadata: {
+    createdAt: string;
+    updatedAt: string;
+    version: number;
+  };
+}
+
+// Form Data Interfaces
+export interface VictimFormData {
+  personalInfo: {
+    firstName: string;
+    middleName?: string;
+    lastName: string;
+    dateOfBirth: string;
+    gender: 'male' | 'female' | 'other';
+    nationality: string;
+    nationalId?: string;
+    passportNumber?: string;
+    phoneNumber?: string;
+    email?: string;
+  };
+  physicalDescription?: {
+    height?: number;
+    weight?: number;
+    eyeColor?: string;
+    hairColor?: string;
+    skinTone?: string;
+    distinguishingMarks?: string;
+  };
+  address?: {
+    current?: {
+      street?: string;
+      city?: string;
+      state?: string;
+      country?: string;
+      postalCode?: string;
+    };
+    permanent?: {
+      street?: string;
+      city?: string;
+      state?: string;
+      country?: string;
+      postalCode?: string;
+    };
+  };
+  status: {
+    isActive: boolean;
+    isDeceased: boolean;
+    dateOfDeath?: string;
+    causeOfDeath?: string;
+    isMinor: boolean;
+    guardianInfo?: {
+      name?: string;
+      relationship?: string;
+      contactInfo?: {
+        phone?: string;
+        email?: string;
+      };
+    };
+  };
+  emergencyContact?: {
+    name?: string;
+    relationship?: string;
+    phone?: string;
+    email?: string;
+  };
+  caseInfo: {
+    caseNumbers?: string[];
+    assignedOfficer?: string;
+    assignedProsecutor?: string;
+    assignedSocialWorker?: string;
+  };
+  notes?: string;
+  tags?: string[];
+}
+
+export interface OffenderOffenceFormData {
+  crimeInfo: {
+    caseNumber: string;
+    title: string;
+    description: string;
+    category: string;
+    subcategory?: string;
+  };
+  dateTime: {
+    dateCommitted: string;
+    timeCommitted?: string;
+    dateReported: string;
+    dateArrested?: string;
+    dateCharged?: string;
+    dateConvicted?: string;
+    dateSentenced?: string;
+  };
+  location: {
+    street?: string;
+    city: string;
+    state: string;
+    country: string;
+    postalCode?: string;
+    locationType?: 'residential' | 'commercial' | 'public' | 'private' | 'vehicle' | 'online' | 'other';
+    specificLocation?: string;
+  };
+  offender: string;
+  offenceCatalogue: string;
+  victims?: Array<{
+    victim: string;
+    relationshipToOffender?: 'stranger' | 'acquaintance' | 'family' | 'friend' | 'colleague' | 'neighbor' | 'romantic' | 'other';
+    victimImpact?: {
+      physicalInjury?: boolean;
+      psychologicalImpact?: 'none' | 'mild' | 'moderate' | 'severe';
+      financialLoss?: number;
+    };
+  }>;
+  legal: {
+    status: 'reported' | 'under_investigation' | 'charged' | 'trial' | 'convicted' | 'acquitted' | 'dismissed' | 'plea_bargain';
+    severity: 'minor' | 'moderate' | 'serious' | 'major' | 'felony';
+    charges?: Array<{
+      charge: string;
+      statute?: string;
+      penalty?: string;
+    }>;
+    court?: string;
+    judge?: {
+      name?: string;
+      id?: string;
+    };
+    prosecutor?: {
+      name?: string;
+      id?: string;
+    };
+    defenseAttorney?: {
+      name?: string;
+      id?: string;
+    };
+    verdict?: 'guilty' | 'not_guilty' | 'no_contest' | 'dismissed' | 'pending';
+    sentence?: {
+      type?: 'prison' | 'probation' | 'fine' | 'community_service' | 'suspended' | 'dismissed' | 'other';
+      duration?: string;
+      fine?: number;
+      conditions?: string[];
+    };
+  };
+  investigation?: {
+    assignedOfficer?: string;
+    assignedDetective?: string;
+    evidence?: Array<{
+      type?: 'physical' | 'digital' | 'witness' | 'documentary' | 'forensic' | 'other';
+      description?: string;
+      collectedDate?: string;
+      location?: string;
+      status?: 'collected' | 'analyzed' | 'presented' | 'dismissed';
+    }>;
+    witnesses?: Array<{
+      name?: string;
+      contactInfo?: string;
+      statement?: string;
+      credibility?: 'high' | 'medium' | 'low';
+    }>;
+    suspects?: string[];
+    motive?: string;
+    method?: string;
+  };
+  financialImpact?: {
+    propertyDamage?: number;
+    stolenValue?: number;
+    investigationCost?: number;
+    courtCosts?: number;
+    victimCompensation?: number;
+  };
+  media?: {
+    isPublic?: boolean;
+    mediaCoverage?: 'none' | 'local' | 'national' | 'international';
+  };
+  riskAssessment?: {
+    threatLevel?: 'low' | 'medium' | 'high' | 'critical';
+    recidivismRisk?: 'low' | 'medium' | 'high';
+    publicSafetyRisk?: 'low' | 'medium' | 'high' | 'critical';
+  };
+  notes?: string;
+  tags?: string[];
 }

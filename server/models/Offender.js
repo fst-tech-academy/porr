@@ -21,6 +21,10 @@ const offenderSchema = new mongoose.Schema({
       type: Date,
       required: true
     },
+    placeOfBirth: {
+      type: String,
+      trim: true
+    },
     gender: {
       type: String,
       required: true,
@@ -56,7 +60,7 @@ const offenderSchema = new mongoose.Schema({
   physicalDescription: {
     height: {
       type: Number, // in cm
-      min: 100,
+      min: 30, // Allow very short heights (around 1 foot)
       max: 250
     },
     weight: {
@@ -66,7 +70,7 @@ const offenderSchema = new mongoose.Schema({
     },
     eyeColor: {
       type: String,
-      enum: ['brown', 'blue', 'green', 'hazel', 'gray', 'amber', 'other']
+      enum: ['brown', 'blue', 'green', 'hazel', 'gray', 'amber', 'black', 'other']
     },
     hairColor: {
       type: String,
@@ -74,7 +78,7 @@ const offenderSchema = new mongoose.Schema({
     },
     skinTone: {
       type: String,
-      enum: ['light', 'medium', 'dark', 'very dark']
+      enum: ['light', 'medium', 'dark', 'very dark', 'maariin', 'jecel', 'other']
     },
     distinguishingMarks: {
       type: String,
@@ -135,7 +139,12 @@ const offenderSchema = new mongoose.Schema({
   familyInfo: {
     maritalStatus: {
       type: String,
-      enum: ['single', 'married', 'divorced', 'widowed', 'separated']
+      enum: ['single', 'married', 'divorced', 'widowed', 'separated'],
+      default: 'single',
+      set: function(value) {
+        // Convert empty string to default value
+        return value === '' ? 'single' : value;
+      }
     },
     spouse: {
       name: String,
@@ -188,12 +197,6 @@ const offenderSchema = new mongoose.Schema({
 
   // Criminal History
   criminalHistory: {
-    totalOffences: {
-      type: Number,
-      default: 0
-    },
-    firstOffenceDate: Date,
-    lastOffenceDate: Date,
     offences: [{
       offenceId: {
         type: mongoose.Schema.Types.ObjectId,
@@ -289,6 +292,12 @@ const offenderSchema = new mongoose.Schema({
     }
   },
 
+  // Profile Photo
+  profilePhoto: {
+    type: String,
+    trim: true
+  },
+
   // Photos and Documents
   photos: [{
     url: String,
@@ -358,7 +367,7 @@ const offenderSchema = new mongoose.Schema({
 offenderSchema.index({ 'personalInfo.nationalId': 1 });
 offenderSchema.index({ 'personalInfo.firstName': 1, 'personalInfo.lastName': 1 });
 offenderSchema.index({ 'personalInfo.dateOfBirth': 1 });
-offenderSchema.index({ 'criminalHistory.totalOffences': -1 });
+// Removed index on removed field 'criminalHistory.totalOffences'
 offenderSchema.index({ 'riskAssessment.level': 1 });
 offenderSchema.index({ 'status.isInCustody': 1 });
 offenderSchema.index({ organisationId: 1 });
@@ -447,5 +456,14 @@ offenderSchema.statics.searchOffenders = function(query, organisationId, options
     .skip(skip)
     .limit(limit);
 };
+
+// Pre-save middleware to handle empty strings
+offenderSchema.pre('save', function(next) {
+  // Set default marital status if empty string
+  if (this.familyInfo && this.familyInfo.maritalStatus === '') {
+    this.familyInfo.maritalStatus = 'single';
+  }
+  next();
+});
 
 module.exports = mongoose.model('Offender', offenderSchema);
