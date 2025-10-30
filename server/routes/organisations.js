@@ -11,7 +11,7 @@ const { sendVerificationEmail } = require('../utils/emailService');
 const router = express.Router();
 
 // Get all organisations (Super Admin only)
-router.get('/', protect, authorize('super_admin'), [
+router.get('/', protect, authorize('super_admin', 'admin'), [
   query('page').optional().isInt({ min: 1 }).withMessage('Page must be a positive integer'),
   query('limit').optional().isInt({ min: 1, max: 100 }).withMessage('Limit must be between 1 and 100'),
   query('search').optional().trim().notEmpty().withMessage('Search term cannot be empty'),
@@ -19,6 +19,9 @@ router.get('/', protect, authorize('super_admin'), [
   query('plan').optional().isIn(['free', 'basic', 'premium', 'enterprise', 'all']).withMessage('Invalid plan filter')
 ], async (req, res) => {
   try {
+    // Scope results if admin (non-super admin): only their organisation
+    const userRole = req.user.role;
+    const userOrgId = (req.user.organisationId && req.user.organisationId._id) ? req.user.organisationId._id.toString() : (req.user.organisationId ? req.user.organisationId.toString() : undefined);
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
@@ -28,6 +31,9 @@ router.get('/', protect, authorize('super_admin'), [
 
     // Build filter object
     const filter = {};
+    if (userRole === 'admin' && userOrgId) {
+      filter._id = userOrgId;
+    }
     
     if (search) {
       filter.$or = [
@@ -75,10 +81,15 @@ router.get('/', protect, authorize('super_admin'), [
 });
 
 // Get single organisation
-router.get('/:id', protect, authorize('super_admin'), [
+router.get('/:id', protect, authorize('super_admin', 'admin'), [
   param('id').isMongoId().withMessage('Invalid organisation ID')
 ], async (req, res) => {
   try {
+    const userRole = req.user.role;
+    const userOrgId = (req.user.organisationId && req.user.organisationId._id) ? req.user.organisationId._id.toString() : (req.user.organisationId ? req.user.organisationId.toString() : undefined);
+    if (userRole === 'admin' && userOrgId && req.params.id !== userOrgId) {
+      return res.status(403).json({ success: false, message: 'Forbidden' });
+    }
     const organisation = await Organisation.findById(req.params.id)
       .populate('adminUser', 'firstName lastName email role isActive phone')
       .populate('metadata.createdBy', 'firstName lastName email')
@@ -243,7 +254,7 @@ router.post('/', protect, authorize('super_admin'), [
 });
 
 // Update organisation
-router.put('/:id', protect, authorize('super_admin'), [
+router.put('/:id', protect, authorize('super_admin', 'admin'), [
   param('id').isMongoId().withMessage('Invalid organisation ID'),
   body('name').optional().trim().notEmpty().withMessage('Organisation name cannot be empty'),
   body('description').optional().trim(),
@@ -260,6 +271,11 @@ router.put('/:id', protect, authorize('super_admin'), [
   body('subscription.isActive').optional().isBoolean().withMessage('Subscription isActive must be boolean')
 ], async (req, res) => {
   try {
+    const userRole = req.user.role;
+    const userOrgId = (req.user.organisationId && req.user.organisationId._id) ? req.user.organisationId._id.toString() : (req.user.organisationId ? req.user.organisationId.toString() : undefined);
+    if (userRole === 'admin' && userOrgId && req.params.id !== userOrgId) {
+      return res.status(403).json({ success: false, message: 'Forbidden' });
+    }
     const organisation = await Organisation.findById(req.params.id);
     
     if (!organisation) {
@@ -384,10 +400,15 @@ router.delete('/:id', protect, authorize('super_admin'), [
 });
 
 // Get organisation statistics
-router.get('/:id/stats', protect, authorize('super_admin'), [
+router.get('/:id/stats', protect, authorize('super_admin', 'admin'), [
   param('id').isMongoId().withMessage('Invalid organisation ID')
 ], async (req, res) => {
   try {
+    const userRole = req.user.role;
+    const userOrgId = (req.user.organisationId && req.user.organisationId._id) ? req.user.organisationId._id.toString() : (req.user.organisationId ? req.user.organisationId.toString() : undefined);
+    if (userRole === 'admin' && userOrgId && req.params.id !== userOrgId) {
+      return res.status(403).json({ success: false, message: 'Forbidden' });
+    }
     const organisation = await Organisation.findById(req.params.id);
     
     if (!organisation) {
@@ -428,7 +449,7 @@ router.get('/:id/stats', protect, authorize('super_admin'), [
 });
 
 // Get users for an organisation
-router.get('/:id/users', protect, authorize('super_admin'), [
+router.get('/:id/users', protect, authorize('super_admin', 'admin'), [
   param('id').isMongoId().withMessage('Invalid organisation ID'),
   query('page').optional().isInt({ min: 1 }).withMessage('Page must be a positive integer'),
   query('limit').optional().isInt({ min: 1, max: 100 }).withMessage('Limit must be between 1 and 100'),
@@ -437,6 +458,11 @@ router.get('/:id/users', protect, authorize('super_admin'), [
   query('status').optional().isIn(['active', 'inactive']).withMessage('Invalid status')
 ], async (req, res) => {
   try {
+    const userRole = req.user.role;
+    const userOrgId = (req.user.organisationId && req.user.organisationId._id) ? req.user.organisationId._id.toString() : (req.user.organisationId ? req.user.organisationId.toString() : undefined);
+    if (userRole === 'admin' && userOrgId && req.params.id !== userOrgId) {
+      return res.status(403).json({ success: false, message: 'Forbidden' });
+    }
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;

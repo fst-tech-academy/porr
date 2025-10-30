@@ -48,7 +48,8 @@ const getMenuItems = (
   t: (key: string) => string, 
   userRole: string, 
   isDashboardAnalyticsEnabled: boolean,
-  isUserManagementEnabled: boolean
+  isUserManagementEnabled: boolean,
+  userOrgId?: string
 ) => [
   // Show dashboard only if analytics feature is enabled
   ...(isDashboardAnalyticsEnabled ? [
@@ -68,12 +69,14 @@ const getMenuItems = (
   // Show users only for admin/manager roles and if user management is enabled
   ...(userRole === 'admin' || userRole === 'manager' ? [
     ...(isUserManagementEnabled ? [
-      { text: t('navigation.users'), icon: <Users className="h-5 w-5" />, path: '/users' },
+      { text: t('navigation.users'), icon: <Users className="h-5 w-5" />, path: userOrgId ? `/organisations/${userOrgId}?tab=users` : '/users' },
     ] : [])
   ] : []),
-  // Show organisations only for super_admin role
+  // Show organisations: super_admin sees list; admin sees own organisation
   ...(userRole === 'super_admin' ? [
     { text: 'Organisations', icon: <Building2 className="h-5 w-5" />, path: '/organisations' },
+  ] : userRole === 'admin' ? [
+    { text: 'My Organisation', icon: <Building2 className="h-5 w-5" />, path: userOrgId ? `/organisations/${userOrgId}` : '/organisations' },
   ] : []),
   // Show settings only for admin/super_admin roles
   ...(userRole === 'admin' || userRole === 'super_admin' ? [
@@ -102,7 +105,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const location = useLocation();
   const profileMenuRef = useRef<HTMLDivElement>(null);
   
-  const menuItems = getMenuItems(t, user?.role || '', isDashboardAnalyticsEnabled(), isUserManagementEnabled());
+  const menuItems = getMenuItems(t, user?.role || '', isDashboardAnalyticsEnabled(), isUserManagementEnabled(), (user?.organisationId as any)?._id || (user?.organisationId as any) || undefined);
 
 
   // Handle click outside to close profile menu

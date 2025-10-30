@@ -41,6 +41,7 @@ import { Label } from '../components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Badge } from '../components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
+import { Switch } from '../components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import {
   Table,
@@ -87,6 +88,8 @@ const OrganisationProfile: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState('all');
   const [isUserFormOpen, setIsUserFormOpen] = useState(false);
   const [isCreatingUser, setIsCreatingUser] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   const handleCreateUser = async (userData: any) => {
     if (!id) return;
@@ -182,16 +185,16 @@ const OrganisationProfile: React.FC = () => {
 
   const handleDeleteOrganisation = async () => {
     if (!organisation) return;
-    
-    if (!confirm(`Are you sure you want to delete "${organisation.name}"? This action cannot be undone.`)) {
-      return;
-    }
-
+    setIsDeleting(true);
     try {
       await apiService.deleteOrganisation(organisation._id);
       navigate('/organisations');
     } catch (err: any) {
       setError(err.message || 'Failed to delete organisation');
+    }
+    finally {
+      setIsDeleting(false);
+      setConfirmOpen(false);
     }
   };
 
@@ -529,19 +532,19 @@ const OrganisationProfile: React.FC = () => {
               </CardHeader>
               <CardContent className="p-6">
                 {/* Search and Filters */}
-                <div className="flex flex-col lg:flex-row gap-4 mb-6">
+                <div className="flex flex-col lg:flex-row gap-4 mb-6 bg-gray-50 border border-gray-200 rounded-xl p-4">
                   <div className="flex-1 relative">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                     <Input
                       placeholder="Search users..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-10 h-12 border-0 bg-gray-50/50 focus:bg-white focus:ring-2 focus:ring-blue-500 rounded-xl"
+                      className="pl-10 h-12 border border-gray-300 bg-white focus:bg-white focus:ring-2 focus:ring-blue-500 rounded-xl text-black placeholder:text-gray-500"
                     />
                   </div>
                   <div className="flex gap-3">
                     <Select value={roleFilter} onValueChange={setRoleFilter}>
-                      <SelectTrigger className="w-40 h-12 border-0 bg-gray-50/50 focus:bg-white focus:ring-2 focus:ring-blue-500 rounded-xl">
+                      <SelectTrigger className="w-40 h-12 border border-gray-300 bg-white focus:bg-white focus:ring-2 focus:ring-blue-500 rounded-xl text-black">
                         <SelectValue placeholder="Role" />
                       </SelectTrigger>
                       <SelectContent className="bg-white border border-gray-200 shadow-lg">
@@ -553,7 +556,7 @@ const OrganisationProfile: React.FC = () => {
                       </SelectContent>
                     </Select>
                     <Select value={statusFilter} onValueChange={setStatusFilter}>
-                      <SelectTrigger className="w-40 h-12 border-0 bg-gray-50/50 focus:bg-white focus:ring-2 focus:ring-blue-500 rounded-xl">
+                      <SelectTrigger className="w-40 h-12 border border-gray-300 bg-white focus:bg-white focus:ring-2 focus:ring-blue-500 rounded-xl text-black">
                         <SelectValue placeholder="Status" />
                       </SelectTrigger>
                       <SelectContent className="bg-white border border-gray-200 shadow-lg">
@@ -565,7 +568,7 @@ const OrganisationProfile: React.FC = () => {
                     <Button
                       onClick={() => fetchUsers()}
                       variant="outline"
-                      className="h-12 px-6 border-0 bg-gray-50/50 hover:bg-gray-100 rounded-xl"
+                      className="h-12 px-6 border border-gray-300 bg-white hover:bg-gray-50 rounded-xl text-black"
                     >
                       <RefreshCw className="w-4 h-4 mr-2" />
                       Refresh
@@ -707,23 +710,14 @@ const OrganisationProfile: React.FC = () => {
                       <h3 className="font-semibold text-gray-900">Organisation Status</h3>
                       <p className="text-sm text-gray-600">Enable or disable this organisation</p>
                     </div>
-                    <Button
-                      onClick={handleToggleStatus}
-                      variant={organisation.settings.isActive ? "destructive" : "default"}
-                      className={organisation.settings.isActive ? "bg-red-600 hover:bg-red-700" : "bg-green-600 hover:bg-green-700"}
-                    >
-                      {organisation.settings.isActive ? (
-                        <>
-                          <ToggleLeft className="w-4 h-4 mr-2" />
-                          Deactivate
-                        </>
-                      ) : (
-                        <>
-                          <ToggleRight className="w-4 h-4 mr-2" />
-                          Activate
-                        </>
-                      )}
-                    </Button>
+                    <div className="flex items-center gap-3">
+                      {getStatusBadge(organisation.settings.isActive)}
+                      <Switch
+                        checked={organisation.settings.isActive}
+                        onCheckedChange={handleToggleStatus}
+                        aria-label="Toggle organisation status"
+                      />
+                    </div>
                   </div>
 
                   <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
@@ -732,9 +726,9 @@ const OrganisationProfile: React.FC = () => {
                       <p className="text-sm text-gray-600">Permanently delete this organisation and all its data</p>
                     </div>
                     <Button
-                      onClick={handleDeleteOrganisation}
+                      onClick={() => setConfirmOpen(true)}
                       variant="destructive"
-                      className="bg-red-600 hover:bg-red-700"
+                      className="bg-red-600 hover:bg-red-700 text-white"
                     >
                       <Trash2 className="w-4 h-4 mr-2" />
                       Delete
@@ -765,6 +759,24 @@ const OrganisationProfile: React.FC = () => {
           </TabsContent>
         </Tabs>
       </div>
+
+    {/* Confirm Delete Dialog */}
+    <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Delete organisation?</DialogTitle>
+          <DialogDescription>
+            This action cannot be undone. This will permanently delete {organisation.name} and all of its data.
+          </DialogDescription>
+        </DialogHeader>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => setConfirmOpen(false)}>Cancel</Button>
+          <Button variant="destructive" onClick={handleDeleteOrganisation} disabled={isDeleting}>
+            {isDeleting ? 'Deleting…' : 'Delete'}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
 
       {/* User Form Modal */}
       <UserForm
