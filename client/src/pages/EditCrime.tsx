@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
@@ -84,10 +84,24 @@ const crimeSchema = yup.object({
   notes: yup.string().optional(),
 });
 
-const CreateCrimePage: React.FC = () => {
+// Helper function to format date for input
+const formatDateForInput = (dateString?: string): string => {
+  if (!dateString) return '';
+  try {
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return '';
+    return date.toISOString().split('T')[0];
+  } catch {
+    return '';
+  }
+};
+
+const EditCrimePage: React.FC = () => {
   const navigate = useNavigate();
+  const { id } = useParams<{ id: string }>();
   const [currentStep, setCurrentStep] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
+  const [isFetching, setIsFetching] = useState(true);
   const [error, setError] = useState<string>('');
 
   const steps = [
@@ -168,6 +182,102 @@ const CreateCrimePage: React.FC = () => {
     },
   });
 
+  // Fetch crime data
+  useEffect(() => {
+    const fetchCrime = async () => {
+      if (!id) return;
+      
+      try {
+        setIsFetching(true);
+        const response = await api.getCrime(id!);
+        
+        if (response.success && response.data) {
+          const crime = response.data;
+          
+          // Handle offender - can be object or string
+          const offenderId = typeof crime.offender === 'object' && crime.offender?._id 
+            ? crime.offender._id 
+            : crime.offender || '';
+          
+          // Handle offenceCatalogue - can be object or string
+          const offenceId = typeof crime.offenceCatalogue === 'object' && crime.offenceCatalogue?._id
+            ? crime.offenceCatalogue._id
+            : crime.offenceCatalogue || crime.offence || '';
+          
+          // Handle court - can be object or string
+          const courtId = typeof crime.legal?.court === 'object' && crime.legal.court?._id
+            ? crime.legal.court._id
+            : crime.legal?.court || '';
+          
+          // Handle victims - map to form structure
+          const victimsData = (crime.victims || []).map((victimEntry: any) => {
+            const victimId = typeof victimEntry.victim === 'object' && victimEntry.victim?._id
+              ? victimEntry.victim._id
+              : victimEntry.victim || '';
+            
+            return {
+              victim: victimId,
+              relationshipToOffender: victimEntry.relationshipToOffender || 'stranger',
+              victimImpact: victimEntry.victimImpact || {}
+            };
+          });
+          
+          // Populate form
+          form.reset({
+            crimeInfo: {
+              title: crime.crimeInfo?.title || '',
+              description: crime.crimeInfo?.description || '',
+              category: crime.crimeInfo?.category || '',
+              subcategory: crime.crimeInfo?.subcategory || '',
+            },
+            dateTime: {
+              dateCommitted: formatDateForInput(crime.dateTime?.dateCommitted),
+              timeCommitted: crime.dateTime?.timeCommitted || '',
+              dateReported: formatDateForInput(crime.dateTime?.dateReported),
+              dateArrested: formatDateForInput(crime.dateTime?.dateArrested),
+              dateCharged: formatDateForInput(crime.dateTime?.dateCharged),
+              dateConvicted: formatDateForInput(crime.dateTime?.dateConvicted),
+              dateSentenced: formatDateForInput(crime.dateTime?.dateSentenced),
+            },
+            location: {
+              street: crime.location?.street || '',
+              city: crime.location?.city || '',
+              state: crime.location?.state || '',
+              country: crime.location?.country || 'Somalia',
+              postalCode: crime.location?.postalCode || '',
+              locationType: crime.location?.locationType || 'other',
+              specificLocation: crime.location?.specificLocation || '',
+            },
+            offender: offenderId,
+            offence: offenceId,
+            victims: victimsData,
+            legal: {
+              status: crime.legal?.status || 'reported',
+              severity: crime.legal?.severity || 'moderate',
+              charges: crime.legal?.charges || [],
+              court: courtId,
+              judge: crime.legal?.judge || { name: '', id: '' },
+              prosecutor: crime.legal?.prosecutor || { name: '', id: '' },
+              defenseAttorney: crime.legal?.defenseAttorney || { name: '', id: '' },
+              verdict: crime.legal?.verdict || 'pending',
+              sentence: crime.legal?.sentence || { type: '', duration: '', fine: 0, conditions: [] },
+            },
+            notes: crime.notes || '',
+          });
+        } else {
+          setError('Failed to fetch crime details');
+        }
+      } catch (err: any) {
+        console.error('Error fetching crime:', err);
+        setError(err.response?.data?.message || 'Failed to load crime');
+      } finally {
+        setIsFetching(false);
+      }
+    };
+
+    fetchCrime();
+  }, [id, form]);
+
   // Search functions for EntitySearch components
   const searchOffenders = async (query: string): Promise<EntityOption[]> => {
     try {
@@ -190,7 +300,7 @@ const CreateCrimePage: React.FC = () => {
     try {
       const response = await api.get(`/offence-catalogues?search=${encodeURIComponent(query)}&limit=20`);
       if (response.data.success) {
-        return (response.data.data.offences || []).map((offence: Offence) => ({
+        return (response.data.data || []).map((offence: Offence) => ({
           _id: offence._id,
           display: `${offence.name} (${offence.code})`,
           type: offence.category
@@ -277,15 +387,15 @@ const CreateCrimePage: React.FC = () => {
       setError('');
       
       const data = form.getValues();
-      const response = await api.createCrime(data);
+      const response = await api.updateCrime(id!, data);
       
       if (response.success) {
-        navigate('/crimes');
+        navigate(`/crimes/${id}`);
       } else {
-        setError(response.message || 'Failed to create crime');
+        setError(response.message || 'Failed to update crime');
       }
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to create crime');
+      setError(err.response?.data?.message || 'Failed to update crime');
     } finally {
       setIsLoading(false);
     }
@@ -775,6 +885,18 @@ const CreateCrimePage: React.FC = () => {
     }
   };
 
+  if (isFetching) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-slate-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-4"></div>
+          <h3 className="text-xl font-semibold text-gray-900 mb-2">Loading Crime Details</h3>
+          <p className="text-gray-600">Please wait while we fetch the information...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-slate-900 py-4">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -799,7 +921,7 @@ const CreateCrimePage: React.FC = () => {
           <div className="lg:col-span-2">
             <Card className="bg-white dark:bg-slate-800 shadow-lg border-gray-200 dark:border-slate-700">
               <div className="text-center py-4 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600">
-                <h1 className="text-2xl font-bold text-white">CREATE NEW CRIME</h1>
+                <h1 className="text-2xl font-bold text-white">EDIT CRIME</h1>
               </div>
               <CardHeader className="bg-gradient-to-r from-blue-600 to-blue-700 text-white py-3">
                 <CardTitle className="text-lg font-bold text-white mb-1">
@@ -834,7 +956,7 @@ const CreateCrimePage: React.FC = () => {
                     <Button
                       type="button"
                       variant="outline"
-                      onClick={() => navigate('/crimes')}
+                      onClick={() => navigate(`/crimes/${id}`)}
                       className="flex items-center"
                     >
                       <X className="w-4 h-4 mr-2" />
@@ -850,12 +972,12 @@ const CreateCrimePage: React.FC = () => {
                         {isLoading ? (
                           <>
                             <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                            Creating...
+                            Updating...
                           </>
                         ) : (
                           <>
                             <CheckCircle className="w-4 h-4 mr-2" />
-                            Create Crime
+                            Update Crime
                           </>
                         )}
                       </Button>
@@ -879,4 +1001,5 @@ const CreateCrimePage: React.FC = () => {
   );
 };
 
-export default CreateCrimePage;
+export default EditCrimePage;
+

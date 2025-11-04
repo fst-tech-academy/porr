@@ -18,7 +18,9 @@ router.get('/', protect, async (req, res) => {
       isActive = ''
     } = req.query;
 
-    const query = { organisationId: req.user.organisationId };
+    // Handle organisationId - extract _id if populated
+    const userOrgId = req.user.organisationId._id || req.user.organisationId;
+    const query = { organisationId: userOrgId };
 
     // Add search filter
     if (search) {
@@ -49,26 +51,29 @@ router.get('/', protect, async (req, res) => {
       query.isActive = isActive === 'true';
     }
 
-    const options = {
-      page: parseInt(page),
-      limit: parseInt(limit),
-      sort: { createdAt: -1 },
-      populate: [
-        { path: 'createdBy', select: 'firstName lastName email' },
-        { path: 'lastModifiedBy', select: 'firstName lastName email' }
-      ]
-    };
+    const pageNum = parseInt(page);
+    const limitNum = parseInt(limit);
+    const skip = (pageNum - 1) * limitNum;
 
-    const offenceCatalogues = await OffenceCatalogue.paginate(query, options);
+    // Get total count
+    const total = await OffenceCatalogue.countDocuments(query);
+
+    // Fetch offence catalogues with pagination
+    const offenceCatalogues = await OffenceCatalogue.find(query)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limitNum)
+      .populate('createdBy', 'firstName lastName email')
+      .populate('lastModifiedBy', 'firstName lastName email');
 
     res.json({
       success: true,
-      data: offenceCatalogues.docs,
+      data: offenceCatalogues,
       pagination: {
-        page: offenceCatalogues.page,
-        pages: offenceCatalogues.pages,
-        limit: offenceCatalogues.limit,
-        total: offenceCatalogues.total
+        page: pageNum,
+        pages: Math.ceil(total / limitNum),
+        limit: limitNum,
+        total: total
       }
     });
   } catch (error) {
@@ -84,9 +89,11 @@ router.get('/', protect, async (req, res) => {
 // Get offence catalogue by ID
 router.get('/:id', protect, async (req, res) => {
   try {
+    // Handle organisationId - extract _id if populated
+    const userOrgId = req.user.organisationId._id || req.user.organisationId;
     const offenceCatalogue = await OffenceCatalogue.findOne({
       _id: req.params.id,
-      organisationId: req.user.organisationId
+      organisationId: userOrgId
     }).populate('createdBy', 'firstName lastName email')
       .populate('lastModifiedBy', 'firstName lastName email');
 
@@ -99,7 +106,9 @@ router.get('/:id', protect, async (req, res) => {
 
     res.json({
       success: true,
-      data: offenceCatalogue
+      data: {
+        offenceCatalogue: offenceCatalogue
+      }
     });
   } catch (error) {
     console.error('Error fetching offence catalogue:', error);
@@ -130,7 +139,7 @@ router.post('/', [
       'terrorism',
       'other'
     ]).withMessage('Invalid category'),
-    body('severity').isIn(['minor', 'moderate', 'serious', 'major', 'severe'])
+    body('severity').isIn(['minor', 'moderate', 'serious', 'major', 'severe', 'felony'])
       .withMessage('Invalid severity'),
     body('riskLevel').isIn(['low', 'medium', 'high', 'critical'])
       .withMessage('Invalid risk level')
@@ -146,9 +155,11 @@ router.post('/', [
       });
     }
 
+    // Handle organisationId - extract _id if populated
+    const userOrgId = req.user.organisationId._id || req.user.organisationId;
     const offenceCatalogueData = {
       ...req.body,
-      organisationId: req.user.organisationId,
+      organisationId: userOrgId,
       createdBy: req.user.id
     };
 
@@ -199,7 +210,7 @@ router.put('/:id', [
       'terrorism',
       'other'
     ]).withMessage('Invalid category'),
-    body('severity').optional().isIn(['minor', 'moderate', 'serious', 'major', 'severe'])
+    body('severity').optional().isIn(['minor', 'moderate', 'serious', 'major', 'severe', 'felony'])
       .withMessage('Invalid severity'),
     body('riskLevel').optional().isIn(['low', 'medium', 'high', 'critical'])
       .withMessage('Invalid risk level')
@@ -215,9 +226,11 @@ router.put('/:id', [
       });
     }
 
+    // Handle organisationId - extract _id if populated
+    const userOrgId = req.user.organisationId._id || req.user.organisationId;
     const offenceCatalogue = await OffenceCatalogue.findOne({
       _id: req.params.id,
-      organisationId: req.user.organisationId
+      organisationId: userOrgId
     });
 
     if (!offenceCatalogue) {
@@ -235,13 +248,18 @@ router.put('/:id', [
     Object.assign(offenceCatalogue, updateData);
     await offenceCatalogue.save();
 
-    await offenceCatalogue.populate('createdBy', 'firstName lastName email')
-      .populate('lastModifiedBy', 'firstName lastName email');
+    // Populate fields using array syntax
+    await OffenceCatalogue.populate(offenceCatalogue, [
+      { path: 'createdBy', select: 'firstName lastName email' },
+      { path: 'lastModifiedBy', select: 'firstName lastName email' }
+    ]);
 
     res.json({
       success: true,
       message: 'Offence catalogue updated successfully',
-      data: offenceCatalogue
+      data: {
+        offenceCatalogue: offenceCatalogue
+      }
     });
   } catch (error) {
     console.error('Error updating offence catalogue:', error);
@@ -264,9 +282,11 @@ router.put('/:id', [
 // Delete offence catalogue
 router.delete('/:id', [protect, checkUserManagement], async (req, res) => {
   try {
+    // Handle organisationId - extract _id if populated
+    const userOrgId = req.user.organisationId._id || req.user.organisationId;
     const offenceCatalogue = await OffenceCatalogue.findOne({
       _id: req.params.id,
-      organisationId: req.user.organisationId
+      organisationId: userOrgId
     });
 
     if (!offenceCatalogue) {
@@ -295,7 +315,8 @@ router.delete('/:id', [protect, checkUserManagement], async (req, res) => {
 // Get offence catalogue statistics
 router.get('/stats/overview', protect, async (req, res) => {
   try {
-    const organisationId = req.user.organisationId;
+    // Handle organisationId - extract _id if populated
+    const organisationId = req.user.organisationId._id || req.user.organisationId;
 
     const stats = await OffenceCatalogue.aggregate([
       { $match: { organisationId: organisationId } },

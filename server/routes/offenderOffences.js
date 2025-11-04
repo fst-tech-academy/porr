@@ -1,5 +1,6 @@
 const express = require('express');
 const { body, validationResult } = require('express-validator');
+const mongoose = require('mongoose');
 const OffenderOffence = require('../models/OffenderOffence');
 const Offender = require('../models/Offender');
 const OffenceCatalogue = require('../models/OffenceCatalogue');
@@ -10,9 +11,47 @@ const { checkUserManagement } = require('../middleware/settings');
 
 const router = express.Router();
 
+// Helper function to generate next case number
+const generateNextCaseNumber = async (organisationId) => {
+  try {
+    // Convert organisationId to ObjectId if it's a string
+    const orgId = mongoose.Types.ObjectId.isValid(organisationId) 
+      ? new mongoose.Types.ObjectId(organisationId) 
+      : organisationId;
+
+    // Get all crimes for this organisation (only case numbers)
+    const crimes = await OffenderOffence.find(
+      { organisationId: orgId },
+      { 'crimeInfo.caseNumber': 1 }
+    ).select('crimeInfo.caseNumber').lean();
+
+    let maxNumber = 0;
+
+    // Find the highest numeric case number
+    crimes.forEach(crime => {
+      if (crime.crimeInfo && crime.crimeInfo.caseNumber) {
+        // Extract numeric part from case number (e.g., "0000001" -> 1)
+        const numericValue = parseInt(crime.crimeInfo.caseNumber.replace(/^0+/, '') || '0');
+        if (numericValue > maxNumber) {
+          maxNumber = numericValue;
+        }
+      }
+    });
+
+    // Increment and format with 7 leading zeros
+    const nextNumber = maxNumber + 1;
+    return String(nextNumber).padStart(7, '0');
+  } catch (error) {
+    console.error('Error generating case number:', error);
+    // Fallback: use timestamp-based number
+    const timestamp = Date.now().toString().slice(-7);
+    return timestamp.padStart(7, '0');
+  }
+};
+
 // Validation rules
 const offenderOffenceValidationRules = [
-  body('crimeInfo.caseNumber').trim().notEmpty().withMessage('Case number is required'),
+  // caseNumber is now optional - will be auto-generated if not provided
   body('crimeInfo.title').trim().notEmpty().withMessage('Crime title is required'),
   body('crimeInfo.description').trim().notEmpty().withMessage('Crime description is required'),
   body('crimeInfo.category').trim().notEmpty().withMessage('Crime category is required'),
@@ -44,7 +83,9 @@ router.get('/', protect, async (req, res) => {
       sortOrder = 'desc'
     } = req.query;
 
-    const query = { organisationId: req.user.organisationId };
+    // Handle organisationId - extract _id if populated
+    const userOrgId = req.user.organisationId._id || req.user.organisationId;
+    const query = { organisationId: userOrgId };
 
     // Search filter
     if (search) {
@@ -105,11 +146,13 @@ router.get('/', protect, async (req, res) => {
 
     res.json({
       success: true,
-      data: crimes,
-      pagination: {
-        current: parseInt(page),
-        pages: Math.ceil(total / limit),
-        total
+      data: {
+        crimes: crimes,
+        pagination: {
+          current: parseInt(page),
+          pages: Math.ceil(total / limit),
+          total
+        }
       }
     });
   } catch (error) {
@@ -124,9 +167,11 @@ router.get('/', protect, async (req, res) => {
 // Get crime by ID
 router.get('/:id', protect, async (req, res) => {
   try {
+    // Handle organisationId - extract _id if populated
+    const userOrgId = req.user.organisationId._id || req.user.organisationId;
     const crime = await OffenderOffence.findOne({
       _id: req.params.id,
-      organisationId: req.user.organisationId
+      organisationId: userOrgId
     })
       .populate('offender', 'personalInfo.firstName personalInfo.lastName offenderId personalInfo.dateOfBirth')
       .populate('offenceCatalogue', 'name code category description')
@@ -167,10 +212,13 @@ router.post('/', protect, checkUserManagement, offenderOffenceValidationRules, a
       });
     }
 
+    // Handle organisationId - extract _id if populated
+    const userOrgId = req.user.organisationId._id || req.user.organisationId;
+
     // Verify offender exists and belongs to organization
     const offender = await Offender.findOne({
       _id: req.body.offender,
-      organisationId: req.user.organisationId
+      organisationId: userOrgId
     });
 
     if (!offender) {
@@ -183,7 +231,7 @@ router.post('/', protect, checkUserManagement, offenderOffenceValidationRules, a
     // Verify offence catalogue exists
     const offenceCatalogue = await OffenceCatalogue.findOne({
       _id: req.body.offenceCatalogue,
-      organisationId: req.user.organisationId
+      organisationId: userOrgId
     });
 
     if (!offenceCatalogue) {
@@ -198,7 +246,7 @@ router.post('/', protect, checkUserManagement, offenderOffenceValidationRules, a
       const victimIds = req.body.victims.map(v => v.victim);
       const victims = await Victim.find({
         _id: { $in: victimIds },
-        organisationId: req.user.organisationId
+        organisationId: userOrgId
       });
 
       if (victims.length !== victimIds.length) {
@@ -209,9 +257,19 @@ router.post('/', protect, checkUserManagement, offenderOffenceValidationRules, a
       }
     }
 
+    // Auto-generate case number if not provided
+    let caseNumber = req.body.crimeInfo?.caseNumber;
+    if (!caseNumber || caseNumber.trim() === '') {
+      caseNumber = await generateNextCaseNumber(userOrgId);
+    }
+
     const crimeData = {
       ...req.body,
-      organisationId: req.user.organisationId,
+      crimeInfo: {
+        ...req.body.crimeInfo,
+        caseNumber: caseNumber
+      },
+      organisationId: userOrgId,
       createdBy: req.user.id
     };
 
@@ -269,9 +327,11 @@ router.put('/:id', protect, offenderOffenceValidationRules, async (req, res) => 
       });
     }
 
+    // Handle organisationId - extract _id if populated
+    const userOrgId = req.user.organisationId._id || req.user.organisationId;
     const crime = await OffenderOffence.findOne({
       _id: req.params.id,
-      organisationId: req.user.organisationId
+      organisationId: userOrgId
     });
 
     if (!crime) {
@@ -312,9 +372,11 @@ router.put('/:id', protect, offenderOffenceValidationRules, async (req, res) => 
 // Delete crime
 router.delete('/:id', protect, async (req, res) => {
   try {
+    // Handle organisationId - extract _id if populated
+    const userOrgId = req.user.organisationId._id || req.user.organisationId;
     const crime = await OffenderOffence.findOne({
       _id: req.params.id,
-      organisationId: req.user.organisationId
+      organisationId: userOrgId
     });
 
     if (!crime) {
@@ -360,9 +422,11 @@ router.get('/offender/:offenderId', protect, async (req, res) => {
   try {
     const { page = 1, limit = 10, sortBy = 'dateTime.dateCommitted', sortOrder = 'desc' } = req.query;
 
+    // Handle organisationId - extract _id if populated
+    const userOrgId = req.user.organisationId._id || req.user.organisationId;
     const query = {
       offender: req.params.offenderId,
-      organisationId: req.user.organisationId
+      organisationId: userOrgId
     };
 
     const sortOptions = {};
@@ -380,11 +444,13 @@ router.get('/offender/:offenderId', protect, async (req, res) => {
 
     res.json({
       success: true,
-      data: crimes,
-      pagination: {
-        current: parseInt(page),
-        pages: Math.ceil(total / limit),
-        total
+      data: {
+        crimes: crimes,
+        pagination: {
+          current: parseInt(page),
+          pages: Math.ceil(total / limit),
+          total
+        }
       }
     });
   } catch (error) {
@@ -399,7 +465,8 @@ router.get('/offender/:offenderId', protect, async (req, res) => {
 // Get crime statistics
 router.get('/stats/overview', protect, async (req, res) => {
   try {
-    const organisationId = req.user.organisationId;
+    // Handle organisationId - extract _id if populated
+    const organisationId = req.user.organisationId._id || req.user.organisationId;
 
     const [
       totalCrimes,

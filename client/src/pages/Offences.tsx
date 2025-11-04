@@ -50,6 +50,7 @@ import { Label } from '../components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Badge } from '../components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '../components/ui/dialog';
 import {
   Table,
   TableBody,
@@ -65,13 +66,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '../components/ui/dropdown-menu';
-import { Offence } from '../types';
+import { OffenceCatalogueCatalogue } from '../types';
 import api from '../services/api';
 
-const Offences: React.FC = () => {
+const OffenceCatalogues: React.FC = () => {
   const navigate = useNavigate();
   
-  const [offences, setOffences] = useState<Offence[]>([]);
+  const [offences, setOffenceCatalogues] = useState<OffenceCatalogue[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>('');
   const [searchTerm, setSearchTerm] = useState('');
@@ -80,18 +81,18 @@ const Offences: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [totalOffences, setTotalOffences] = useState(0);
-  const [selectedOffence, setSelectedOffence] = useState<Offence | null>(null);
+  const [totalOffenceCatalogues, setTotalOffenceCatalogues] = useState(0);
+  const [selectedOffenceCatalogue, setSelectedOffenceCatalogue] = useState<OffenceCatalogue | null>(null);
   const [showViewDialog, setShowViewDialog] = useState(false);
   const [isFiltersExpanded, setIsFiltersExpanded] = useState(false);
 
   const limit = 10;
 
   useEffect(() => {
-    fetchOffences();
+    fetchOffenceCatalogues();
   }, [currentPage, searchTerm, categoryFilter, severityFilter, statusFilter]);
 
-  const fetchOffences = async () => {
+  const fetchOffenceCatalogues = async () => {
     try {
       setLoading(true);
       const params = new URLSearchParams({
@@ -100,15 +101,15 @@ const Offences: React.FC = () => {
         ...(searchTerm && { search: searchTerm }),
         ...(categoryFilter && categoryFilter !== 'all' && { category: categoryFilter }),
         ...(severityFilter && severityFilter !== 'all' && { severity: severityFilter }),
-        ...(statusFilter && statusFilter !== 'all' && { status: statusFilter }),
+        ...(statusFilter && statusFilter !== 'all' && { isActive: statusFilter === 'active' ? 'true' : 'false' }),
       });
 
       const response = await api.get(`/offence-catalogues?${params}`);
       
       if (response.data.success) {
-        setOffences(response.data.data.offences);
-        setTotalPages(response.data.data.pagination.pages);
-        setTotalOffences(response.data.data.pagination.total);
+        setOffenceCatalogues(response.data.data);
+        setTotalPages(response.data.pagination.pages);
+        setTotalOffenceCatalogues(response.data.pagination.total);
       } else {
         setError(response.data.message || 'Failed to fetch offences');
       }
@@ -135,33 +136,32 @@ const Offences: React.FC = () => {
     setCurrentPage(1);
   };
 
-  const handleViewOffence = (offence: Offence) => {
-    setSelectedOffence(offence);
+  const handleViewOffenceCatalogue = (offence: OffenceCatalogue) => {
+    setSelectedOffenceCatalogue(offence);
     setShowViewDialog(true);
   };
 
-  const handleEditOffence = (offence: Offence) => {
+  const handleEditOffenceCatalogue = (offence: OffenceCatalogue) => {
     navigate(`/offences/${offence._id}/edit`);
   };
 
-  const handleDeleteOffence = async (offence: Offence) => {
+  const handleDeleteOffenceCatalogue = async (offence: OffenceCatalogue) => {
     if (window.confirm(`Are you sure you want to delete offence ${offence.name}?`)) {
       try {
-        await api.deleteOffenceCatalogue(offence._id);
-        fetchOffences();
+        await api.deleteOffenceCatalogueCatalogue(offence._id);
+        fetchOffenceCatalogues();
       } catch (err: any) {
         setError(err.response?.data?.message || 'Failed to delete offence');
       }
     }
   };
 
-  const handleToggleStatus = async (offence: Offence) => {
+  const handleToggleStatus = async (offence: OffenceCatalogue) => {
     try {
       await api.updateOffenceCatalogue(offence._id, {
-        ...offence,
         isActive: !offence.isActive
       });
-      fetchOffences();
+      fetchOffenceCatalogues();
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to update offence status');
     }
@@ -208,6 +208,25 @@ const Offences: React.FC = () => {
     );
   };
 
+  const getSeverityBadge = (severity: string) => {
+    const color = getSeverityColor(severity);
+    return (
+      <Badge className={color}>
+        {formatSeverity(severity)}
+      </Badge>
+    );
+  };
+
+  const getRiskLevelColor = (riskLevel: string) => {
+    switch (riskLevel?.toLowerCase()) {
+      case 'low': return 'bg-green-100 text-green-800 border-green-200';
+      case 'medium': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      case 'high': return 'bg-orange-100 text-orange-800 border-orange-200';
+      case 'critical': return 'bg-red-100 text-red-800 border-red-200';
+      default: return 'bg-gray-100 text-gray-800 border-gray-200';
+    }
+  };
+
   const formatCategory = (category: string) => {
     return category.split('_').map(word => 
       word.charAt(0).toUpperCase() + word.slice(1)
@@ -228,7 +247,7 @@ const Offences: React.FC = () => {
               <AlertTriangle className="w-6 h-6 text-blue-600 animate-pulse" />
             </div>
           </div>
-          <h3 className="text-xl font-semibold text-gray-900 mb-2">Loading Offences</h3>
+          <h3 className="text-xl font-semibold text-gray-900 mb-2">Loading OffenceCatalogues</h3>
           <p className="text-gray-600">Please wait while we fetch your data...</p>
         </div>
       </div>
@@ -244,10 +263,10 @@ const Offences: React.FC = () => {
               <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <AlertCircle className="w-8 h-8 text-red-600" />
               </div>
-              <h3 className="text-xl font-semibold text-red-900 mb-2">Error Loading Offences</h3>
+              <h3 className="text-xl font-semibold text-red-900 mb-2">Error Loading OffenceCatalogues</h3>
               <p className="text-red-700 mb-6">{error}</p>
               <Button 
-                onClick={() => fetchOffences()} 
+                onClick={() => fetchOffenceCatalogues()} 
                 className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
               >
                 <RefreshCw className="w-4 h-4 mr-2" />
@@ -280,14 +299,14 @@ const Offences: React.FC = () => {
                   <AlertTriangle className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                  <h1 className="text-4xl font-bold">Offence Management</h1>
+                  <h1 className="text-4xl font-bold">OffenceCatalogue Management</h1>
                   <p className="text-blue-100 text-lg">Manage and monitor all offence types</p>
                 </div>
               </div>
               <div className="flex items-center space-x-6 text-blue-100">
                 <div className="flex items-center space-x-2">
                   <Scale className="w-5 h-5" />
-                  <span className="text-sm">{totalOffences} Total Offences</span>
+                  <span className="text-sm">{totalOffenceCatalogues} Total OffenceCatalogues</span>
                 </div>
                 <div className="flex items-center space-x-2">
                   <Activity className="w-5 h-5" />
@@ -305,7 +324,7 @@ const Offences: React.FC = () => {
                 className="bg-white/20 hover:bg-white/30 text-white border-white/30 backdrop-blur-sm px-6 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
               >
                 <Plus className="w-5 h-5 mr-2" />
-                Add Offence
+                Add OffenceCatalogue
               </Button>
             </div>
           </div>
@@ -323,7 +342,7 @@ const Offences: React.FC = () => {
             <CardTitle className="flex items-center justify-between text-gray-900">
               <div className="flex items-center">
                 <Filter className="w-5 h-5 mr-2 text-blue-600" />
-                Search & Filter Offences
+                Search & Filter OffenceCatalogues
               </div>
               {isFiltersExpanded ? (
                 <ChevronUp className="w-5 h-5 text-gray-600" />
@@ -337,7 +356,7 @@ const Offences: React.FC = () => {
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div>
                   <Label htmlFor="search" className="text-sm font-medium text-gray-700 mb-2 block">
-                    Search Offences
+                    Search OffenceCatalogues
                   </Label>
                   <div className="relative">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
@@ -362,12 +381,12 @@ const Offences: React.FC = () => {
                       <SelectItem value="all" className="text-black hover:bg-blue-600 hover:text-white focus:bg-blue-600 focus:text-white cursor-pointer">All Categories</SelectItem>
                       <SelectItem value="violent_crime" className="text-black hover:bg-blue-600 hover:text-white focus:bg-blue-600 focus:text-white cursor-pointer">Violent Crime</SelectItem>
                       <SelectItem value="property_crime" className="text-black hover:bg-blue-600 hover:text-white focus:bg-blue-600 focus:text-white cursor-pointer">Property Crime</SelectItem>
-                      <SelectItem value="drug_offence" className="text-black hover:bg-blue-600 hover:text-white focus:bg-blue-600 focus:text-white cursor-pointer">Drug Offence</SelectItem>
+                      <SelectItem value="drug_offence" className="text-black hover:bg-blue-600 hover:text-white focus:bg-blue-600 focus:text-white cursor-pointer">Drug OffenceCatalogue</SelectItem>
                       <SelectItem value="white_collar_crime" className="text-black hover:bg-blue-600 hover:text-white focus:bg-blue-600 focus:text-white cursor-pointer">White Collar Crime</SelectItem>
                       <SelectItem value="cyber_crime" className="text-black hover:bg-blue-600 hover:text-white focus:bg-blue-600 focus:text-white cursor-pointer">Cyber Crime</SelectItem>
                       <SelectItem value="traffic_violation" className="text-black hover:bg-blue-600 hover:text-white focus:bg-blue-600 focus:text-white cursor-pointer">Traffic Violation</SelectItem>
                       <SelectItem value="public_order" className="text-black hover:bg-blue-600 hover:text-white focus:bg-blue-600 focus:text-white cursor-pointer">Public Order</SelectItem>
-                      <SelectItem value="sexual_offence" className="text-black hover:bg-blue-600 hover:text-white focus:bg-blue-600 focus:text-white cursor-pointer">Sexual Offence</SelectItem>
+                      <SelectItem value="sexual_offence" className="text-black hover:bg-blue-600 hover:text-white focus:bg-blue-600 focus:text-white cursor-pointer">Sexual OffenceCatalogue</SelectItem>
                       <SelectItem value="terrorism" className="text-black hover:bg-blue-600 hover:text-white focus:bg-blue-600 focus:text-white cursor-pointer">Terrorism</SelectItem>
                       <SelectItem value="other" className="text-black hover:bg-blue-600 hover:text-white focus:bg-blue-600 focus:text-white cursor-pointer">Other</SelectItem>
                     </SelectContent>
@@ -411,14 +430,14 @@ const Offences: React.FC = () => {
           )}
         </Card>
 
-        {/* Offences Table */}
+        {/* OffenceCatalogues Table */}
         <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-xl">
           <CardContent className="p-0">
             <div className="border border-gray-200 rounded-xl overflow-hidden">
               <Table>
                 <TableHeader className="bg-gray-50">
                   <TableRow>
-                    <TableHead className="font-semibold">Offence</TableHead>
+                    <TableHead className="font-semibold">OffenceCatalogue</TableHead>
                     <TableHead className="font-semibold">Category</TableHead>
                     <TableHead className="font-semibold">Severity</TableHead>
                     <TableHead className="font-semibold">Status</TableHead>
@@ -473,7 +492,7 @@ const Offences: React.FC = () => {
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => handleViewOffence(offence)}
+                            onClick={() => handleViewOffenceCatalogue(offence)}
                             className="h-8 px-3 text-blue-600 hover:bg-blue-50"
                           >
                             <Eye className="w-4 h-4 mr-1" />
@@ -487,11 +506,11 @@ const Offences: React.FC = () => {
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" className="w-48 bg-white border border-gray-200 shadow-lg">
                               <DropdownMenuItem 
-                                onClick={() => handleEditOffence(offence)}
+                                onClick={() => handleEditOffenceCatalogue(offence)}
                                 className="text-black hover:bg-blue-600 hover:text-white focus:bg-blue-600 focus:text-white cursor-pointer"
                               >
                                 <Edit className="w-4 h-4 mr-2" />
-                                Edit Offence
+                                Edit OffenceCatalogue
                               </DropdownMenuItem>
                               <DropdownMenuItem 
                                 onClick={() => handleToggleStatus(offence)}
@@ -511,11 +530,11 @@ const Offences: React.FC = () => {
                               </DropdownMenuItem>
                               <DropdownMenuSeparator className="bg-gray-200" />
                               <DropdownMenuItem 
-                                onClick={() => handleDeleteOffence(offence)}
+                                onClick={() => handleDeleteOffenceCatalogue(offence)}
                                 className="text-red-600 hover:bg-blue-600 hover:text-white focus:bg-blue-600 focus:text-white cursor-pointer"
                               >
                                 <Trash2 className="w-4 h-4 mr-2" />
-                                Delete Offence
+                                Delete OffenceCatalogue
                               </DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>
@@ -535,7 +554,7 @@ const Offences: React.FC = () => {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div className="text-sm text-gray-600">
-                  Showing {((currentPage - 1) * limit) + 1} to {Math.min(currentPage * limit, totalOffences)} of {totalOffences} offences
+                  Showing {((currentPage - 1) * limit) + 1} to {Math.min(currentPage * limit, totalOffenceCatalogues)} of {totalOffenceCatalogues} offences
                 </div>
                 <div className="flex items-center space-x-2">
                   <Button
@@ -574,7 +593,7 @@ const Offences: React.FC = () => {
               <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
                 <AlertTriangle className="w-10 h-10 text-gray-400" />
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">No Offences Found</h3>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">No OffenceCatalogues Found</h3>
               <p className="text-gray-600 mb-6">
                 {searchTerm || categoryFilter !== 'all' || severityFilter !== 'all' || statusFilter !== 'all'
                   ? 'Try adjusting your search criteria or filters.'
@@ -585,14 +604,222 @@ const Offences: React.FC = () => {
                 className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
               >
                 <Plus className="w-5 h-5 mr-2" />
-                Add First Offence
+                Add First OffenceCatalogue
               </Button>
             </CardContent>
           </Card>
         )}
       </div>
+
+      {/* View Offence Dialog */}
+      <Dialog open={showViewDialog} onOpenChange={(open) => {
+        // Only close when explicitly requested (not on outside click)
+        if (!open) {
+          setShowViewDialog(false);
+        }
+      }}>
+        <DialogContent 
+          className="max-w-4xl max-h-[90vh] overflow-y-auto"
+          onInteractOutside={(e) => {
+            e.preventDefault();
+          }}
+        >
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-bold text-black flex items-center gap-2">
+              <AlertTriangle className="w-6 h-6 text-blue-600" />
+              Offence Details
+            </DialogTitle>
+            <DialogDescription className="text-gray-600">
+              View complete details of the offence catalogue entry
+            </DialogDescription>
+          </DialogHeader>
+          
+          {selectedOffenceCatalogue && (
+            <div className="space-y-6 mt-4">
+              {/* Basic Information */}
+              <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-200">
+                <CardHeader>
+                  <CardTitle className="text-lg font-semibold text-black flex items-center gap-2">
+                    <FileText className="w-5 h-5 text-blue-600" />
+                    Basic Information
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label className="text-sm font-semibold text-gray-600">Name</Label>
+                      <p className="text-black font-medium">{selectedOffenceCatalogue.name}</p>
+                    </div>
+                    <div>
+                      <Label className="text-sm font-semibold text-gray-600">Code</Label>
+                      <p className="text-black font-medium">{selectedOffenceCatalogue.code}</p>
+                    </div>
+                    <div>
+                      <Label className="text-sm font-semibold text-gray-600">Category</Label>
+                      <p className="text-black font-medium">{formatCategory(selectedOffenceCatalogue.category || '')}</p>
+                    </div>
+                    <div>
+                      <Label className="text-sm font-semibold text-gray-600">Severity</Label>
+                      <div className="mt-1">
+                        {getSeverityBadge(selectedOffenceCatalogue.severity)}
+                      </div>
+                    </div>
+                    <div className="md:col-span-2">
+                      <Label className="text-sm font-semibold text-gray-600">Description</Label>
+                      <p className="text-black">{selectedOffenceCatalogue.description || 'N/A'}</p>
+                    </div>
+                    <div className="md:col-span-2">
+                      <Label className="text-sm font-semibold text-gray-600">Legal Definition</Label>
+                      <p className="text-black">{selectedOffenceCatalogue.legalDefinition || 'N/A'}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Penalties */}
+              {selectedOffenceCatalogue.penalties && (
+                <Card className="bg-gradient-to-br from-orange-50 to-red-50 border-2 border-orange-200">
+                  <CardHeader>
+                    <CardTitle className="text-lg font-semibold text-black flex items-center gap-2">
+                      <Scale className="w-5 h-5 text-orange-600" />
+                      Penalties
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <Label className="text-sm font-semibold text-gray-600">Minimum Sentence</Label>
+                        <p className="text-black">{selectedOffenceCatalogue.penalties.minimumSentence || 'N/A'}</p>
+                      </div>
+                      <div>
+                        <Label className="text-sm font-semibold text-gray-600">Maximum Sentence</Label>
+                        <p className="text-black">{selectedOffenceCatalogue.penalties.maximumSentence || 'N/A'}</p>
+                      </div>
+                      {selectedOffenceCatalogue.penalties.fineRange && (
+                        <>
+                          <div>
+                            <Label className="text-sm font-semibold text-gray-600">Minimum Fine</Label>
+                            <p className="text-black">
+                              {selectedOffenceCatalogue.penalties.fineRange.minimum 
+                                ? `${selectedOffenceCatalogue.penalties.fineRange.minimum} ${selectedOffenceCatalogue.penalties.fineRange.currency || 'USD'}`
+                                : 'N/A'}
+                            </p>
+                          </div>
+                          <div>
+                            <Label className="text-sm font-semibold text-gray-600">Maximum Fine</Label>
+                            <p className="text-black">
+                              {selectedOffenceCatalogue.penalties.fineRange.maximum 
+                                ? `${selectedOffenceCatalogue.penalties.fineRange.maximum} ${selectedOffenceCatalogue.penalties.fineRange.currency || 'USD'}`
+                                : 'N/A'}
+                            </p>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Risk Assessment */}
+              {selectedOffenceCatalogue.riskFactors && (
+                <Card className="bg-gradient-to-br from-purple-50 to-pink-50 border-2 border-purple-200">
+                  <CardHeader>
+                    <CardTitle className="text-lg font-semibold text-black flex items-center gap-2">
+                      <Shield className="w-5 h-5 text-purple-600" />
+                      Risk Assessment
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <Label className="text-sm font-semibold text-gray-600">Overall Risk Level</Label>
+                        <div className="mt-1">
+                          <Badge className={getRiskLevelColor(selectedOffenceCatalogue.riskLevel)}>
+                            {selectedOffenceCatalogue.riskLevel?.toUpperCase() || 'N/A'}
+                          </Badge>
+                        </div>
+                      </div>
+                      <div>
+                        <Label className="text-sm font-semibold text-gray-600">Violence Risk</Label>
+                        <div className="mt-1">
+                          <Badge className={getRiskLevelColor(selectedOffenceCatalogue.riskFactors.violenceRisk)}>
+                            {selectedOffenceCatalogue.riskFactors.violenceRisk?.toUpperCase() || 'N/A'}
+                          </Badge>
+                        </div>
+                      </div>
+                      <div>
+                        <Label className="text-sm font-semibold text-gray-600">Recidivism Risk</Label>
+                        <div className="mt-1">
+                          <Badge className={getRiskLevelColor(selectedOffenceCatalogue.riskFactors.recidivismRisk)}>
+                            {selectedOffenceCatalogue.riskFactors.recidivismRisk?.toUpperCase() || 'N/A'}
+                          </Badge>
+                        </div>
+                      </div>
+                      <div>
+                        <Label className="text-sm font-semibold text-gray-600">Public Safety Risk</Label>
+                        <div className="mt-1">
+                          <Badge className={getRiskLevelColor(selectedOffenceCatalogue.riskFactors.publicSafetyRisk)}>
+                            {selectedOffenceCatalogue.riskFactors.publicSafetyRisk?.toUpperCase() || 'N/A'}
+                          </Badge>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Status and Metadata */}
+              <Card className="bg-gradient-to-br from-gray-50 to-slate-50 border-2 border-gray-200">
+                <CardHeader>
+                  <CardTitle className="text-lg font-semibold text-black flex items-center gap-2">
+                    <Settings className="w-5 h-5 text-gray-600" />
+                    Status & Metadata
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label className="text-sm font-semibold text-gray-600">Status</Label>
+                      <div className="mt-1">
+                        {getStatusBadge(selectedOffenceCatalogue.isActive)}
+                      </div>
+                    </div>
+                    {selectedOffenceCatalogue.notes && (
+                      <div className="md:col-span-2">
+                        <Label className="text-sm font-semibold text-gray-600">Notes</Label>
+                        <p className="text-black">{selectedOffenceCatalogue.notes}</p>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Actions */}
+              <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
+                <Button
+                  variant="outline"
+                  onClick={() => setShowViewDialog(false)}
+                  className="text-black"
+                >
+                  Close
+                </Button>
+                <Button
+                  onClick={() => {
+                    setShowViewDialog(false);
+                    handleEditOffenceCatalogue(selectedOffenceCatalogue);
+                  }}
+                  className="bg-blue-600 hover:bg-blue-700 text-white"
+                >
+                  <Edit className="w-4 h-4 mr-2" />
+                  Edit
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
 
-export default Offences;
+export default OffenceCatalogues;

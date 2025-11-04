@@ -42,8 +42,24 @@ import {
   Clock,
   ChevronLeft,
   ChevronRight,
-  X
+  X,
+  MoreVertical
 } from 'lucide-react';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '../components/ui/table';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '../components/ui/dropdown-menu';
 
 const OffenderView: React.FC = () => {
   const { user } = useAuth();
@@ -119,9 +135,12 @@ const OffenderView: React.FC = () => {
     try {
       const res = await apiService.getCrimesByOffender(offenderId);
       if (res.success) {
-        setCrimes(res.data || []);
+        // Handle both response structures: res.data (array) or res.data.crimes (from new structure)
+        const crimesData = res.data?.crimes || res.data || [];
+        setCrimes(Array.isArray(crimesData) ? crimesData : []);
       }
     } catch (e) {
+      console.error('Error fetching crimes:', e);
       // ignore
     }
   };
@@ -200,6 +219,41 @@ const OffenderView: React.FC = () => {
     }
     
     return age;
+  };
+
+  const getCrimeStatusBadge = (status: string) => {
+    const statusColors: Record<string, string> = {
+      reported: 'bg-blue-100 text-blue-800 border-blue-200',
+      under_investigation: 'bg-yellow-100 text-yellow-800 border-yellow-200',
+      charged: 'bg-orange-100 text-orange-800 border-orange-200',
+      trial: 'bg-purple-100 text-purple-800 border-purple-200',
+      convicted: 'bg-red-100 text-red-800 border-red-200',
+      acquitted: 'bg-green-100 text-green-800 border-green-200',
+      dismissed: 'bg-gray-100 text-gray-800 border-gray-200',
+      plea_bargain: 'bg-indigo-100 text-indigo-800 border-indigo-200',
+    };
+    
+    return (
+      <Badge className={statusColors[status] || 'bg-gray-100 text-gray-800 border-gray-200'}>
+        {status.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+      </Badge>
+    );
+  };
+
+  const getSeverityBadge = (severity: string) => {
+    const severityColors: Record<string, string> = {
+      minor: 'bg-green-100 text-green-800 border-green-200',
+      moderate: 'bg-yellow-100 text-yellow-800 border-yellow-200',
+      serious: 'bg-orange-100 text-orange-800 border-orange-200',
+      major: 'bg-red-100 text-red-800 border-red-200',
+      felony: 'bg-red-200 text-red-900 border-red-300',
+    };
+    
+    return (
+      <Badge className={severityColors[severity] || 'bg-gray-100 text-gray-800 border-gray-200'}>
+        {severity.charAt(0).toUpperCase() + severity.slice(1)}
+      </Badge>
+    );
   };
 
   const handlePhotoUpload = async (file: File) => {
@@ -434,12 +488,14 @@ const OffenderView: React.FC = () => {
                   <SignedImage
                     src={selectedOffender.profilePhoto}
                     alt={`${selectedOffender.personalInfo.firstName} ${selectedOffender.personalInfo.lastName}`}
-                    className="h-24 w-24 rounded-lg object-cover border-4 border-blue-100 shadow-lg"
+                    className={`h-24 w-24 rounded-lg object-cover border-4 shadow-lg ${
+                      crimes.length > 0 ? 'border-red-500' : 'border-blue-100'
+                    }`}
                     fallback={getInitials(selectedOffender.personalInfo.firstName, selectedOffender.personalInfo.lastName)}
                     size="xl"
                   />
                 ) : (
-                  <Avatar className="h-24 w-24 border-4 border-blue-100 shadow-lg rounded-lg">
+                  <Avatar className="h-24 w-24 border-4 border-red-500 shadow-lg rounded-lg">
                     <AvatarFallback className="bg-gradient-to-br from-blue-500 to-blue-600 text-white text-3xl rounded-lg font-bold">
                       {getInitials(selectedOffender.personalInfo.firstName, selectedOffender.personalInfo.lastName)}
                     </AvatarFallback>
@@ -858,72 +914,137 @@ const OffenderView: React.FC = () => {
               )}
             </div>
 
-            {/* All Offences List */}
-            {crimes.length > 0 && (
-              <Card className="border-2 border-slate-300 shadow-lg bg-white">
+            {/* Crimes Table */}
+            {crimes.length > 0 ? (
+              <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-xl">
                 <CardHeader className="pb-3 bg-gradient-to-r from-slate-700 to-slate-800">
                   <div className="flex items-center justify-between">
                     <CardTitle className="text-lg font-semibold text-white flex items-center">
                       <FileText className="w-5 h-5 mr-2" />
-                      Offence History
+                      Criminal History
                     </CardTitle>
                     <Badge className="bg-white text-slate-700 text-xs font-semibold px-3 py-1">
-                      {crimes.length} {crimes.length === 1 ? 'Offence' : 'Offences'}
+                      {crimes.length} {crimes.length === 1 ? 'Crime' : 'Crimes'}
                     </Badge>
                   </div>
                 </CardHeader>
-                <CardContent className="pt-4">
-                  <div className="space-y-3">
-                    {crimes.map((crime, index) => (
-                      <div key={index} className="group relative border-l-4 border-slate-400 bg-gradient-to-r from-slate-50 to-white rounded-r-lg p-4 hover:shadow-md transition-all duration-200 hover:border-slate-600">
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1">
-                            <div className="flex items-start space-x-3 mb-2">
-                              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center group-hover:bg-slate-300 transition-colors">
-                                <span className="text-xs font-bold text-slate-700">#{index + 1}</span>
-                              </div>
-                              <div className="flex-1">
-                                <h4 className="text-base font-semibold text-slate-900 mb-1">
-                                  {typeof crime.offenceCatalogue === 'object' ? (crime.offenceCatalogue as any).name : 'Offence'}
-                                </h4>
-                                <div className="flex flex-wrap items-center gap-3 text-xs text-slate-600 mb-2">
-                                  <div className="flex items-center">
-                                    <Calendar className="w-3 h-3 mr-1" />
-                                    <span className="font-medium">Committed:</span> {formatDate(crime.dateTime.dateCommitted)}
-                                  </div>
-                                  {crime.dateTime.dateArrested && (
-                                    <div className="flex items-center">
-                                      <Shield className="w-3 h-3 mr-1" />
-                                      <span className="font-medium">Arrested:</span> {formatDate(crime.dateTime.dateArrested)}
-                                    </div>
-                                  )}
-                                  {crime.location?.city && (
-                                    <div className="flex items-center">
-                                      <MapPin className="w-3 h-3 mr-1" />
-                                      {crime.location.city}
-                                    </div>
-                                  )}
-                                </div>
-                                {crime.notes && (
-                                  <div className="mt-2 p-2 bg-slate-100 rounded text-xs text-slate-700 border-l-2 border-slate-300">
-                                    <span className="font-medium">Notes:</span> {crime.notes}
-                                  </div>
+                <CardContent className="p-0">
+                  <div className="border border-gray-200 rounded-xl overflow-hidden">
+                    <Table>
+                      <TableHeader className="bg-gray-50">
+                        <TableRow>
+                          <TableHead className="font-semibold">Case Number</TableHead>
+                          <TableHead className="font-semibold">Offence</TableHead>
+                          <TableHead className="font-semibold">Date Committed</TableHead>
+                          <TableHead className="font-semibold">Location</TableHead>
+                          <TableHead className="font-semibold">Status</TableHead>
+                          <TableHead className="font-semibold">Severity</TableHead>
+                          <TableHead className="font-semibold text-right">Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {crimes.map((crime) => (
+                          <TableRow key={crime._id} className="hover:bg-gray-50">
+                            <TableCell className="font-medium text-gray-900">
+                              {crime.crimeInfo.caseNumber}
+                            </TableCell>
+                            <TableCell className="text-gray-600">
+                              <div className="flex flex-col">
+                                <span className="font-medium">
+                                  {typeof crime.offenceCatalogue === 'object' 
+                                    ? (crime.offenceCatalogue as any).name 
+                                    : crime.crimeInfo.title}
+                                </span>
+                                {typeof crime.offenceCatalogue === 'object' && (crime.offenceCatalogue as any).code && (
+                                  <span className="text-xs text-gray-500">
+                                    {(crime.offenceCatalogue as any).code}
+                                  </span>
                                 )}
                               </div>
-                            </div>
-                          </div>
-                          <div className="flex flex-col items-end space-y-2 ml-4">
-                            <Badge 
-                              variant={crime.legal.status === 'convicted' ? 'destructive' : crime.legal.status === 'pending' ? 'default' : 'secondary'} 
-                              className="text-xs font-semibold px-3 py-1"
-                            >
-                              {crime.legal.status}
-                            </Badge>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
+                            </TableCell>
+                            <TableCell className="text-gray-600">
+                              <div className="flex items-center space-x-2">
+                                <Calendar className="w-4 h-4 text-gray-500" />
+                                <span className="text-sm">{formatDate(crime.dateTime.dateCommitted)}</span>
+                              </div>
+                            </TableCell>
+                            <TableCell className="text-gray-600">
+                              <span className="flex items-center gap-1">
+                                <MapPin className="h-4 w-4 text-gray-500" />
+                                {crime.location.city}, {crime.location.state}
+                              </span>
+                            </TableCell>
+                            <TableCell>
+                              {getCrimeStatusBadge(crime.legal.status)}
+                            </TableCell>
+                            <TableCell>
+                              {getSeverityBadge(crime.legal.severity)}
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <div className="flex items-center justify-end space-x-2">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => navigate(`/crimes/${crime._id}`)}
+                                  className="h-8 px-3 text-blue-600 hover:bg-blue-50"
+                                >
+                                  <Eye className="w-4 h-4 mr-1" />
+                                  View
+                                </Button>
+                                <DropdownMenu>
+                                  <DropdownMenuTrigger asChild>
+                                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                                      <MoreVertical className="h-4 w-4" />
+                                    </Button>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent align="end" className="bg-white border border-gray-200 shadow-lg">
+                                    <DropdownMenuItem 
+                                      className="text-black hover:bg-blue-600 hover:text-white focus:bg-blue-600 focus:text-white cursor-pointer"
+                                      onClick={() => navigate(`/crimes/${crime._id}/edit`)}
+                                    >
+                                      <Edit className="h-4 w-4 mr-2" />
+                                      Edit Crime
+                                    </DropdownMenuItem>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem 
+                                      className="text-red-600 hover:bg-red-50 hover:text-red-700 focus:bg-red-50 focus:text-red-700 cursor-pointer"
+                                      onClick={() => {
+                                        if (window.confirm('Are you sure you want to delete this crime record?')) {
+                                          apiService.deleteCrime(crime._id).then(() => {
+                                            fetchCrimes(id!);
+                                          });
+                                        }
+                                      }}
+                                    >
+                                      <Trash2 className="h-4 w-4 mr-2" />
+                                      Delete
+                                    </DropdownMenuItem>
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
                   </div>
+                </CardContent>
+              </Card>
+            ) : (
+              <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-xl">
+                <CardContent className="p-8 text-center">
+                  <Shield className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                  <p className="text-gray-500 text-lg font-medium mb-2">No crimes found</p>
+                  <p className="text-gray-400 text-sm mb-4">
+                    This offender has no recorded criminal history.
+                  </p>
+                  <Button
+                    onClick={() => navigate(`/crimes/new?offender=${id}`)}
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
+                  >
+                    <Plus className="w-5 h-5 mr-2" />
+                    Add Crime Record
+                  </Button>
                 </CardContent>
               </Card>
             )}

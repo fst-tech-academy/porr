@@ -245,21 +245,21 @@ const CreateVictimPage: React.FC = () => {
     switch (currentStep) {
       case 0:
         return (
-          <div className="space-y-8">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <div className="space-y-2">
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+              <div className="space-y-1">
                 <Label htmlFor="firstName" className="text-sm font-semibold text-black">First Name *</Label>
                 <Input
                   id="firstName"
                   {...form.register('personalInfo.firstName')}
                   placeholder="Enter first name"
-                  className={`h-12 text-black ${form.formState.errors.personalInfo?.firstName ? 'border-red-500' : ''}`}
+                  className={`h-10 text-black text-sm ${form.formState.errors.personalInfo?.firstName ? 'border-red-500' : ''}`}
                 />
                 {form.formState.errors.personalInfo?.firstName && (
-                  <p className="text-sm text-red-500 text-black">{form.formState.errors.personalInfo.firstName.message}</p>
+                  <p className="text-xs text-red-500 text-black">{form.formState.errors.personalInfo.firstName.message}</p>
                 )}
               </div>
-              <div className="space-y-2">
+              <div className="space-y-1">
                 <Label htmlFor="middleName" className="text-sm font-semibold text-black">Middle Name</Label>
                 <Input
                   id="middleName"
@@ -268,40 +268,40 @@ const CreateVictimPage: React.FC = () => {
                   className="h-12 text-black"
                 />
               </div>
-              <div className="space-y-2">
+              <div className="space-y-1">
                 <Label htmlFor="lastName" className="text-sm font-semibold text-black">Last Name *</Label>
                 <Input
                   id="lastName"
                   {...form.register('personalInfo.lastName')}
                   placeholder="Enter last name"
-                  className={`h-12 text-black ${form.formState.errors.personalInfo?.lastName ? 'border-red-500' : ''}`}
+                  className={`h-10 text-black text-sm ${form.formState.errors.personalInfo?.lastName ? 'border-red-500' : ''}`}
                 />
                 {form.formState.errors.personalInfo?.lastName && (
-                  <p className="text-sm text-red-500 text-black">{form.formState.errors.personalInfo.lastName.message}</p>
+                  <p className="text-xs text-red-500 text-black">{form.formState.errors.personalInfo.lastName.message}</p>
                 )}
               </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div className="space-y-2">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <div className="space-y-1">
                 <Label htmlFor="dateOfBirth" className="text-sm font-semibold text-black">Date of Birth *</Label>
                 <Input
                   id="dateOfBirth"
                   type="date"
                   {...form.register('personalInfo.dateOfBirth')}
-                  className={`h-12 text-black ${form.formState.errors.personalInfo?.dateOfBirth ? 'border-red-500' : ''}`}
+                  className={`h-10 text-black text-sm ${form.formState.errors.personalInfo?.dateOfBirth ? 'border-red-500' : ''}`}
                 />
                 {form.formState.errors.personalInfo?.dateOfBirth && (
-                  <p className="text-sm text-red-500 text-black">{form.formState.errors.personalInfo.dateOfBirth.message}</p>
+                  <p className="text-xs text-red-500 text-black">{form.formState.errors.personalInfo.dateOfBirth.message}</p>
                 )}
               </div>
-              <div className="space-y-2">
+              <div className="space-y-1">
                 <Label htmlFor="gender" className="text-sm font-semibold text-black">Gender *</Label>
                 <Select
                   value={form.watch('personalInfo.gender')}
                   onValueChange={(value) => form.setValue('personalInfo.gender', value as 'male' | 'female' | 'other')}
                 >
-                  <SelectTrigger className="h-12 text-black bg-white border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500">
+                  <SelectTrigger className="h-10 text-black bg-white border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 text-sm">
                     <SelectValue placeholder="Select gender" />
                   </SelectTrigger>
                   <SelectContent className="bg-white border-gray-200">
@@ -315,20 +315,20 @@ const CreateVictimPage: React.FC = () => {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div className="space-y-2">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <div className="space-y-1">
                 <Label htmlFor="nationality" className="text-sm font-semibold text-black">Nationality *</Label>
                 <Input
                   id="nationality"
                   {...form.register('personalInfo.nationality')}
                   placeholder="Enter nationality"
-                  className={`h-12 text-black ${form.formState.errors.personalInfo?.nationality ? 'border-red-500' : ''}`}
+                  className={`h-10 text-black text-sm ${form.formState.errors.personalInfo?.nationality ? 'border-red-500' : ''}`}
                 />
                 {form.formState.errors.personalInfo?.nationality && (
-                  <p className="text-sm text-red-500 text-black">{form.formState.errors.personalInfo.nationality.message}</p>
+                  <p className="text-xs text-red-500 text-black">{form.formState.errors.personalInfo.nationality.message}</p>
                 )}
               </div>
-              <div className="space-y-2">
+              <div className="space-y-1">
                 <Label htmlFor="nationalId" className="text-sm font-semibold text-black">National ID</Label>
                 <Input
                   id="nationalId"
@@ -339,8 +339,8 @@ const CreateVictimPage: React.FC = () => {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div className="space-y-2">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <div className="space-y-1">
                 <Label htmlFor="phoneNumber" className="text-sm font-semibold text-black">Phone Number</Label>
                 <Input
                   id="phoneNumber"
@@ -349,7 +349,7 @@ const CreateVictimPage: React.FC = () => {
                   className="h-12 text-black"
                 />
               </div>
-              <div className="space-y-2">
+              <div className="space-y-1">
                 <Label htmlFor="email" className="text-sm font-semibold text-black">Email</Label>
                 <Input
                   id="email"
@@ -359,7 +359,7 @@ const CreateVictimPage: React.FC = () => {
                   className="h-12 text-black"
                 />
                 {form.formState.errors.personalInfo?.email && (
-                  <p className="text-sm text-red-500 text-black">{form.formState.errors.personalInfo.email.message}</p>
+                  <p className="text-xs text-red-500 text-black">{form.formState.errors.personalInfo.email.message}</p>
                 )}
               </div>
             </div>
@@ -368,9 +368,9 @@ const CreateVictimPage: React.FC = () => {
 
       case 1:
         return (
-          <div className="space-y-8">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div className="space-y-2">
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <div className="space-y-1">
                 <Label htmlFor="height" className="text-sm font-semibold text-black">Height (cm)</Label>
                 <Input
                   id="height"
@@ -380,7 +380,7 @@ const CreateVictimPage: React.FC = () => {
                   className="h-12 text-black"
                 />
               </div>
-              <div className="space-y-2">
+              <div className="space-y-1">
                 <Label htmlFor="weight" className="text-sm font-semibold text-black">Weight (kg)</Label>
                 <Input
                   id="weight"
@@ -392,8 +392,8 @@ const CreateVictimPage: React.FC = () => {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div className="space-y-2">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <div className="space-y-1">
                 <Label htmlFor="eyeColor" className="text-sm font-semibold text-black">Eye Color</Label>
                 <Input
                   id="eyeColor"
@@ -402,7 +402,7 @@ const CreateVictimPage: React.FC = () => {
                   className="h-12 text-black"
                 />
               </div>
-              <div className="space-y-2">
+              <div className="space-y-1">
                 <Label htmlFor="hairColor" className="text-sm font-semibold text-black">Hair Color</Label>
                 <Input
                   id="hairColor"
@@ -413,7 +413,7 @@ const CreateVictimPage: React.FC = () => {
               </div>
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-1">
               <Label htmlFor="skinTone" className="text-sm font-semibold text-black">Skin Tone</Label>
               <Input
                 id="skinTone"
@@ -423,13 +423,13 @@ const CreateVictimPage: React.FC = () => {
               />
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-1">
               <Label htmlFor="distinguishingMarks" className="text-sm font-semibold text-black">Distinguishing Marks</Label>
               <textarea
                 id="distinguishingMarks"
                 {...form.register('physicalDescription.distinguishingMarks')}
                 placeholder="Enter any distinguishing marks or features"
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent h-24 text-black"
+                className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent h-20 text-black text-sm"
               />
             </div>
           </div>
@@ -437,11 +437,11 @@ const CreateVictimPage: React.FC = () => {
 
       case 2:
         return (
-          <div className="space-y-8">
-            <div className="space-y-6">
+          <div className="space-y-4">
+            <div className="space-y-3">
               <h4 className="font-semibold text-black text-lg">Current Address</h4>
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div className="space-y-2">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <div className="space-y-1">
                   <Label htmlFor="currentStreet" className="text-black">Street</Label>
                   <Input
                     id="currentStreet"
@@ -450,7 +450,7 @@ const CreateVictimPage: React.FC = () => {
                     className="h-12 text-black"
                   />
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-1">
                   <Label htmlFor="currentCity" className="text-black">City</Label>
                   <Input
                     id="currentCity"
@@ -461,8 +461,8 @@ const CreateVictimPage: React.FC = () => {
                 </div>
               </div>
               
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div className="space-y-2">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                <div className="space-y-1">
                   <Label htmlFor="currentState" className="text-black">State</Label>
                   <Input
                     id="currentState"
@@ -471,7 +471,7 @@ const CreateVictimPage: React.FC = () => {
                     className="h-12 text-black"
                   />
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-1">
                   <Label htmlFor="currentCountry" className="text-black">Country</Label>
                   <Input
                     id="currentCountry"
@@ -480,7 +480,7 @@ const CreateVictimPage: React.FC = () => {
                     className="h-12 text-black"
                   />
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-1">
                   <Label htmlFor="currentPostalCode" className="text-black">Postal Code</Label>
                   <Input
                     id="currentPostalCode"
@@ -492,10 +492,10 @@ const CreateVictimPage: React.FC = () => {
               </div>
             </div>
 
-            <div className="space-y-6">
+            <div className="space-y-3">
               <h4 className="font-semibold text-black text-lg">Permanent Address</h4>
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div className="space-y-2">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <div className="space-y-1">
                   <Label htmlFor="permanentStreet" className="text-black">Street</Label>
                   <Input
                     id="permanentStreet"
@@ -504,7 +504,7 @@ const CreateVictimPage: React.FC = () => {
                     className="h-12 text-black"
                   />
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-1">
                   <Label htmlFor="permanentCity" className="text-black">City</Label>
                   <Input
                     id="permanentCity"
@@ -515,8 +515,8 @@ const CreateVictimPage: React.FC = () => {
                 </div>
               </div>
               
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div className="space-y-2">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                <div className="space-y-1">
                   <Label htmlFor="permanentState" className="text-black">State</Label>
                   <Input
                     id="permanentState"
@@ -525,7 +525,7 @@ const CreateVictimPage: React.FC = () => {
                     className="h-12 text-black"
                   />
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-1">
                   <Label htmlFor="permanentCountry" className="text-black">Country</Label>
                   <Input
                     id="permanentCountry"
@@ -534,7 +534,7 @@ const CreateVictimPage: React.FC = () => {
                     className="h-12 text-black"
                   />
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-1">
                   <Label htmlFor="permanentPostalCode" className="text-black">Postal Code</Label>
                   <Input
                     id="permanentPostalCode"
@@ -550,17 +550,17 @@ const CreateVictimPage: React.FC = () => {
 
       case 3:
         return (
-          <div className="space-y-8">
-            <div className="space-y-6">
+          <div className="space-y-4">
+            <div className="space-y-3">
               <h4 className="font-semibold text-black text-lg">Status Information</h4>
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div className="space-y-2">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <div className="space-y-1">
                   <Label className="text-black">Is Minor?</Label>
                   <Select
                     value={form.watch('status.isMinor') ? 'yes' : 'no'}
                     onValueChange={(value) => form.setValue('status.isMinor', value === 'yes')}
                   >
-                    <SelectTrigger className="h-12 text-black bg-white border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500">
+                    <SelectTrigger className="h-10 text-black bg-white border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 text-sm">
                       <SelectValue placeholder="Select" />
                     </SelectTrigger>
                     <SelectContent className="bg-white border-gray-200">
@@ -570,13 +570,13 @@ const CreateVictimPage: React.FC = () => {
                   </Select>
                 </div>
                 
-                <div className="space-y-2">
+                <div className="space-y-1">
                   <Label className="text-black">Is Deceased?</Label>
                   <Select
                     value={form.watch('status.isDeceased') ? 'yes' : 'no'}
                     onValueChange={(value) => form.setValue('status.isDeceased', value === 'yes')}
                   >
-                    <SelectTrigger className="h-12 text-black bg-white border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500">
+                    <SelectTrigger className="h-10 text-black bg-white border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 text-sm">
                       <SelectValue placeholder="Select" />
                     </SelectTrigger>
                     <SelectContent className="bg-white border-gray-200">
@@ -588,8 +588,8 @@ const CreateVictimPage: React.FC = () => {
               </div>
 
               {form.watch('status.isDeceased') && (
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  <div className="space-y-2">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                  <div className="space-y-1">
                     <Label htmlFor="dateOfDeath" className="text-black">Date of Death</Label>
                     <Input
                       id="dateOfDeath"
@@ -598,7 +598,7 @@ const CreateVictimPage: React.FC = () => {
                       className="h-12 text-black"
                     />
                   </div>
-                  <div className="space-y-2">
+                  <div className="space-y-1">
                     <Label htmlFor="causeOfDeath" className="text-black">Cause of Death</Label>
                     <Input
                       id="causeOfDeath"
@@ -611,10 +611,10 @@ const CreateVictimPage: React.FC = () => {
               )}
 
               {form.watch('status.isMinor') && (
-                <div className="space-y-6">
+                <div className="space-y-3">
                   <h4 className="font-semibold text-black text-lg">Guardian Information</h4>
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <div className="space-y-2">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    <div className="space-y-1">
                       <Label htmlFor="guardianName" className="text-black">Guardian Name</Label>
                       <Input
                         id="guardianName"
@@ -623,13 +623,13 @@ const CreateVictimPage: React.FC = () => {
                         className="h-12 text-black"
                       />
                     </div>
-                    <div className="space-y-2">
+                    <div className="space-y-1">
                       <Label htmlFor="guardianRelationship" className="text-black">Relationship</Label>
                       <Select
                         value={form.watch('status.guardianInfo.relationship') || ''}
                         onValueChange={(value) => form.setValue('status.guardianInfo.relationship', value)}
                       >
-                        <SelectTrigger className="h-12 text-black bg-white border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500">
+                        <SelectTrigger className="h-10 text-black bg-white border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 text-sm">
                           <SelectValue placeholder="Select relationship" />
                         </SelectTrigger>
                         <SelectContent className="bg-white border-gray-200">
@@ -643,8 +643,8 @@ const CreateVictimPage: React.FC = () => {
                     </div>
                   </div>
                   
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <div className="space-y-2">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    <div className="space-y-1">
                       <Label htmlFor="guardianPhone" className="text-black">Guardian Phone</Label>
                       <Input
                         id="guardianPhone"
@@ -653,7 +653,7 @@ const CreateVictimPage: React.FC = () => {
                         className="h-12 text-black"
                       />
                     </div>
-                    <div className="space-y-2">
+                    <div className="space-y-1">
                       <Label htmlFor="guardianEmail" className="text-black">Guardian Email</Label>
                       <Input
                         id="guardianEmail"
@@ -668,10 +668,10 @@ const CreateVictimPage: React.FC = () => {
               )}
             </div>
 
-            <div className="space-y-6">
+            <div className="space-y-3">
               <h4 className="font-semibold text-black text-lg">Emergency Contact</h4>
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div className="space-y-2">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <div className="space-y-1">
                   <Label htmlFor="emergencyName" className="text-black">Contact Name</Label>
                   <Input
                     id="emergencyName"
@@ -680,13 +680,13 @@ const CreateVictimPage: React.FC = () => {
                     className="h-12 text-black"
                   />
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-1">
                   <Label htmlFor="emergencyRelationship" className="text-black">Relationship</Label>
                   <Select
                     value={form.watch('emergencyContact.relationship') || ''}
                     onValueChange={(value) => form.setValue('emergencyContact.relationship', value)}
                   >
-                    <SelectTrigger className="h-12 text-black bg-white border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500">
+                    <SelectTrigger className="h-10 text-black bg-white border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 text-sm">
                       <SelectValue placeholder="Select relationship" />
                     </SelectTrigger>
                     <SelectContent className="bg-white border-gray-200">
@@ -700,8 +700,8 @@ const CreateVictimPage: React.FC = () => {
                 </div>
               </div>
               
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div className="space-y-2">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <div className="space-y-1">
                   <Label htmlFor="emergencyPhone" className="text-black">Phone</Label>
                   <Input
                     id="emergencyPhone"
@@ -710,7 +710,7 @@ const CreateVictimPage: React.FC = () => {
                     className="h-12 text-black"
                   />
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-1">
                   <Label htmlFor="emergencyEmail" className="text-black">Email</Label>
                   <Input
                     id="emergencyEmail"
@@ -727,9 +727,9 @@ const CreateVictimPage: React.FC = () => {
 
       case 4:
         return (
-          <div className="space-y-6">
-            <h3 className="text-xl font-bold text-black mb-4">Review Victim Details</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-3">
+            <h3 className="text-lg font-bold text-black mb-2">Review Victim Details</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Card className="bg-gray-50 border-gray-200 shadow-sm">
                 <CardHeader>
                   <CardTitle className="text-lg font-semibold text-black">Personal Information</CardTitle>
@@ -762,90 +762,95 @@ const CreateVictimPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-slate-900 py-8">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Create New Victim</h1>
-          <p className="text-gray-500 dark:text-gray-400 mt-2">
-            Record a new victim with detailed information
-          </p>
-        </div>
+    <div className="min-h-screen bg-gray-50 dark:bg-slate-900 py-4">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Left Column - Stepper */}
+          <div className="lg:col-span-1">
+            <Card className="bg-white dark:bg-slate-800 shadow-lg border-gray-200 dark:border-slate-700 sticky top-4">
+              <CardHeader className="bg-gradient-to-r from-blue-600 to-blue-700 text-white py-3">
+                <CardTitle className="text-lg font-semibold">Victim Registration</CardTitle>
+              </CardHeader>
+              <CardContent className="p-4">
+                <Stepper
+                  steps={steps}
+                  currentStep={currentStep}
+                  onStepClick={handleStepClick}
+                />
+              </CardContent>
+            </Card>
+          </div>
 
-        <Card className="bg-white dark:bg-slate-800 shadow-lg border-gray-200 dark:border-slate-700">
-          <CardHeader className="bg-gradient-to-r from-red-600 to-red-700 text-white">
-            <CardTitle className="text-xl font-semibold">Victim Registration</CardTitle>
-          </CardHeader>
-          <CardContent className="p-8">
-            <Stepper
-              steps={steps}
-              currentStep={currentStep}
-              onStepClick={handleStepClick}
-            />
-
-            <div className="mt-8">
-              {renderStepContent()}
-            </div>
-
-            {error && (
-              <div className="mt-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
-                <p className="text-red-800 dark:text-red-200">{error}</p>
+          {/* Right Column - Form Content */}
+          <div className="lg:col-span-2">
+            <Card className="bg-white dark:bg-slate-800 shadow-lg border-gray-200 dark:border-slate-700">
+              <div className="text-center py-4 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600">
+                <h1 className="text-2xl font-bold text-white">CREATE NEW VICTIM</h1>
               </div>
-            )}
-
-            <div className="flex justify-between mt-8">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handlePrevious}
-                disabled={currentStep === 0}
-                className="flex items-center"
-              >
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Previous
-              </Button>
-
-              <div className="flex space-x-4">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => navigate('/victims')}
-                  className="flex items-center"
-                >
-                  <X className="w-4 h-4 mr-2" />
-                  Cancel
-                </Button>
-
-                {currentStep === steps.length - 1 ? (
-                  <Button
-                    onClick={handleSubmit}
-                    disabled={isLoading}
-                    className="bg-red-600 hover:bg-red-700 text-white flex items-center"
-                  >
-                    {isLoading ? (
-                      <>
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                        Creating...
-                      </>
-                    ) : (
-                      <>
-                        <CheckCircle className="w-4 h-4 mr-2" />
-                        Create Victim
-                      </>
-                    )}
-                  </Button>
-                ) : (
-                  <Button
-                    onClick={handleNext}
-                    className="bg-red-600 hover:bg-red-700 text-white flex items-center"
-                  >
-                    Next
-                    <ArrowRight className="w-4 h-4 ml-2" />
-                  </Button>
+              <CardHeader className="bg-gradient-to-r from-blue-600 to-blue-700 text-white py-3">
+                <CardTitle className="flex items-center space-x-2 text-white text-lg mb-1">
+                  {steps[currentStep].icon}
+                  <span className="text-white">{steps[currentStep].title}</span>
+                </CardTitle>
+                <p className="text-sm text-blue-100">{steps[currentStep].description}</p>
+              </CardHeader>
+              <CardContent className="p-4">
+                {error && (
+                  <div className="mb-3 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                    <p className="text-sm text-red-800 dark:text-red-200">{error}</p>
+                  </div>
                 )}
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+
+                <div className="mb-4 text-black">
+                  {renderStepContent()}
+                </div>
+
+                <div className="flex justify-between pt-4 border-t border-gray-200 dark:border-slate-700">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={currentStep === 0 ? () => navigate('/victims') : handlePrevious}
+                    disabled={isLoading}
+                    className="flex items-center space-x-2 px-4 py-2 text-black text-sm"
+                  >
+                    <ArrowLeft className="h-4 w-4" />
+                    <span className="text-black">{currentStep === 0 ? 'Cancel' : 'Previous'}</span>
+                  </Button>
+
+                  <div className="flex space-x-4">
+                    {currentStep === steps.length - 1 ? (
+                      <Button
+                        onClick={handleSubmit}
+                        disabled={isLoading}
+                        className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 px-4 py-2 text-white text-sm"
+                      >
+                        {isLoading ? (
+                          <>
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                            <span className="text-white">Creating...</span>
+                          </>
+                        ) : (
+                          <>
+                            <CheckCircle className="w-4 h-4" />
+                            <span className="text-white">Create Victim</span>
+                          </>
+                        )}
+                      </Button>
+                    ) : (
+                      <Button
+                        onClick={handleNext}
+                        className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 px-4 py-2 text-white text-sm"
+                      >
+                        <span className="text-white">Next</span>
+                        <ArrowRight className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
       </div>
     </div>
   );

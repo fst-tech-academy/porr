@@ -32,11 +32,14 @@ import Cases from './pages/Cases';
 import CreateCase from './pages/CreateCase';
 import Offences from './pages/Offences';
 import CreateOffence from './pages/CreateOffence';
+import EditOffence from './pages/EditOffence';
 import Courts from './pages/Courts';
 import CreateCourt from './pages/CreateCourt';
 import Victims from './pages/Victims';
 import Crimes from './pages/Crimes';
 import CreateCrime from './pages/CreateCrime';
+import EditCrime from './pages/EditCrime';
+import CrimeView from './pages/CrimeView';
 import CreateVictim from './pages/CreateVictim';
 import NotFound from './pages/NotFound';
 import NotFoundTest from './pages/NotFoundTest';
@@ -196,7 +199,7 @@ function App() {
                           </RoleBasedRoute>
                         } />
                         <Route path="/organisations/:id" element={
-                          <RoleBasedRoute allowedRoles={['super_admin']}>
+                          <RoleBasedRoute allowedRoles={['admin', 'super_admin']}>
                             <OrganisationProfile />
                           </RoleBasedRoute>
                         } />
@@ -258,6 +261,13 @@ function App() {
                             </Layout>
                           </RoleBasedRoute>
                         } />
+                        <Route path="/offences/:id/edit" element={
+                          <RoleBasedRoute allowedRoles={['admin', 'manager', 'officer', 'super_admin']}>
+                            <Layout>
+                              <EditOffence />
+                            </Layout>
+                          </RoleBasedRoute>
+                        } />
                         <Route path="/courts" element={
                           <RoleBasedRoute allowedRoles={['admin', 'manager', 'officer', 'super_admin']}>
                             <Layout>
@@ -290,6 +300,20 @@ function App() {
                           <RoleBasedRoute allowedRoles={['admin', 'manager', 'officer', 'super_admin']}>
                             <Layout>
                               <CreateCrime />
+                            </Layout>
+                          </RoleBasedRoute>
+                        } />
+                        <Route path="/crimes/:id/edit" element={
+                          <RoleBasedRoute allowedRoles={['admin', 'manager', 'officer', 'super_admin']}>
+                            <Layout>
+                              <EditCrime />
+                            </Layout>
+                          </RoleBasedRoute>
+                        } />
+                        <Route path="/crimes/:id" element={
+                          <RoleBasedRoute allowedRoles={['admin', 'manager', 'officer', 'super_admin']}>
+                            <Layout>
+                              <CrimeView />
                             </Layout>
                           </RoleBasedRoute>
                         } />

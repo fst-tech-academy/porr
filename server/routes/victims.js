@@ -34,7 +34,9 @@ router.get('/', protect, async (req, res) => {
       sortOrder = 'desc'
     } = req.query;
 
-    const query = { organisationId: req.user.organisationId };
+    // Handle organisationId - extract _id if populated
+    const userOrgId = req.user.organisationId?._id || req.user.organisationId;
+    const query = { organisationId: userOrgId };
 
     // Search filter
     if (search) {
@@ -90,9 +92,11 @@ router.get('/', protect, async (req, res) => {
 // Get victim by ID
 router.get('/:id', protect, async (req, res) => {
   try {
+    // Handle organisationId - extract _id if populated
+    const userOrgId = req.user.organisationId?._id || req.user.organisationId;
     const victim = await Victim.findOne({
       _id: req.params.id,
-      organisationId: req.user.organisationId
+      organisationId: userOrgId
     })
       .populate('createdBy', 'firstName lastName email')
       .populate('lastModifiedBy', 'firstName lastName email');
@@ -129,9 +133,11 @@ router.post('/', protect, checkUserManagement, victimValidationRules, async (req
       });
     }
 
+    // Handle organisationId - extract _id if populated
+    const userOrgId = req.user.organisationId?._id || req.user.organisationId;
     const victimData = {
       ...req.body,
-      organisationId: req.user.organisationId,
+      organisationId: userOrgId,
       createdBy: req.user.id
     };
 
@@ -166,9 +172,11 @@ router.put('/:id', protect, victimValidationRules, async (req, res) => {
       });
     }
 
+    // Handle organisationId - extract _id if populated
+    const userOrgId = req.user.organisationId?._id || req.user.organisationId;
     const victim = await Victim.findOne({
       _id: req.params.id,
-      organisationId: req.user.organisationId
+      organisationId: userOrgId
     });
 
     if (!victim) {
@@ -209,9 +217,11 @@ router.put('/:id', protect, victimValidationRules, async (req, res) => {
 // Delete victim
 router.delete('/:id', protect, async (req, res) => {
   try {
+    // Handle organisationId - extract _id if populated
+    const userOrgId = req.user.organisationId?._id || req.user.organisationId;
     const victim = await Victim.findOne({
       _id: req.params.id,
-      organisationId: req.user.organisationId
+      organisationId: userOrgId
     });
 
     if (!victim) {

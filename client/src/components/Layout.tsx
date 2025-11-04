@@ -60,7 +60,7 @@ const getMenuItems = (
   ...(userRole === 'admin' || userRole === 'manager' || userRole === 'officer' || userRole === 'super_admin' ? [
     { text: 'Offenders', icon: <UserCheck className="h-5 w-5" />, path: '/offenders' },
     { text: 'Cases', icon: <FileText className="h-5 w-5" />, path: '/cases' },
-    { text: 'Offences', icon: <AlertTriangle className="h-5 w-5" />, path: '/offences' },
+    { text: 'Offences Catalogue', icon: <AlertTriangle className="h-5 w-5" />, path: '/offences' },
     { text: 'Crimes', icon: <ShieldAlert className="h-5 w-5" />, path: '/crimes' },
     { text: 'Victims', icon: <Heart className="h-5 w-5" />, path: '/victims' },
     { text: 'Courts', icon: <Scale className="h-5 w-5" />, path: '/courts' },

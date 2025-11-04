@@ -7,7 +7,10 @@
     "start": "node index.js",
     "dev": "nodemon index.js",
     "test": "jest",
-    "migrate:users-to-default-org": "node scripts/migrate-users-to-default-org.js"
+    "migrate:users-to-default-org": "node scripts/migrate-users-to-default-org.js",
+    "populate:sample-crimes": "node scripts/populate-sample-crimes.js",
+    "create:crimes-ahmed-dini": "node scripts/create-crimes-for-ahmed-dini.js",
+    "populate:victims-for-crimes": "node scripts/populate-victims-for-crimes.js"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.914.0",

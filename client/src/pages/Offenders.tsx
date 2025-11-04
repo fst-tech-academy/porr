@@ -91,6 +91,7 @@ const OffendersPage: React.FC = () => {
   const [totalOffenders, setTotalOffenders] = useState(0);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [isFiltersExpanded, setIsFiltersExpanded] = useState(false);
+  const [offendersWithCrimes, setOffendersWithCrimes] = useState<Set<string>>(new Set());
 
   const limit = 10;
 
@@ -113,9 +114,30 @@ const OffendersPage: React.FC = () => {
       const response = await api.get(`/offenders?${params}`);
       
       if (response.data.success) {
-        setOffenders(response.data.data.offenders);
+        const fetchedOffenders = response.data.data.offenders;
+        setOffenders(fetchedOffenders);
         setTotalPages(response.data.data.pagination.pages);
         setTotalOffenders(response.data.data.pagination.total);
+
+        // Check which offenders have crimes
+        const offendersWithCrimesSet = new Set<string>();
+        await Promise.all(
+          fetchedOffenders.map(async (offender: Offender) => {
+            try {
+              const crimesResponse = await api.getCrimesByOffender(offender._id, { limit: 1 });
+              if (crimesResponse.success) {
+                // Handle both response structures: res.data (array) or res.data.crimes (from new structure)
+                const crimesData = crimesResponse.data?.crimes || crimesResponse.data || [];
+                if (Array.isArray(crimesData) && crimesData.length > 0) {
+                  offendersWithCrimesSet.add(offender._id);
+                }
+              }
+            } catch (err) {
+              // Silently fail - offender might not have crimes
+            }
+          })
+        );
+        setOffendersWithCrimes(offendersWithCrimesSet);
       } else {
         setError(response.data.message || 'Failed to fetch offenders');
       }
@@ -442,11 +464,19 @@ const OffendersPage: React.FC = () => {
                             <SignedImage
                               src={offender.profilePhoto}
                               alt={`${offender.personalInfo.firstName} ${offender.personalInfo.lastName}`}
-                              className="w-10 h-10 rounded-full object-cover border-2 border-gray-200"
+                              className={`w-10 h-10 rounded-full object-cover ${
+                                offendersWithCrimes.has(offender._id) 
+                                  ? 'border-4 border-red-500' 
+                                  : 'border-2 border-gray-200'
+                              }`}
                               fallback=""
                             />
                           ) : (
-                            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center">
+                            <div className={`w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center ${
+                              offendersWithCrimes.has(offender._id) 
+                                ? 'ring-4 ring-red-500' 
+                                : ''
+                            }`}>
                               <User className="w-5 h-5 text-white" />
                             </div>
                           )}

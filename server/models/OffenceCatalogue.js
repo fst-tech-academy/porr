@@ -35,7 +35,7 @@ const offenceCatalogueSchema = new mongoose.Schema({
   severity: {
     type: String,
     required: true,
-    enum: ['minor', 'moderate', 'serious', 'major', 'severe']
+    enum: ['minor', 'moderate', 'serious', 'major', 'severe', 'felony']
   },
   riskLevel: {
     type: String,

@@ -697,6 +697,23 @@ const OrganisationProfile: React.FC = () => {
 
           {/* Settings Tab */}
           <TabsContent value="settings" className="space-y-6">
+            {/* System Settings at top */}
+            <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-xl">
+              <CardHeader className="bg-gradient-to-r from-indigo-50 to-blue-50 border-b border-gray-100">
+                <CardTitle className="flex items-center space-x-2 text-gray-900">
+                  <Settings className="w-5 h-5 text-indigo-600" />
+                  <span className="text-gray-900">System Settings</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-0">
+                {/* Reuse existing Settings page component */}
+                <div className="p-6">
+                  <SettingsPage />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Organisation Settings moved to bottom */}
             <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-xl">
               <CardHeader className="bg-gradient-to-r from-purple-50 to-pink-50 border-b border-gray-100">
                 <CardTitle className="flex items-center space-x-2 text-gray-900">
@@ -735,22 +752,6 @@ const OrganisationProfile: React.FC = () => {
                       Delete
                     </Button>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Global Settings merged under organisation settings */}
-            <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-xl">
-              <CardHeader className="bg-gradient-to-r from-indigo-50 to-blue-50 border-b border-gray-100">
-                <CardTitle className="flex items-center space-x-2 text-gray-900">
-                  <Settings className="w-5 h-5 text-indigo-600" />
-                  <span className="text-gray-900">System Settings</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-0">
-                {/* Reuse existing Settings page component */}
-                <div className="p-6">
-                  <SettingsPage />
                 </div>
               </CardContent>
             </Card>

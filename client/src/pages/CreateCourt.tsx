@@ -177,52 +177,52 @@ const CreateCourtPage: React.FC = () => {
     switch (currentStep) {
       case 0:
         return (
-          <div className="space-y-8">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div className="space-y-2">
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <div className="space-y-1">
                 <Label htmlFor="name" className="text-sm font-semibold text-black">Court Name *</Label>
                 <Input
                   id="name"
                   {...form.register('name')}
                   placeholder="Enter court name"
-                  className={`h-12 text-black ${form.formState.errors.name ? 'border-red-500' : ''}`}
+                  className={`h-10 text-black text-sm ${form.formState.errors.name ? 'border-red-500' : ''}`}
                 />
                 {form.formState.errors.name && (
-                  <p className="text-sm text-red-500 text-black">{form.formState.errors.name.message}</p>
+                  <p className="text-xs text-red-500 text-black">{form.formState.errors.name.message}</p>
                 )}
               </div>
-              <div className="space-y-2">
+              <div className="space-y-1">
                 <Label htmlFor="code" className="text-sm font-semibold text-black">Court Code *</Label>
                 <Input
                   id="code"
                   {...form.register('code')}
                   placeholder="Enter court code"
-                  className={`h-12 text-black ${form.formState.errors.code ? 'border-red-500' : ''}`}
+                  className={`h-10 text-black text-sm ${form.formState.errors.code ? 'border-red-500' : ''}`}
                 />
                 {form.formState.errors.code && (
-                  <p className="text-sm text-red-500 text-black">{form.formState.errors.code.message}</p>
+                  <p className="text-xs text-red-500 text-black">{form.formState.errors.code.message}</p>
                 )}
               </div>
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-1">
               <Label htmlFor="description" className="text-black">Description</Label>
               <textarea
                 id="description"
                 {...form.register('description')}
                 placeholder="Enter court description"
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent h-24 text-black"
+                className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent h-20 text-black text-sm"
               />
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <div className="space-y-2">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+              <div className="space-y-1">
                 <Label htmlFor="type" className="text-sm font-semibold text-black">Court Type *</Label>
                 <Select
                   value={form.watch('type')}
                   onValueChange={(value) => form.setValue('type', value)}
                 >
-                  <SelectTrigger className="h-12 text-black bg-white border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500">
+                  <SelectTrigger className="h-10 text-black bg-white border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 text-sm">
                     <SelectValue placeholder="Select court type" />
                   </SelectTrigger>
                   <SelectContent className="bg-white border-gray-200">
@@ -235,13 +235,13 @@ const CreateCourtPage: React.FC = () => {
                 </Select>
               </div>
               
-              <div className="space-y-2">
+              <div className="space-y-1">
                 <Label htmlFor="jurisdiction" className="text-sm font-semibold text-black">Jurisdiction *</Label>
                 <Select
                   value={form.watch('jurisdiction')}
                   onValueChange={(value) => form.setValue('jurisdiction', value)}
                 >
-                  <SelectTrigger className="h-12 text-black bg-white border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500">
+                  <SelectTrigger className="h-10 text-black bg-white border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 text-sm">
                     <SelectValue placeholder="Select jurisdiction" />
                   </SelectTrigger>
                   <SelectContent className="bg-white border-gray-200">
@@ -254,13 +254,13 @@ const CreateCourtPage: React.FC = () => {
                 </Select>
               </div>
               
-              <div className="space-y-2">
+              <div className="space-y-1">
                 <Label htmlFor="level" className="text-sm font-semibold text-black">Level *</Label>
                 <Select
                   value={form.watch('level')}
                   onValueChange={(value) => form.setValue('level', value)}
                 >
-                  <SelectTrigger className="h-12 text-black bg-white border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500">
+                  <SelectTrigger className="h-10 text-black bg-white border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 text-sm">
                     <SelectValue placeholder="Select level" />
                   </SelectTrigger>
                   <SelectContent className="bg-white border-gray-200">
@@ -278,11 +278,11 @@ const CreateCourtPage: React.FC = () => {
 
       case 1:
         return (
-          <div className="space-y-8">
-            <div className="space-y-6">
+          <div className="space-y-4">
+            <div className="space-y-3">
               <h4 className="font-semibold text-black text-lg">Address Information</h4>
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div className="space-y-2">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <div className="space-y-1">
                   <Label htmlFor="street" className="text-black">Street Address</Label>
                   <Input
                     id="street"
@@ -291,7 +291,7 @@ const CreateCourtPage: React.FC = () => {
                     className="h-12 text-black"
                   />
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-1">
                   <Label htmlFor="city" className="text-black">City</Label>
                   <Input
                     id="city"
@@ -300,7 +300,7 @@ const CreateCourtPage: React.FC = () => {
                     className="h-12 text-black"
                   />
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-1">
                   <Label htmlFor="state" className="text-black">State/Region</Label>
                   <Input
                     id="state"
@@ -309,7 +309,7 @@ const CreateCourtPage: React.FC = () => {
                     className="h-12 text-black"
                   />
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-1">
                   <Label htmlFor="country" className="text-black">Country</Label>
                   <Input
                     id="country"
@@ -318,7 +318,7 @@ const CreateCourtPage: React.FC = () => {
                     className="h-12 text-black"
                   />
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-1">
                   <Label htmlFor="postalCode" className="text-black">Postal Code</Label>
                   <Input
                     id="postalCode"
@@ -334,11 +334,11 @@ const CreateCourtPage: React.FC = () => {
 
       case 2:
         return (
-          <div className="space-y-8">
-            <div className="space-y-6">
+          <div className="space-y-4">
+            <div className="space-y-3">
               <h4 className="font-semibold text-black text-lg">Contact Information</h4>
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div className="space-y-2">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <div className="space-y-1">
                   <Label htmlFor="phone" className="text-black">Phone Number</Label>
                   <Input
                     id="phone"
@@ -347,7 +347,7 @@ const CreateCourtPage: React.FC = () => {
                     className="h-12 text-black"
                   />
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-1">
                   <Label htmlFor="email" className="text-black">Email Address</Label>
                   <Input
                     id="email"
@@ -359,7 +359,7 @@ const CreateCourtPage: React.FC = () => {
                 </div>
               </div>
               
-              <div className="space-y-2">
+              <div className="space-y-1">
                 <Label htmlFor="website" className="text-black">Website</Label>
                 <Input
                   id="website"
@@ -374,11 +374,11 @@ const CreateCourtPage: React.FC = () => {
 
       case 3:
         return (
-          <div className="space-y-8">
-            <div className="space-y-6">
+          <div className="space-y-4">
+            <div className="space-y-3">
               <h4 className="font-semibold text-black text-lg">Management Information</h4>
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div className="space-y-2">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <div className="space-y-1">
                   <Label htmlFor="maxCaseLoad" className="text-black">Maximum Case Load</Label>
                   <Input
                     id="maxCaseLoad"
@@ -389,7 +389,7 @@ const CreateCourtPage: React.FC = () => {
                     className="h-12 text-black"
                   />
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-1">
                   <Label htmlFor="annualBudget" className="text-black">Annual Budget</Label>
                   <Input
                     id="annualBudget"
@@ -403,13 +403,13 @@ const CreateCourtPage: React.FC = () => {
               </div>
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-1">
               <Label htmlFor="notes" className="text-black">Additional Notes</Label>
               <textarea
                 id="notes"
                 {...form.register('notes')}
                 placeholder="Enter any additional notes"
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent h-24 text-black"
+                className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent h-20 text-black text-sm"
               />
             </div>
           </div>
@@ -417,9 +417,9 @@ const CreateCourtPage: React.FC = () => {
 
       case 4:
         return (
-          <div className="space-y-6">
-            <h3 className="text-xl font-bold text-black mb-4">Review Court Details</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-3">
+            <h3 className="text-lg font-bold text-black mb-2">Review Court Details</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Card className="bg-gray-50 border-gray-200 shadow-sm">
                 <CardHeader>
                   <CardTitle className="text-lg font-semibold text-black">Basic Information</CardTitle>
@@ -464,63 +464,19 @@ const CreateCourtPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
-      {/* Hero Header */}
-      <div className="relative overflow-hidden bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600">
-        <div className="absolute inset-0 bg-black/10"></div>
-        <div className="absolute inset-0">
-          <div className="absolute top-0 left-0 w-full h-full">
-            <div className="absolute top-10 left-10 w-20 h-20 bg-white/10 rounded-full animate-pulse"></div>
-            <div className="absolute top-20 right-20 w-16 h-16 bg-white/10 rounded-full animate-pulse delay-1000"></div>
-            <div className="absolute bottom-20 left-1/4 w-12 h-12 bg-white/10 rounded-full animate-pulse delay-2000"></div>
-          </div>
-        </div>
-        <div className="relative max-w-7xl mx-auto px-6 py-12">
-          <div className="text-white">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3 mb-4">
-                <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
-                  <Gavel className="w-6 h-6 text-white" />
-                </div>
-                <div>
-                  <h1 className="text-4xl font-bold">Create Court</h1>
-                  <p className="text-blue-100 text-lg">Add a new court to the system</p>
-                </div>
-              </div>
-              <Button
-                variant="ghost"
-                onClick={() => navigate('/courts')}
-                className="text-white hover:bg-white/20 px-4 py-2 rounded-lg"
-              >
-                <X className="w-5 h-5" />
-              </Button>
-            </div>
-            <div className="flex items-center space-x-6 text-blue-100">
-              <div className="flex items-center space-x-2">
-                <CheckCircle className="w-4 h-4" />
-                <span>Step {currentStep + 1} of {steps.length}</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Building2 className="w-4 h-4" />
-                <span>Multi-step Setup</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="max-w-7xl mx-auto px-6 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 py-4">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Stepper Sidebar */}
           <div className="lg:col-span-1">
-            <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl sticky top-8">
-              <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-100">
-                <CardTitle className="flex items-center space-x-2 text-black">
-                  <Gavel className="w-5 h-5 text-blue-600" />
-                  <span className="text-black">Setup Progress</span>
+            <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl sticky top-4">
+              <CardHeader className="bg-gradient-to-r from-blue-600 to-blue-700 text-white py-3">
+                <CardTitle className="flex items-center space-x-2 text-white text-lg">
+                  <Gavel className="w-4 h-4 text-white" />
+                  <span className="text-white">Setup Progress</span>
                 </CardTitle>
               </CardHeader>
-              <CardContent className="p-6">
+              <CardContent className="p-4">
                 <Stepper
                   steps={steps}
                   currentStep={currentStep}
@@ -533,34 +489,37 @@ const CreateCourtPage: React.FC = () => {
           {/* Main Content */}
           <div className="lg:col-span-2">
             <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl">
-              <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-100">
-                <CardTitle className="flex items-center space-x-2 text-black">
+              <div className="text-center py-4 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600">
+                <h1 className="text-2xl font-bold text-white">CREATE NEW COURT</h1>
+              </div>
+              <CardHeader className="bg-gradient-to-r from-blue-600 to-blue-700 text-white py-3">
+                <CardTitle className="flex items-center space-x-2 text-white text-lg mb-1">
                   {steps[currentStep].icon}
-                  <span className="text-black">{steps[currentStep].title}</span>
+                  <span className="text-white">{steps[currentStep].title}</span>
                 </CardTitle>
-                <p className="text-gray-700 text-black">{steps[currentStep].description}</p>
+                <p className="text-sm text-blue-100">{steps[currentStep].description}</p>
               </CardHeader>
-              <CardContent className="p-8">
+              <CardContent className="p-4">
                 {/* Error Display */}
                 {error && (
-                  <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-                    <p className="text-red-800 text-black">{error}</p>
+                  <div className="mb-3 p-3 bg-red-50 border border-red-200 rounded-lg">
+                    <p className="text-sm text-red-800 text-black">{error}</p>
                   </div>
                 )}
 
                 {/* Step Content */}
-                <div className="mb-8 text-black">
+                <div className="mb-4 text-black">
                   {renderStepContent()}
                 </div>
 
                 {/* Navigation */}
-                <div className="flex justify-between pt-6 border-t border-gray-200">
+                <div className="flex justify-between pt-4 border-t border-gray-200">
                   <Button
                     type="button"
                     variant="outline"
                     onClick={currentStep === 0 ? () => navigate('/courts') : handlePrevious}
                     disabled={isLoading}
-                    className="flex items-center space-x-2 px-6 py-3 text-black"
+                    className="flex items-center space-x-2 px-4 py-2 text-black text-sm"
                   >
                     <ArrowLeft className="h-4 w-4" />
                     <span className="text-black">{currentStep === 0 ? 'Cancel' : 'Previous'}</span>
@@ -570,7 +529,7 @@ const CreateCourtPage: React.FC = () => {
                     type="button"
                     onClick={currentStep === steps.length - 1 ? handleSubmit : handleNext}
                     disabled={isLoading}
-                    className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 px-6 py-3 text-white"
+                    className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 px-4 py-2 text-white text-sm"
                   >
                     <span className="text-white">{currentStep === steps.length - 1 ? 'Create Court' : 'Next'}</span>
                     {currentStep < steps.length - 1 && <ArrowRight className="h-4 w-4" />}
