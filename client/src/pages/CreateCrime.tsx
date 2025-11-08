@@ -41,8 +41,8 @@ const crimeSchema = yup.object({
     locationType: yup.string().optional(),
     specificLocation: yup.string().optional(),
   }).required(),
-  offender: yup.string().required('Offender is required'),
-  offence: yup.string().required('Offence is required'),
+  offender: yup.string().optional(),
+  offenceCatalogue: yup.string().required('Offence is required'),
   victims: yup.array().of(yup.object({
     victim: yup.string().required('Victim is required'),
     relationshipToOffender: yup.string().optional(),
@@ -89,6 +89,8 @@ const CreateCrimePage: React.FC = () => {
   const [currentStep, setCurrentStep] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string>('');
+  const [offenderName, setOffenderName] = useState<string>('');
+  const [offenceName, setOffenceName] = useState<string>('');
 
   const steps = [
     {
@@ -151,7 +153,7 @@ const CreateCrimePage: React.FC = () => {
         specificLocation: '',
       },
       offender: '',
-      offence: '',
+      offenceCatalogue: '',
       victims: [],
       legal: {
         status: 'reported',
@@ -190,10 +192,12 @@ const CreateCrimePage: React.FC = () => {
     try {
       const response = await api.get(`/offence-catalogues?search=${encodeURIComponent(query)}&limit=20`);
       if (response.data.success) {
-        return (response.data.data.offences || []).map((offence: Offence) => ({
+        // API returns data as array directly, not nested in offences
+        const offences = Array.isArray(response.data.data) ? response.data.data : [];
+        return offences.map((offence: Offence) => ({
           _id: offence._id,
           display: `${offence.name} (${offence.code})`,
-          type: offence.category
+          type: offence.category || 'Offence'
         }));
       }
       return [];
@@ -207,9 +211,11 @@ const CreateCrimePage: React.FC = () => {
     try {
       const response = await api.get(`/victims?search=${encodeURIComponent(query)}&limit=20`);
       if (response.data.success) {
-        return (response.data.data.victims || []).map((victim: Victim) => ({
+        // API returns data as array directly, not nested in victims
+        const victims = Array.isArray(response.data.data) ? response.data.data : [];
+        return victims.map((victim: Victim) => ({
           _id: victim._id,
-          display: `${victim.personalInfo.firstName} ${victim.personalInfo.lastName} (${victim.personalInfo.nationalId || 'No ID'})`,
+          display: `${victim.personalInfo.firstName} ${victim.personalInfo.lastName} (${victim.personalInfo.nationalId || victim.caseInfo?.victimId || 'No ID'})`,
           type: 'Victim'
         }));
       }
@@ -253,6 +259,38 @@ const CreateCrimePage: React.FC = () => {
     setCurrentStep(stepIndex);
   };
 
+  // Fetch offender and offence names when step changes to review
+  useEffect(() => {
+    if (currentStep === 4) {
+      const selectedOffenderId = form.getValues('offender');
+      const selectedOffenceId = form.getValues('offenceCatalogue');
+
+      // Fetch offender name if selected
+      if (selectedOffenderId) {
+        api.get(`/offenders/${selectedOffenderId}`).then(response => {
+          if (response.data.success && response.data.data.offender) {
+            const offender = response.data.data.offender;
+            setOffenderName(`${offender.personalInfo.firstName} ${offender.personalInfo.lastName}`);
+          }
+        }).catch(() => setOffenderName('Unknown'));
+      } else {
+        setOffenderName('');
+      }
+
+      // Fetch offence name if selected
+      if (selectedOffenceId) {
+        api.get(`/offence-catalogues/${selectedOffenceId}`).then(response => {
+          if (response.data.success && response.data.data.offenceCatalogue) {
+            const offence = response.data.data.offenceCatalogue;
+            setOffenceName(`${offence.name} (${offence.code})`);
+          }
+        }).catch(() => setOffenceName('Unknown'));
+      } else {
+        setOffenceName('');
+      }
+    }
+  }, [currentStep]);
+
   const addVictim = () => {
     const currentVictims = form.getValues('victims') || [];
     form.setValue('victims', [...currentVictims, { victim: '', relationshipToOffender: 'stranger', victimImpact: {} }]);
@@ -276,7 +314,15 @@ const CreateCrimePage: React.FC = () => {
       setIsLoading(true);
       setError('');
       
-      const data = form.getValues();
+      const formData = form.getValues();
+      
+      // Prepare data for submission - map offenceCatalogue to offenceCatalogue (backend field name)
+      const data = {
+        ...formData,
+        offenceCatalogue: formData.offenceCatalogue || undefined,
+        offender: formData.offender || undefined, // Make offender optional
+      };
+      
       const response = await api.createCrime(data);
       
       if (response.success) {
@@ -450,12 +496,12 @@ const CreateCrimePage: React.FC = () => {
           <div className="space-y-8">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <Label className="text-sm font-semibold text-black">Offender *</Label>
+                <Label className="text-sm font-semibold text-black">Offender (Optional)</Label>
                 <EntitySearch
                   label=""
-                  placeholder="Search for offender..."
-                  value={form.watch('offender')}
-                  onChange={(value) => form.setValue('offender', value)}
+                  placeholder="Search for offender (optional)..."
+                  value={form.watch('offender') || ''}
+                  onChange={(value) => form.setValue('offender', value || '')}
                   onSearch={searchOffenders}
                   error={form.formState.errors.offender?.message}
                   className="h-12"
@@ -467,10 +513,10 @@ const CreateCrimePage: React.FC = () => {
                 <EntitySearch
                   label=""
                   placeholder="Search for offence..."
-                  value={form.watch('offence')}
-                  onChange={(value) => form.setValue('offence', value)}
+                  value={form.watch('offenceCatalogue') || ''}
+                  onChange={(value) => form.setValue('offenceCatalogue', value || '')}
                   onSearch={searchOffences}
-                  error={form.formState.errors.offence?.message}
+                  error={form.formState.errors.offenceCatalogue?.message}
                   className="h-12"
                 />
               </div>
@@ -754,6 +800,8 @@ const CreateCrimePage: React.FC = () => {
                   <p><strong className="text-black">Title:</strong> <span className="text-black">{form.watch('crimeInfo.title')}</span></p>
                   <p><strong className="text-black">Category:</strong> <span className="text-black">{form.watch('crimeInfo.category')}</span></p>
                   <p><strong className="text-black">Date Committed:</strong> <span className="text-black">{form.watch('dateTime.dateCommitted')}</span></p>
+                  <p><strong className="text-black">Offender:</strong> <span className="text-black">{offenderName || (form.watch('offender') ? 'Loading...' : 'Not specified')}</span></p>
+                  <p><strong className="text-black">Offence:</strong> <span className="text-black">{offenceName || (form.watch('offenceCatalogue') ? 'Loading...' : 'Not specified')}</span></p>
                 </CardContent>
               </Card>
               <Card className="bg-gray-50 border-gray-200 shadow-sm">

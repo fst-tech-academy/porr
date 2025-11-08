@@ -650,6 +650,169 @@ export interface Court {
   utilizationRate?: number;
 }
 
+export interface Agent {
+  _id: string;
+  agentId: string; // Auto-incremented numeric field (00001 format)
+  pseudonym: {
+    firstName: string;
+    lastName: string;
+    codeName?: string;
+  };
+  realIdentity?: {
+    firstName?: string;
+    lastName?: string;
+    nationalId?: string;
+    dateOfBirth?: string;
+    placeOfBirth?: string;
+  };
+  department: Department | string;
+  user?: User | string;
+  rank: 'detective' | 'senior_detective' | 'supervisor' | 'commander' | 'director';
+  specialization: 'homicide' | 'narcotics' | 'fraud' | 'cybercrime' | 'terrorism' | 'organized_crime' | 'general' | 'other';
+  employmentDate: string;
+  status: 'active' | 'on_leave' | 'suspended' | 'retired' | 'transferred';
+  clearanceLevel: 'confidential' | 'secret' | 'top_secret';
+  contactInfo?: {
+    phone?: string;
+    email?: string;
+    emergencyContact?: {
+      name?: string;
+      relationship?: string;
+      phone?: string;
+    };
+  };
+  physicalDescription?: {
+    height?: number;
+    weight?: number;
+    eyeColor?: string;
+    hairColor?: string;
+    distinguishingMarks?: string;
+  };
+  caseAssignments?: Array<{
+    caseId?: Case | string;
+    crimeId?: OffenderOffence | string;
+    assignedDate?: string;
+    role: 'lead_investigator' | 'co_investigator' | 'support' | 'supervisor';
+    status: 'active' | 'completed' | 'transferred' | 'closed';
+    notes?: string;
+  }>;
+  performance?: {
+    totalCases?: number;
+    solvedCases?: number;
+    currentCases?: number;
+    ratings?: Array<{
+      date: string;
+      rating: number;
+      notes?: string;
+      reviewedBy?: User | string;
+    }>;
+    certifications?: Array<{
+      name: string;
+      issuingOrganization: string;
+      issueDate: string;
+      expiryDate?: string;
+      certificateNumber?: string;
+    }>;
+    training?: Array<{
+      courseName: string;
+      institution: string;
+      completionDate: string;
+      certificate?: string;
+    }>;
+  };
+  medicalInfo?: {
+    mentalHealthStatus?: 'stable' | 'treatment_required' | 'medication_required' | 'hospitalized';
+    physicalHealthStatus?: 'good' | 'fair' | 'poor' | 'critical';
+    medications?: Array<{ name: string; dosage: string; frequency: string }>;
+    allergies?: string[];
+    medicalNotes?: string;
+    fitnessForDuty?: boolean;
+    lastFitnessTest?: string;
+  };
+  statusInfo: {
+    isActive: boolean;
+    lastActiveDate?: string;
+    onDuty: boolean;
+    currentLocation?: string;
+    availability: 'available' | 'on_case' | 'on_leave' | 'off_duty';
+  };
+  profilePhoto?: string;
+  photos?: Array<{
+    url: string;
+    type: 'badge_photo' | 'profile' | 'identification' | 'other';
+    description?: string;
+    uploadedAt: string;
+  }>;
+  documents?: Array<{
+    url: string;
+    type: 'id_copy' | 'passport_copy' | 'badge_copy' | 'certificate' | 'medical_record' | 'other';
+    description?: string;
+    uploadedAt: string;
+  }>;
+  organisationId: string;
+  createdBy: User | string;
+  lastModifiedBy?: User | string;
+  tags?: string[];
+  notes?: string;
+  metadata: {
+    createdAt: string;
+    updatedAt: string;
+    version: number;
+  };
+  // Direct access properties for frontend compatibility
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+  // Virtual fields
+  fullPseudonym?: string;
+  age?: number;
+  yearsOfService?: number;
+}
+
+export interface AgentFormData {
+  pseudonym: {
+    firstName: string;
+    lastName: string;
+    codeName?: string;
+  };
+  realIdentity?: {
+    firstName?: string;
+    lastName?: string;
+    nationalId?: string;
+    dateOfBirth?: string;
+    placeOfBirth?: string;
+  };
+  department: string;
+  user?: string;
+  rank: 'detective' | 'senior_detective' | 'supervisor' | 'commander' | 'director';
+  specialization: 'homicide' | 'narcotics' | 'fraud' | 'cybercrime' | 'terrorism' | 'organized_crime' | 'general' | 'other';
+  employmentDate: string;
+  status?: 'active' | 'on_leave' | 'suspended' | 'retired' | 'transferred';
+  clearanceLevel?: 'confidential' | 'secret' | 'top_secret';
+  contactInfo?: {
+    phone?: string;
+    email?: string;
+    emergencyContact?: {
+      name?: string;
+      relationship?: string;
+      phone?: string;
+    };
+  };
+  physicalDescription?: {
+    height?: number;
+    weight?: number;
+    eyeColor?: string;
+    hairColor?: string;
+    distinguishingMarks?: string;
+  };
+  statusInfo?: {
+    isActive?: boolean;
+    onDuty?: boolean;
+    availability?: 'available' | 'on_case' | 'on_leave' | 'off_duty';
+  };
+  notes?: string;
+}
+
 // Form data interfaces
 export interface OffenderFormData {
   personalInfo: {

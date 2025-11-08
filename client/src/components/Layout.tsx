@@ -18,7 +18,7 @@ import {
   Home, 
   Users, 
   User, 
-  Building, 
+  Building,
   Shield, 
   FileText, 
   CreditCard, 
@@ -64,6 +64,8 @@ const getMenuItems = (
     { text: 'Crimes', icon: <ShieldAlert className="h-5 w-5" />, path: '/crimes' },
     { text: 'Victims', icon: <Heart className="h-5 w-5" />, path: '/victims' },
     { text: 'Courts', icon: <Scale className="h-5 w-5" />, path: '/courts' },
+    { text: 'Departments', icon: <Building className="h-5 w-5" />, path: '/departments' },
+    { text: 'Agents', icon: <UserCheck className="h-5 w-5" />, path: '/agents' },
   ] : []),
   
   // Show users only for admin/manager roles and if user management is enabled

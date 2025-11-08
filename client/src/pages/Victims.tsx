@@ -92,9 +92,10 @@ const VictimsPage: React.FC = () => {
       const response = await api.getVictims(params);
       
       if (response.success) {
-        setVictims(response.data.victims || []);
-        setTotalPages(response.data.pagination?.pages || 1);
-        setTotalVictims(response.data.pagination?.total || 0);
+        // API returns data as array directly, pagination at top level
+        setVictims(Array.isArray(response.data) ? response.data : []);
+        setTotalPages(response.pagination?.pages || 1);
+        setTotalVictims(response.pagination?.total || 0);
       } else {
         setError(response.message || 'Failed to fetch victims');
       }

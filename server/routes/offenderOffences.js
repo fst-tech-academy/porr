@@ -60,7 +60,7 @@ const offenderOffenceValidationRules = [
   body('location.city').trim().notEmpty().withMessage('City is required'),
   body('location.state').trim().notEmpty().withMessage('State is required'),
   body('location.country').trim().notEmpty().withMessage('Country is required'),
-  body('offender').isMongoId().withMessage('Valid offender ID is required'),
+  body('offender').optional().isMongoId().withMessage('Valid offender ID must be a MongoDB ObjectId'),
   body('offenceCatalogue').isMongoId().withMessage('Valid offence catalogue ID is required'),
   body('legal.severity').isIn(['minor', 'moderate', 'serious', 'major', 'felony']).withMessage('Valid severity is required'),
   body('legal.status').isIn(['reported', 'under_investigation', 'charged', 'trial', 'convicted', 'acquitted', 'dismissed', 'plea_bargain']).withMessage('Valid status is required')
@@ -212,20 +212,28 @@ router.post('/', protect, checkUserManagement, offenderOffenceValidationRules, a
       });
     }
 
+    // Log request body for debugging (in development only)
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Creating crime with data:', JSON.stringify(req.body, null, 2));
+    }
+
     // Handle organisationId - extract _id if populated
     const userOrgId = req.user.organisationId._id || req.user.organisationId;
 
-    // Verify offender exists and belongs to organization
-    const offender = await Offender.findOne({
-      _id: req.body.offender,
-      organisationId: userOrgId
-    });
-
-    if (!offender) {
-      return res.status(400).json({
-        success: false,
-        message: 'Offender not found or does not belong to your organization'
+    // Verify offender exists and belongs to organization (if provided)
+    let offender = null;
+    if (req.body.offender) {
+      offender = await Offender.findOne({
+        _id: req.body.offender,
+        organisationId: userOrgId
       });
+
+      if (!offender) {
+        return res.status(400).json({
+          success: false,
+          message: 'Offender not found or does not belong to your organization'
+        });
+      }
     }
 
     // Verify offence catalogue exists
@@ -263,38 +271,124 @@ router.post('/', protect, checkUserManagement, offenderOffenceValidationRules, a
       caseNumber = await generateNextCaseNumber(userOrgId);
     }
 
+    // Prepare crime data - ensure offender is only included if provided
     const crimeData = {
       ...req.body,
       crimeInfo: {
         ...req.body.crimeInfo,
         caseNumber: caseNumber
       },
+      dateTime: {
+        ...req.body.dateTime,
+        dateCommitted: req.body.dateTime.dateCommitted ? new Date(req.body.dateTime.dateCommitted) : undefined,
+        dateReported: req.body.dateTime.dateReported ? new Date(req.body.dateTime.dateReported) : undefined,
+        dateArrested: req.body.dateTime.dateArrested ? new Date(req.body.dateTime.dateArrested) : undefined,
+        dateCharged: req.body.dateTime.dateCharged ? new Date(req.body.dateTime.dateCharged) : undefined,
+        dateConvicted: req.body.dateTime.dateConvicted ? new Date(req.body.dateTime.dateConvicted) : undefined,
+        dateSentenced: req.body.dateTime.dateSentenced ? new Date(req.body.dateTime.dateSentenced) : undefined
+      },
       organisationId: userOrgId,
       createdBy: req.user.id
     };
 
+    // Only include offender if it was provided and is not empty
+    if (!req.body.offender || req.body.offender === '' || req.body.offender === null || req.body.offender === undefined) {
+      delete crimeData.offender;
+    }
+
+    // Remove empty string dates
+    Object.keys(crimeData.dateTime).forEach(key => {
+      if (crimeData.dateTime[key] === '' || crimeData.dateTime[key] === null) {
+        delete crimeData.dateTime[key];
+      }
+    });
+
+    // Clean up legal section - remove empty strings for optional fields
+    if (crimeData.legal) {
+      // Remove empty court string (ObjectId field)
+      if (crimeData.legal.court === '' || crimeData.legal.court === null) {
+        delete crimeData.legal.court;
+      }
+
+      // Remove empty judge/prosecutor/defenseAttorney if they have empty values
+      if (crimeData.legal.judge) {
+        if ((!crimeData.legal.judge.name || crimeData.legal.judge.name === '') && 
+            (!crimeData.legal.judge.id || crimeData.legal.judge.id === '')) {
+          delete crimeData.legal.judge;
+        }
+      }
+
+      if (crimeData.legal.prosecutor) {
+        if ((!crimeData.legal.prosecutor.name || crimeData.legal.prosecutor.name === '') && 
+            (!crimeData.legal.prosecutor.id || crimeData.legal.prosecutor.id === '')) {
+          delete crimeData.legal.prosecutor;
+        }
+      }
+
+      if (crimeData.legal.defenseAttorney) {
+        if ((!crimeData.legal.defenseAttorney.name || crimeData.legal.defenseAttorney.name === '') && 
+            (!crimeData.legal.defenseAttorney.id || crimeData.legal.defenseAttorney.id === '')) {
+          delete crimeData.legal.defenseAttorney;
+        }
+      }
+
+      // Clean up sentence object
+      if (crimeData.legal.sentence) {
+        // Remove empty sentence type (enum field)
+        if (crimeData.legal.sentence.type === '' || crimeData.legal.sentence.type === null) {
+          delete crimeData.legal.sentence.type;
+        }
+
+        // Remove other empty sentence fields
+        if (crimeData.legal.sentence.duration === '' || crimeData.legal.sentence.duration === null) {
+          delete crimeData.legal.sentence.duration;
+        }
+
+        if (crimeData.legal.sentence.fine === 0 || crimeData.legal.sentence.fine === null || crimeData.legal.sentence.fine === '') {
+          delete crimeData.legal.sentence.fine;
+        }
+
+        // If sentence is empty, remove it entirely
+        if (Object.keys(crimeData.legal.sentence).length === 0) {
+          delete crimeData.legal.sentence;
+        }
+      }
+
+      // Remove empty charges array
+      if (Array.isArray(crimeData.legal.charges) && crimeData.legal.charges.length === 0) {
+        delete crimeData.legal.charges;
+      }
+
+      // Remove empty conditions array
+      if (crimeData.legal.sentence && Array.isArray(crimeData.legal.sentence.conditions) && crimeData.legal.sentence.conditions.length === 0) {
+        delete crimeData.legal.sentence.conditions;
+      }
+    }
+
     const crime = new OffenderOffence(crimeData);
     await crime.save();
 
-    // Update offender's criminal history
-    await Offender.findByIdAndUpdate(req.body.offender, {
-      $push: {
-        'criminalHistory.offences': {
-          offenceCatalogueId: req.body.offenceCatalogue,
-          dateCommitted: req.body.dateTime.dateCommitted,
-          dateArrested: req.body.dateTime.dateArrested,
-          location: req.body.location.city + ', ' + req.body.location.state,
-          status: req.body.legal.status,
-          severity: req.body.legal.severity,
-          notes: req.body.notes
+    // Update offender's criminal history (only if offender is provided)
+    if (req.body.offender && offender) {
+      await Offender.findByIdAndUpdate(req.body.offender, {
+        $push: {
+          'criminalHistory.offences': {
+            offenceCatalogueId: req.body.offenceCatalogue,
+            dateCommitted: req.body.dateTime.dateCommitted,
+            dateArrested: req.body.dateTime.dateArrested,
+            location: req.body.location.city + ', ' + req.body.location.state,
+            status: req.body.legal.status,
+            severity: req.body.legal.severity,
+            notes: req.body.notes
+          }
+        },
+        $inc: { 'criminalHistory.totalOffences': 1 },
+        $set: {
+          'criminalHistory.lastOffenceDate': req.body.dateTime.dateCommitted,
+          'criminalHistory.firstOffenceDate': offender.criminalHistory?.firstOffenceDate || req.body.dateTime.dateCommitted
         }
-      },
-      $inc: { 'criminalHistory.totalOffences': 1 },
-      $set: {
-        'criminalHistory.lastOffenceDate': req.body.dateTime.dateCommitted,
-        'criminalHistory.firstOffenceDate': offender.criminalHistory.firstOffenceDate || req.body.dateTime.dateCommitted
-      }
-    });
+      });
+    }
 
     await crime.populate('offender', 'personalInfo.firstName personalInfo.lastName offenderId');
     await crime.populate('offenceCatalogue', 'name code category');
@@ -310,7 +404,9 @@ router.post('/', protect, checkUserManagement, offenderOffenceValidationRules, a
     console.error('Error creating crime:', error);
     res.status(500).json({
       success: false,
-      message: 'Error creating crime'
+      message: 'Error creating crime',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined,
+      details: process.env.NODE_ENV === 'development' ? error.stack : undefined
     });
   }
 });
@@ -394,13 +490,15 @@ router.delete('/:id', protect, async (req, res) => {
       });
     }
 
-    // Update offender's criminal history
-    await Offender.findByIdAndUpdate(crime.offender, {
-      $pull: {
-        'criminalHistory.offences': { offenceCatalogueId: crime.offenceCatalogue }
-      },
-      $inc: { 'criminalHistory.totalOffences': -1 }
-    });
+    // Update offender's criminal history (only if offender exists)
+    if (crime.offender) {
+      await Offender.findByIdAndUpdate(crime.offender, {
+        $pull: {
+          'criminalHistory.offences': { offenceCatalogueId: crime.offenceCatalogue }
+        },
+        $inc: { 'criminalHistory.totalOffences': -1 }
+      });
+    }
 
     await OffenderOffence.findByIdAndDelete(req.params.id);
 

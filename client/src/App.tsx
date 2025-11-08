@@ -36,11 +36,20 @@ import EditOffence from './pages/EditOffence';
 import Courts from './pages/Courts';
 import CreateCourt from './pages/CreateCourt';
 import Victims from './pages/Victims';
+import VictimView from './pages/VictimView';
 import Crimes from './pages/Crimes';
 import CreateCrime from './pages/CreateCrime';
 import EditCrime from './pages/EditCrime';
 import CrimeView from './pages/CrimeView';
 import CreateVictim from './pages/CreateVictim';
+import Departments from './pages/Departments';
+import CreateDepartment from './pages/CreateDepartment';
+import EditDepartment from './pages/EditDepartment';
+import DepartmentView from './pages/DepartmentView';
+import Agents from './pages/Agents';
+import CreateAgent from './pages/CreateAgent';
+import EditAgent from './pages/EditAgent';
+import AgentView from './pages/AgentView';
 import NotFound from './pages/NotFound';
 import NotFoundTest from './pages/NotFoundTest';
 import NotFoundSimple from './pages/NotFoundSimple';
@@ -321,6 +330,69 @@ function App() {
                           <RoleBasedRoute allowedRoles={['admin', 'manager', 'officer', 'super_admin']}>
                             <Layout>
                               <CreateVictim />
+                            </Layout>
+                          </RoleBasedRoute>
+                        } />
+                        <Route path="/victims/:id" element={
+                          <RoleBasedRoute allowedRoles={['admin', 'manager', 'officer', 'super_admin']}>
+                            <Layout>
+                              <VictimView />
+                            </Layout>
+                          </RoleBasedRoute>
+                        } />
+                        <Route path="/departments" element={
+                          <RoleBasedRoute allowedRoles={['admin', 'manager', 'officer', 'super_admin']}>
+                            <Layout>
+                              <Departments />
+                            </Layout>
+                          </RoleBasedRoute>
+                        } />
+                        <Route path="/departments/new" element={
+                          <RoleBasedRoute allowedRoles={['admin', 'manager', 'officer', 'super_admin']}>
+                            <Layout>
+                              <CreateDepartment />
+                            </Layout>
+                          </RoleBasedRoute>
+                        } />
+                        <Route path="/departments/:id/edit" element={
+                          <RoleBasedRoute allowedRoles={['admin', 'manager', 'officer', 'super_admin']}>
+                            <Layout>
+                              <EditDepartment />
+                            </Layout>
+                          </RoleBasedRoute>
+                        } />
+                        <Route path="/departments/:id" element={
+                          <RoleBasedRoute allowedRoles={['admin', 'manager', 'officer', 'super_admin']}>
+                            <Layout>
+                              <DepartmentView />
+                            </Layout>
+                          </RoleBasedRoute>
+                        } />
+                        <Route path="/agents" element={
+                          <RoleBasedRoute allowedRoles={['admin', 'manager', 'officer', 'super_admin']}>
+                            <Layout>
+                              <Agents />
+                            </Layout>
+                          </RoleBasedRoute>
+                        } />
+                        <Route path="/agents/new" element={
+                          <RoleBasedRoute allowedRoles={['admin', 'manager', 'officer', 'super_admin']}>
+                            <Layout>
+                              <CreateAgent />
+                            </Layout>
+                          </RoleBasedRoute>
+                        } />
+                        <Route path="/agents/:id/edit" element={
+                          <RoleBasedRoute allowedRoles={['admin', 'manager', 'officer', 'super_admin']}>
+                            <Layout>
+                              <EditAgent />
+                            </Layout>
+                          </RoleBasedRoute>
+                        } />
+                        <Route path="/agents/:id" element={
+                          <RoleBasedRoute allowedRoles={['admin', 'manager', 'officer', 'super_admin']}>
+                            <Layout>
+                              <AgentView />
                             </Layout>
                           </RoleBasedRoute>
                         } />

@@ -34,6 +34,8 @@ const caseRoutes = require("./routes/cases");
 const courtRoutes = require("./routes/courts");
 const victimRoutes = require("./routes/victims");
 const offenderOffenceRoutes = require("./routes/offenderOffences");
+const departmentRoutes = require("./routes/departments");
+const agentRoutes = require("./routes/agents");
 const settingsManager = require("./utils/settingsManager");
 const { auditMiddleware } = require("./middleware/audit");
 
@@ -137,6 +139,8 @@ app.use("/api/cases", caseRoutes);
 app.use("/api/courts", courtRoutes);
 app.use("/api/victims", victimRoutes);
 app.use("/api/crimes", offenderOffenceRoutes);
+app.use("/api/departments", departmentRoutes);
+app.use("/api/agents", agentRoutes);
 
 // Health check endpoint
 app.get("/api/health", (req, res) => {

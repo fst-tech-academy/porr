@@ -43,6 +43,7 @@ const EntitySearch: React.FC<EntitySearchProps> = ({
   const inputRef = useRef<HTMLInputElement>(null);
   const suggestionsRef = useRef<HTMLDivElement>(null);
   const debounceTimeoutRef = useRef<NodeJS.Timeout>();
+  const uniqueIdRef = useRef<string>(`entity-search-${Math.random().toString(36).substr(2, 9)}`);
 
   // Load initial suggestions when component mounts
   useEffect(() => {
@@ -149,7 +150,7 @@ const EntitySearch: React.FC<EntitySearchProps> = ({
 
   return (
     <div className={`relative ${className}`}>
-      <Label htmlFor="entity-search" className="text-black dark:text-white">
+      <Label htmlFor={uniqueIdRef.current} className="text-black dark:text-white">
         {label}
       </Label>
       <div className="relative">
@@ -157,13 +158,20 @@ const EntitySearch: React.FC<EntitySearchProps> = ({
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 dark:text-slate-500 h-4 w-4" />
           <Input
             ref={inputRef}
-            id="entity-search"
+            id={uniqueIdRef.current}
             type="text"
             placeholder={placeholder}
             value={displayValue}
             onChange={handleInputChange}
             onFocus={handleInputFocus}
             disabled={disabled}
+            autoComplete="off"
+            autoCapitalize="off"
+            autoCorrect="off"
+            spellCheck="false"
+            name={uniqueIdRef.current}
+            data-lpignore="true"
+            data-form-type="other"
             className={`pl-10 pr-10 bg-white text-black dark:bg-slate-800 dark:text-white border-gray-200 dark:border-slate-700 ${
               error ? 'border-red-500' : ''
             }`}

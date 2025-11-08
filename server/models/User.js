@@ -109,6 +109,14 @@ const userSchema = new mongoose.Schema({
   },
   lockoutUntil: {
     type: Date
+  },
+  // Agent Reference (one-to-one: User -> Agent)
+  agent: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Agent',
+    unique: true,
+    sparse: true, // Allow null values but ensure uniqueness when present
+    index: true
   }
 }, {
   timestamps: true

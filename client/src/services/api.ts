@@ -1382,6 +1382,123 @@ class ApiService {
     return response.data;
   }
 
+  // Department endpoints
+  async getDepartments(params?: {
+    page?: number;
+    limit?: number;
+    search?: string;
+    type?: string;
+    isActive?: boolean;
+    sortBy?: string;
+    sortOrder?: number;
+  }): Promise<ApiResponse<{ departments: any[]; pagination: any }>> {
+    const response: AxiosResponse<ApiResponse<{ departments: any[]; pagination: any }>> =
+      await this.api.get("/departments", { params });
+    return response.data;
+  }
+
+  async getDepartment(id: string): Promise<ApiResponse<{ department: any }>> {
+    const response: AxiosResponse<ApiResponse<{ department: any }>> =
+      await this.api.get(`/departments/${id}`);
+    return response.data;
+  }
+
+  async createDepartment(departmentData: any): Promise<ApiResponse<{ department: any }>> {
+    const response: AxiosResponse<ApiResponse<{ department: any }>> =
+      await this.api.post("/departments", departmentData);
+    return response.data;
+  }
+
+  async updateDepartment(id: string, departmentData: any): Promise<ApiResponse<{ department: any }>> {
+    const response: AxiosResponse<ApiResponse<{ department: any }>> =
+      await this.api.put(`/departments/${id}`, departmentData);
+    return response.data;
+  }
+
+  async deleteDepartment(id: string): Promise<ApiResponse<null>> {
+    const response: AxiosResponse<ApiResponse<null>> =
+      await this.api.delete(`/departments/${id}`);
+    return response.data;
+  }
+
+  async updateDepartmentStatus(
+    id: string,
+    statusData: {
+      isActive?: boolean;
+    }
+  ): Promise<ApiResponse<{ department: any }>> {
+    const response: AxiosResponse<ApiResponse<{ department: any }>> =
+      await this.api.patch(`/departments/${id}/status`, statusData);
+    return response.data;
+  }
+
+  async getDepartmentStats(): Promise<ApiResponse<any>> {
+    const response: AxiosResponse<ApiResponse<any>> =
+      await this.api.get("/departments/stats/overview");
+    return response.data;
+  }
+
+  // Agent endpoints
+  async getAgents(params?: {
+    page?: number;
+    limit?: number;
+    search?: string;
+    rank?: string;
+    status?: string;
+    department?: string;
+    isActive?: boolean;
+    sortBy?: string;
+    sortOrder?: number;
+  }): Promise<ApiResponse<{ agents: any[]; pagination: any }>> {
+    const response: AxiosResponse<ApiResponse<{ agents: any[]; pagination: any }>> =
+      await this.api.get("/agents", { params });
+    return response.data;
+  }
+
+  async getAgent(id: string): Promise<ApiResponse<{ agent: any }>> {
+    const response: AxiosResponse<ApiResponse<{ agent: any }>> =
+      await this.api.get(`/agents/${id}`);
+    return response.data;
+  }
+
+  async createAgent(agentData: any): Promise<ApiResponse<{ agent: any }>> {
+    const response: AxiosResponse<ApiResponse<{ agent: any }>> =
+      await this.api.post("/agents", agentData);
+    return response.data;
+  }
+
+  async updateAgent(id: string, agentData: any): Promise<ApiResponse<{ agent: any }>> {
+    const response: AxiosResponse<ApiResponse<{ agent: any }>> =
+      await this.api.put(`/agents/${id}`, agentData);
+    return response.data;
+  }
+
+  async deleteAgent(id: string): Promise<ApiResponse<null>> {
+    const response: AxiosResponse<ApiResponse<null>> =
+      await this.api.delete(`/agents/${id}`);
+    return response.data;
+  }
+
+  async updateAgentStatus(
+    id: string,
+    statusData: {
+      isActive?: boolean;
+      onDuty?: boolean;
+      availability?: string;
+      status?: string;
+    }
+  ): Promise<ApiResponse<{ agent: any }>> {
+    const response: AxiosResponse<ApiResponse<{ agent: any }>> =
+      await this.api.patch(`/agents/${id}/status`, statusData);
+    return response.data;
+  }
+
+  async getAgentStats(): Promise<ApiResponse<any>> {
+    const response: AxiosResponse<ApiResponse<any>> =
+      await this.api.get("/agents/stats/overview");
+    return response.data;
+  }
+
   // Victim API methods
   async getVictims(params?: any): Promise<PaginatedResponse> {
     const response = await this.api.get("/victims", { params });
